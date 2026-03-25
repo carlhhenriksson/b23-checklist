@@ -103,6 +103,21 @@
       transition: background 0.25s ease, border-color 0.25s ease;
     }
 
+    /* Emergency phase highlight */
+    .phase-card.emergency {
+      border: 2px solid #ef4444;
+    }
+
+    /* Blue highlighted operational phases */
+    .phase-card.highlight-blue {
+      border: 2px solid #3b82f6;
+    }
+
+    /* Green default phases */
+    .phase-card.highlight-green {
+      border: 2px solid #22c55e;
+    }
+
     .phase-card.completed {
       background: var(--success-soft);
       border-color: #9fd2b0;
@@ -194,6 +209,57 @@
       color: var(--text);
       font-size: 13px;
       font-weight: bold;
+    }
+
+    .header-input-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #243140;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .header-input-value {
+      color: #ffffff;
+    }
+
+    .header-input-pill input, .header-input-pill select {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: #111827;
+      color: var(--text);
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .header-input-pill input:focus, .header-input-pill select:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .header-input-value {
+      color: #ffffff;
+    }
+
+    .emergency-jump-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .emergency-jump-btn:active {
+      transform: scale(0.97);
     }
 
     .value-summary {
@@ -449,6 +515,19 @@
       color: var(--muted);
     }
 
+    .header-disclaimer {
+      margin-top: 12px;
+      margin-bottom: 16px; /* match spacing between phases */
+      padding: 10px 12px;
+      border: 2px solid #facc15; /* yellow border */
+      border-radius: 12px;
+      background: #1b2531;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
     @media (display-mode: standalone) {
       .install-area {
         display: none;
@@ -461,30 +540,46 @@
     <div class="card">
       <h1>Bristell B23 Check List</h1>
       <p class="muted">Ground checklist grouped by phase using your SE-MOA checklist and the Bristell B23 SOP / training manual details. Each item must be confirmed before the next step unlocks.</p>
+
       <div class="top-meta">
+        <button class="emergency-jump-btn" id="emergencyJumpBtn">EMERGENCY</button>
+
+        <div class="header-input-pill">Airport
+          <input id="headerAirport" type="text" value="ESGA">
+        </div>
+
+        <div class="header-input-pill">Aircraft
+          <select id="headerAircraft">
+            <option value="SE-MOY" selected>SE-MOY</option>
+            <option value="SE-MOA">SE-MOA</option>
+          </select>
+        </div>
+
         <div class="top-meta-pill" id="todayDate">Date --</div>
         <div class="top-meta-pill" id="zuluTime">Time -- Z</div>
+
+        <div class="header-input-pill">Start
+          <input id="headerStartTime" type="time">
+        </div>
+        <div class="header-input-pill">End
+          <input id="headerEndTime" type="time">
+        </div>
+
+        <div class="header-input-pill">L Fuel <span class="header-input-value" id="headerFuelLeftValue">--</span></div>
+        <div class="header-input-pill">R Fuel <span class="header-input-value" id="headerFuelRightValue">--</span></div>
+        <div class="header-input-pill">Hobbs <span class="header-input-value" id="headerHobbsValue">--</span></div>
       </div>
+
       <div class="progress-wrap">
         <div class="progress-bar">
           <div id="progressFill" class="progress-fill"></div>
         </div>
         <p id="progressText" class="muted">0 checklist items completed</p>
       </div>
-    </div>
 
-    <div class="card install-area">
-      <h2>Install app</h2>
-      <p class="muted">Add this checklist to your Home Screen for a cleaner app-like experience and offline access after the first load.</p>
-      <div class="install-row">
-        <button class="secondary-btn install-btn" id="installBtn" type="button">Install app</button>
+      <div class="header-disclaimer">
+        ⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.
       </div>
-      <p class="install-help" id="installHelp">On iPhone: open in Safari, tap Share, then Add to Home Screen.</p>
-    </div>
-
-    <div class="card">
-      <h2>Important</h2>
-      <p class="muted">This browser version combines the uploaded checklist with expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.</p>
     </div>
 
     <div id="stepsContainer"></div>
@@ -496,13 +591,22 @@
       </div>
       <p class="footer-note">Grouped by phase with detailed notes added from the uploaded Bristell B23 SOP and training manual.</p>
     </div>
+
+    <div class="card install-area">
+      <h2>Install app</h2>
+      <p class="muted">Add this checklist to your Home Screen for a cleaner app-like experience and offline access after the first load.</p>
+      <div class="install-row">
+        <button class="secondary-btn install-btn" id="installBtn" type="button">Install app</button>
+      </div>
+      <p class="install-help" id="installHelp">On iPhone: open in Safari, tap Share, then Add to Home Screen.</p>
+    </div>
   </div>
 
   <script>
     const phases = [
       {
         title: 'Pre-flight inspection',
-        intro: 'Walk-around and cockpit preparation based on the pre-flight inspection pages and pre-flight procedure.',
+        intro: 'Walk-around and exterior inspection before entering the final cockpit setup flow.',
         items: [
           { title: 'Cabin - Ignition', detail: 'OFF' },
           { title: 'Cabin - Avionics/Instruments', detail: 'Check condition' },
@@ -543,21 +647,28 @@
           { title: 'Before entering cockpit - Chocks', detail: 'Removed' },
           { title: 'Before entering cockpit - Pitot cover', detail: 'Off' },
           { title: 'Before entering cockpit - Tow bar', detail: 'Removed if used' },
-          { title: 'Before entering cockpit - Prop area and taxi path', detail: 'Clear, including wingtips and stabilizer if immediate turn is planned' },
-          { title: 'Flight log / remarks', detail: 'Checked' },
-          { title: 'Weight and balance', detail: 'Checked' },
-          { title: 'Pre-flight inspection', detail: 'Completed' },
-          { title: 'Rudder pedal position', detail: 'SET', note: 'Set according to pilot leg length. Full deflection should be possible without overlocking the knee.' },
-          { title: 'Seatbelts', detail: 'ON' },
-          { title: 'Parking brake', detail: 'SET', note: 'Even with park brake set during startup, guard the brakes with your feet in case the brake does not hold.' },
-          { title: 'Canopy', detail: 'Closed and locked', note: 'May be postponed briefly in hot outside air temperature conditions.' },
-          { title: 'Flight controls', detail: 'Check free and correct', note: 'Smooth control stick movements are strongly advised.' }
+          { title: 'Before entering cockpit - Prop area and taxi path', detail: 'Clear, including wingtips and stabilizer if immediate turn is planned' }
         ]
       },
       {
-        title: 'Before start',
+        title: 'Before Engine Start',
+        intro: 'Final cockpit checks before engine start.',
+        items: [
+          { title: 'Flight log / remarks', detail: 'Checked' },
+          { title: 'Weight and balance', detail: 'Checked' },
+          { title: 'Pre-flight inspection', detail: 'Completed' },
+          { title: 'Rudder pedals', detail: 'Set' },
+          { title: 'Parking brake', detail: 'Set' },
+          { title: 'Seatbelts', detail: 'ON' },
+          { title: 'Flight controls', detail: 'Free and correct' },
+          { title: 'Canopy', detail: 'Closed and locked' }
+        ]
+      },
+      {
+        title: 'Engine Start',
         intro: 'Cockpit setup and engine start preparation.',
         items: [
+          { title: 'Backup BATT', detail: 'ON' },
           { title: 'Master switch', detail: 'ON' },
           { title: 'Choke', detail: 'Use as needed', note: 'The Rotax enricher is not a conventional choke. If using choke, leave the throttle fully closed or the added air will cancel the enrichment effect.' },
           { title: 'Dimmer', detail: 'Adjust' },
@@ -567,7 +678,6 @@
           { title: 'Throttle', detail: 'Closed (max 5 mm open)' },
           { title: 'Fuel selector', detail: 'LEFT', note: 'The engine fuel return line runs to the left tank. Do not start or take off on RIGHT if the left tank is full, or returning fuel may overpressure and vent from the left tank.' },
           { title: 'PFD / fuel quantity', detail: 'Check fuel quantity' },
-          { title: 'QNH / altimeter', detail: 'SET' },
           { title: 'Strobe light', detail: 'ON', note: 'Strobe power draw may cause a fluctuating fuel pump sound.' },
           { title: 'Fuel pump', detail: 'ON' },
           { title: 'Prop area', detail: 'Clear' },
@@ -575,24 +685,33 @@
         ]
       },
       {
-        title: 'After start and taxi',
-        intro: 'Initial engine checks and taxi checks while keeping the engine within ground limits.',
+        title: 'After Start',
+        intro: 'Initial engine checks after engine start.',
         items: [
           { title: 'Oil pressure', detail: 'Check within 10 seconds', note: 'Oil pressure up to 7 bar for a short period is admissible at cold start.' },
-          { title: 'Throttle', detail: 'Adjust for 2000 RPM' },
           { title: 'Choke', detail: 'OFF' },
-          { title: 'Fuel pump', detail: 'OFF', note: 'Low fuel pressure indications may appear briefly, but pressure must stabilize within operating limits in 10 seconds.' },
-          { title: 'Avionics', detail: 'ON' },
-          { title: 'MFD', detail: 'Engine page' },
-          { title: 'Voltage', detail: 'Check above 11.0 V' },
+          { title: 'Throttle', detail: 'Adjust for 2000 RPM' },
+          { title: 'Backup BATT', detail: 'OFF' },
+          { title: 'ALT 1 and 2', detail: 'ON' },
           { title: 'ALT-1', detail: 'ON' },
           { title: 'Voltage after ALT-1', detail: 'Check about 13.4 V' },
           { title: 'ALT-2', detail: 'ON' },
           { title: 'Voltage after ALT-2', detail: 'Check about 13.8 V' },
-          { title: 'EFIS L-3', detail: 'ON' },
-          { title: 'Taxi - Brakes', detail: 'Check', note: 'No abrupt braking is needed. A light smooth application and slight deceleration is enough to verify function.' },
-          { title: 'Taxi technique', detail: 'Apply power as needed and keep RPM below 2500 until oil temperature reaches 50 C', note: 'Avoid using more than idle power and brakes simultaneously. Use caution above 20 kt wind and position the control stick correctly for crosswind.' },
-          { title: 'Taxi - Flight instruments', detail: 'Check' }
+          { title: 'Fuel pump', detail: 'OFF', note: 'Low fuel pressure indications may appear briefly, but pressure must stabilize within operating limits in 10 seconds.' },
+          { title: 'Avionics', detail: 'ON' },
+          { title: 'MFD', detail: 'Engine page' },
+          { title: 'Voltage', detail: 'Check above 11.0 V' },
+          { title: 'EFIS', detail: 'ON' },
+          { title: 'Altimeter', detail: 'SET QNH' }
+        ]
+      },
+      {
+        title: 'Taxi',
+        intro: 'Taxi checks and techniques.',
+        items: [
+          { title: 'Brakes', detail: 'Check', note: 'No abrupt braking is needed. A light smooth application and slight deceleration is enough to verify function.' },
+          { title: 'Flight instruments', detail: 'Check' },
+          { title: 'Taxi technique', detail: 'Apply power as needed and keep RPM below 2500 until oil temperature reaches 50 C', note: 'Avoid using more than idle power and brakes simultaneously. Use caution above 20 kt wind and position the control stick correctly for crosswind.' }
         ]
       },
       {
@@ -610,46 +729,100 @@
           { title: 'Oil pressure / temperature', detail: 'Check' },
           { title: 'Throttle', detail: 'IDLE' },
           { title: 'Trim', detail: 'SET / Neutral' },
-          { title: 'Flaps', detail: 'Set 0 or 1' },
+          { title: 'Flaps', detail: 'Set 1' },
           { title: 'Canopy', detail: 'Closed / locked' },
           { title: 'Annunciators', detail: 'Extinguished' },
+          { title: 'Fuel pump', detail: 'ON' },
           { title: 'Departure briefing', detail: 'Completed', note: 'Keep it short and standardised. Example items include runway, braking action, wind and initial clearance.' },
           { title: 'Emergency checklist', detail: 'Repeat' },
-          { title: 'Fuel pump', detail: 'ON' },
-          { title: 'Fuel selector', detail: 'Verify LEFT tank', note: 'The return line goes to the left tank. Do not operate on RIGHT if the left tank is full.' },
-          { title: 'Approach sector', detail: 'Checked' },
-          { title: 'Transponder', detail: 'ALT / ACS as applicable', note: 'Once line-up clearance is obtained, select transponder to ALT and verify strobe lights ON before entering an active runway.' }
+          { title: 'Fuel selector', detail: 'Verify LEFT tank', note: 'The return line goes to the left tank. Do not operate on RIGHT if the left tank is full.' }
         ]
       },
       {
-        title: 'Line-up / on runway',
-        intro: 'Final ground actions before the take-off roll.',
+        title: 'Before Departure',
+        intro: 'Final checks before entering runway.',
         items: [
-          { title: 'Compasses', detail: 'Checked' },
+          { title: 'Approach sector', detail: 'Checked' },
+          { title: 'Transponder', detail: 'GND/ALT', note: 'Once line-up clearance is obtained, select transponder to ALT and verify strobe lights ON before entering an active runway.' },
+          { title: 'ON RWY - Compasses', detail: 'Checked' },
           { title: 'Landing lights', detail: 'ON when take-off clearance is received' }
         ]
       },
       {
-        title: 'After landing / shutdown',
-        intro: 'Ground actions after vacating the runway and at parking.',
+        title: 'After Take off',
+        intro: 'Post take-off configuration and checks.',
         items: [
-          { title: 'Flaps', detail: '0 UP / Zero' },
+          { title: 'Prop Lever', detail: '5500 RPM' },
+          { title: 'Flaps', detail: '0 (Zero)' },
+          { title: 'Landing Lights', detail: 'OFF' },
+          { title: 'Engine Instruments', detail: 'Monitor' }
+        ]
+      },
+      {
+        title: 'Cruise',
+        intro: 'Cruise configuration and monitoring.',
+        items: [
+          { title: 'Throttle/Prop', detail: 'Set' },
+          { title: 'Fuel Selector', detail: 'Left or Right' },
+          { title: 'Fuel Pump', detail: 'OFF' },
+          { title: 'ENG Instruments', detail: 'Monitor' }
+        ]
+      },
+      {
+        title: 'Approach',
+        intro: 'Preparation for landing.',
+        items: [
+          { title: 'LDG Briefing', detail: 'Completed' },
+          { title: 'Altimeter', detail: 'Set QNH' },
+          { title: 'Landing Light', detail: 'ON' },
+          { title: 'Fuel Pump', detail: 'ON' },
+          { title: 'Carb Heat', detail: 'ON (OAT<10)' }
+        ]
+      },
+      {
+        title: 'After Landing',
+        intro: 'Post-landing actions after runway vacated.',
+        items: [
+          { title: 'Flaps', detail: '0 (Zero)' },
           { title: 'Transponder', detail: '7000 STBY' },
-          { title: 'Landing lights', detail: 'OFF' },
-          { title: 'Fuel pump', detail: 'OFF' },
-          { title: 'Carb heat', detail: 'OFF' },
-          { title: 'Pitch trim', detail: 'Neutral' },
+          { title: 'Landing Lights', detail: 'OFF' },
+          { title: 'Fuel Pump', detail: 'OFF' },
+          { title: 'Pitch Trim', detail: 'Neutral' }
+        ]
+      },
+      {
+        title: 'Parking',
+        intro: 'Shutdown and securing the aircraft.',
+        items: [
           { title: 'Parking brake', detail: 'ON' },
-          { title: 'Throttle', detail: 'IDLE' },
+          { title: 'Throttle', detail: 'Idle' },
           { title: 'Ignition', detail: 'OFF' },
           { title: 'ALT 1 and 2', detail: 'OFF' },
           { title: 'Hobbs', detail: 'Note' },
           { title: 'Avionics', detail: 'OFF' },
-          { title: 'EFIS L-3', detail: 'OFF' },
-          { title: 'Exterior lights', detail: 'OFF' },
-          { title: 'Master switch', detail: 'OFF' },
-          { title: 'Parking brake final', detail: 'As needed', note: 'Avoid leaving the aircraft parked with the brake set in very hot or cold conditions. Use chocks when appropriate.' },
-          { title: 'Close flightplan', detail: 'As required' }
+          { title: 'EFIS', detail: 'OFF' },
+          { title: 'Ext Lights', detail: 'OFF' },
+          { title: 'Master Switch', detail: 'OFF' },
+          { title: 'BPRS PIN', detail: 'INSERT' },
+          { title: 'Parking brake', detail: 'As Req.' },
+          { title: 'Flightplan', detail: 'Closed.' }
+        ]
+      },
+      {
+        title: 'Emergency',
+        intro: 'Engine failure / emergency actions.',
+        items: [
+          { title: 'Speed', detail: '67 KTS' },
+          { title: 'Field', detail: 'Select' },
+          { title: 'Fuel Selector', detail: 'Switch' },
+          { title: 'Fuel Pump', detail: 'ON' },
+          { title: 'Carb Heat', detail: 'ON' },
+          { title: 'Magnetos', detail: 'Best/Both' },
+          { title: 'ATC', detail: 'Notify/121.5' },
+          { title: 'XPNDR', detail: '7700' },
+          { title: 'PAX', detail: 'Brief' },
+          { title: 'ELT', detail: 'ON' },
+          { title: 'BPRS', detail: 'CONSIDER' }
         ]
       }
     ];
@@ -661,9 +834,16 @@
     const resetBtn = document.getElementById('resetBtn');
     const installBtn = document.getElementById('installBtn');
     const installHelp = document.getElementById('installHelp');
+    const headerFuelLeftValue = document.getElementById('headerFuelLeftValue');
+    const headerFuelRightValue = document.getElementById('headerFuelRightValue');
+    const headerHobbsValue = document.getElementById('headerHobbsValue');
+    const headerAirport = document.getElementById('headerAirport');
+    const headerAircraft = document.getElementById('headerAircraft');
+    const headerStartTime = document.getElementById('headerStartTime');
+    const headerEndTime = document.getElementById('headerEndTime');
 
-    const storageKey = 'b23-ground-check-progress-v4';
-    const collapsedStorageKey = 'b23-ground-check-collapsed-v2';
+    const storageKey = 'b23-ground-check-progress-v5';
+    const collapsedStorageKey = 'b23-ground-check-collapsed-v3';
     const fuelStorageKey = 'b23-ground-check-fuel-v1';
     const hobbsStorageKey = 'b23-ground-check-hobbs-v1';
     let pendingFocusStepIndex = null;
@@ -761,7 +941,7 @@
       });
 
       return {
-        dateText: dateFormatter.format(now).replace(/ /g, ' '),
+        dateText: dateFormatter.format(now),
         timeText: timeFormatter.format(now)
       };
     }
@@ -777,6 +957,15 @@
       if (zuluTimeEl) {
         zuluTimeEl.textContent = 'Time ' + parts.timeText + ' Z';
       }
+      if (headerFuelLeftValue) {
+        headerFuelLeftValue.textContent = fuelState.left || '--';
+      }
+      if (headerFuelRightValue) {
+        headerFuelRightValue.textContent = fuelState.right || '--';
+      }
+      if (headerHobbsValue) {
+        headerHobbsValue.textContent = hobbsValue || '--';
+      }
     }
 
     function isIos() {
@@ -791,9 +980,7 @@
       if (!installHelp) return;
       if (isInStandaloneMode()) {
         installHelp.textContent = 'Installed on Home Screen.';
-        return;
-      }
-      if (isIos()) {
+      } else if (isIos()) {
         installHelp.textContent = 'On iPhone: open in Safari, tap Share, then Add to Home Screen.';
       } else if (deferredPrompt) {
         installHelp.textContent = 'Install this checklist for a full-screen app experience and offline access.';
@@ -804,11 +991,7 @@
 
     function updateInstallButton() {
       if (!installBtn) return;
-      if (deferredPrompt && !isIos() && !isInStandaloneMode()) {
-        installBtn.style.display = 'inline-flex';
-      } else {
-        installBtn.style.display = 'none';
-      }
+      installBtn.style.display = deferredPrompt && !isIos() && !isInStandaloneMode() ? 'inline-flex' : 'none';
       updateInstallHelp();
     }
 
@@ -843,15 +1026,31 @@
           return flatSteps[globalIndexFor(phaseIndex, itemIndex)].confirmed;
         }).length;
         const isPhaseComplete = phaseDone === phase.items.length;
-        const fuelSummaryText = phaseIndex === 0 && (fuelState.left || fuelState.right)
+        const fuelSummaryText = phase.title === 'Pre-flight inspection' && (fuelState.left || fuelState.right)
           ? 'Fuel Tank Volume  L: ' + (fuelState.left || '-') + '  R: ' + (fuelState.right || '-')
           : '';
-        const hobbsSummaryText = phase.title === 'After landing / shutdown' && hobbsValue
+        const hobbsSummaryText = phase.title === 'Parking' && hobbsValue
           ? 'Hobbs ' + hobbsValue
           : '';
 
         const phaseCard = document.createElement('div');
         phaseCard.className = 'card phase-card';
+
+        if (phase.title === 'Emergency') {
+          phaseCard.classList.add('emergency');
+        }
+
+        const bluePhases = ['Taxi', 'Before Departure', 'After Take off', 'Cruise', 'Approach', 'After Landing'];
+        const isBlue = bluePhases.includes(phase.title);
+        const isEmergency = phase.title === 'Emergency';
+
+        if (isEmergency) {
+          phaseCard.classList.add('emergency');
+        } else if (isBlue) {
+          phaseCard.classList.add('highlight-blue');
+        } else {
+          phaseCard.classList.add('highlight-green');
+        }
         if (isPhaseComplete) {
           phaseCard.classList.add('completed');
         }
@@ -869,11 +1068,11 @@
             <div class="step ${step.confirmed ? 'completed' : ''} ${focusClass}" data-step-card="${stepIndex}">
               <div class="step-header">
                 <div>
-                  <div class="step-number">Step ${itemIndex + 1}</div>
-                  <h3 class="step-title">${step.title}</h3>
+                  ${item.title === 'Taxi technique' ? '' : `<div class="step-number">Step ${itemIndex + 1}</div>`}
+                  <h3 class="step-title">${step.title === 'Taxi technique' ? '💡 TIP — Taxi technique' : step.title}</h3>
                   <p class="step-detail">${step.detail}</p>
                 </div>
-                <span class="status ${stateClass}">${stateLabel}</span>
+                ${step.title === 'Taxi technique' ? '' : `<span class="status ${stateClass}">${stateLabel}</span>`}
               </div>
               ${step.title === 'Cabin - Fuel quantity indication' ? `
               <div class="fuel-input-grid">
@@ -887,7 +1086,7 @@
                 </div>
               </div>
               <div class="fuel-helper">Enter measured fuel quantity for both tanks. These values remain visible in the collapsed phase header.</div>
-            ` : ''}
+              ` : ''}
               ${step.title === 'Hobbs' ? `
               <div class="fuel-input-grid">
                 <div class="fuel-input-card">
@@ -896,11 +1095,11 @@
                 </div>
               </div>
               <div class="fuel-helper">Enter the Hobbs value. This value remains visible in the collapsed phase header.</div>
-            ` : ''}
+              ` : ''}
               ${step.note ? `<div class="step-note">${step.note}</div>` : ''}
-              <button class="confirm-btn ${step.confirmed ? 'done' : ''}" data-step-index="${stepIndex}" ${(!unlocked || step.confirmed) ? 'disabled' : ''} ${pendingFocusStepIndex === stepIndex ? 'autofocus' : ''}>
+              ${(step.title === 'Taxi technique' || !unlocked) ? '' : `<button class="confirm-btn ${step.confirmed ? 'done' : ''}" data-step-index="${stepIndex}">
                 ${step.confirmed ? 'Confirmed' : 'Confirm step'}
-              </button>
+              </button>`}
             </div>
           `;
         }).join('');
@@ -909,7 +1108,7 @@
           <button class="phase-toggle" data-phase-index="${phaseIndex}" type="button">
             <div class="phase-header">
               <div class="phase-title-wrap">
-                <span class="phase-badge">Phase ${phaseIndex + 1}</span>
+                
                 <h2>${phase.title}</h2>
               </div>
               <div class="phase-summary">
@@ -940,13 +1139,44 @@
         });
       });
 
+      // Emergency jump button (expand + scroll + focus)
+      const emergencyBtn = document.getElementById('emergencyJumpBtn');
+      if (emergencyBtn) {
+        emergencyBtn.addEventListener('click', function() {
+          const emergencyIndex = phases.findIndex(p => p.title === 'Emergency');
+          if (emergencyIndex !== -1) {
+            // Expand emergency phase
+            collapsedPhases[emergencyIndex] = false;
+            saveCollapsedState();
+
+            render();
+
+            setTimeout(function() {
+              const phaseCards = document.querySelectorAll('.phase-card');
+              const target = phaseCards[emergencyIndex];
+              if (target) {
+                // scroll to top of phase (header)
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // visual focus on phase header
+                const header = target.querySelector('.phase-toggle');
+                if (header) {
+                  header.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.6)';
+                  setTimeout(function() { header.style.boxShadow = ''; }, 1500);
+                }
+                setTimeout(function() { target.classList.remove('next-focus'); }, 1500);
+              }
+            }, 50);
+          }
+        });
+      }
+
       document.querySelectorAll('input[data-fuel-side]').forEach(function(input) {
         input.addEventListener('input', function() {
           fuelState[input.dataset.fuelSide] = input.value;
           activeFuelInputSide = input.dataset.fuelSide;
           activeHobbsInput = false;
           saveFuelState();
-
+          updateTopMeta();
           const phaseFuelSummary = document.querySelector('.fuel-summary');
           if (phaseFuelSummary) {
             phaseFuelSummary.textContent = 'Fuel Tank Volume  L: ' + (fuelState.left || '-') + '  R: ' + (fuelState.right || '-');
@@ -965,7 +1195,7 @@
           activeFuelInputSide = null;
           activeHobbsInput = true;
           saveHobbsValue();
-
+          updateTopMeta();
           const hobbsSummary = document.querySelector('.value-summary');
           if (hobbsSummary) {
             hobbsSummary.textContent = 'Hobbs ' + (hobbsValue || '-');
@@ -983,7 +1213,6 @@
           const index = Number(btn.dataset.stepIndex);
           if (!flatSteps[index].confirmed && isUnlocked(index)) {
             flatSteps[index].confirmed = true;
-
             const currentPhaseIndex = flatSteps[index].phaseIndex;
             const nextStep = flatSteps[index + 1];
             pendingFocusStepIndex = nextStep ? index + 1 : null;
@@ -1003,11 +1232,9 @@
       if (pendingFocusStepIndex !== null) {
         const nextStepCard = document.querySelector('[data-step-card="' + pendingFocusStepIndex + '"]');
         const nextStepButton = document.querySelector('.confirm-btn[data-step-index="' + pendingFocusStepIndex + '"]');
-
         if (nextStepCard) {
           nextStepCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-
         if (nextStepButton) {
           setTimeout(function() {
             nextStepButton.focus({ preventScroll: true });
@@ -1060,6 +1287,7 @@
       saveCollapsedState();
       saveFuelState();
       saveHobbsValue();
+      updateTopMeta();
       render();
     }
 
@@ -1108,6 +1336,36 @@
     updateTopMeta();
     setInterval(updateTopMeta, 30000);
     updateInstallButton();
+    updateTopMeta();
+
+    if (headerAirport) {
+      headerAirport.addEventListener('input', function() {
+        localStorage.setItem('b23-airport', headerAirport.value);
+      });
+      headerAirport.value = localStorage.getItem('b23-airport') || 'ESGA';
+    }
+
+    if (headerAircraft) {
+      headerAircraft.addEventListener('change', function() {
+        localStorage.setItem('b23-aircraft', headerAircraft.value);
+      });
+      headerAircraft.value = localStorage.getItem('b23-aircraft') || 'SE-MOY';
+    }
+
+    if (headerStartTime) {
+      headerStartTime.value = localStorage.getItem('b23-start-time') || '';
+      headerStartTime.addEventListener('change', function() {
+        localStorage.setItem('b23-start-time', headerStartTime.value);
+      });
+    }
+
+    if (headerEndTime) {
+      headerEndTime.value = localStorage.getItem('b23-end-time') || '';
+      headerEndTime.addEventListener('change', function() {
+        localStorage.setItem('b23-end-time', headerEndTime.value);
+      });
+    }
+
     render();
   </script>
 </body>
