@@ -28,7 +28,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html, body { min-height: 100%; }
 
     body {
@@ -73,19 +72,23 @@
 
     .muted { color: var(--muted); }
 
-    .top-meta {
+    .top-meta,
+    .top-actions,
+    .btn-row,
+    .phase-tools,
+    .step-tools,
+    .install-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 12px;
     }
 
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
+    .top-meta,
+    .top-actions { margin-top: 12px; }
+    .btn-row { margin-top: 18px; }
+    .phase-tools { margin-top: 10px; margin-bottom: 12px; }
+    .step-tools { gap: 8px; }
+    .install-row { margin-top: 14px; }
 
     .top-meta-pill,
     .header-input-pill {
@@ -102,11 +105,24 @@
     }
 
     .header-input-pill input,
-    .header-input-pill select {
+    .header-input-pill select,
+    .fuel-input-card input,
+    .edit-panel input,
+    .edit-panel textarea {
       border: 1px solid var(--border);
-      border-radius: 999px;
+      border-radius: 10px;
       background: #111827;
       color: var(--text);
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    .header-input-pill input,
+    .header-input-pill select {
+      width: auto;
+      border-radius: 999px;
       padding: 6px 10px;
       font-size: 13px;
       font-weight: bold;
@@ -114,25 +130,113 @@
 
     .header-input-pill input:focus,
     .header-input-pill select:focus,
-    .fuel-input-card input:focus {
+    .fuel-input-card input:focus,
+    .edit-panel input:focus,
+    .edit-panel textarea:focus {
       outline: 2px solid var(--accent);
       outline-offset: 1px;
     }
 
+    .header-input-pill input:disabled {
+      opacity: 0.9;
+      cursor: not-allowed;
+    }
+
     .header-input-value { color: #ffffff; }
 
-    .emergency-jump-btn {
-      background: #ef4444;
-      color: #ffffff;
+    button {
       border: none;
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 13px;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 15px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    .emergency-jump-btn:active { transform: scale(0.97); }
+    .emergency-jump-btn {
+      background: #ef4444;
+      color: #ffffff;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    .secondary-btn,
+    .mini-btn {
+      background: #2b3642;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .secondary-btn,
+    .edit-btn,
+    .primary-btn { min-width: 140px; }
+
+    .edit-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #374151;
+      color: #e5e7eb;
+      border: 1px solid #4b5563;
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 12px;
+      min-width: auto;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-icon-btn {
+      position: absolute;
+      top: 12px;
+      background: #374151;
+      color: #e5e7eb;
+      border: 1px solid #4b5563;
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 12px;
+      min-width: auto;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-import-btn { right: 52px; }
+    .header-export-btn { right: 92px; }
+
+    .primary-btn {
+      background: var(--success);
+      color: white;
+    }
+
+    .primary-btn:disabled {
+      background: #bbd7c3;
+      cursor: not-allowed;
+    }
+
+    .danger-btn {
+      border-color: #ef4444;
+      color: #fecaca;
+    }
+
+    .mini-btn {
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 10px;
+    }
+
+    .install-btn {
+      background: #ffffff;
+      color: #111827;
+      border: 1px solid #ffffff;
+      display: none;
+    }
 
     .progress-wrap { margin-top: 14px; }
 
@@ -148,7 +252,7 @@
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #60a5fa, #22c55e);
+      background: #22c55e;
       transition: width 0.25s ease;
     }
 
@@ -177,6 +281,7 @@
     .phase-card.completed {
       background: var(--success-soft);
       border-color: #9fd2b0;
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.7);
     }
 
     .phase-toggle {
@@ -200,12 +305,6 @@
       justify-content: space-between;
       gap: 12px;
       width: 100%;
-    }
-
-    .phase-title-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
     }
 
     .phase-title-wrap h2 { color: #ffffff; }
@@ -238,18 +337,29 @@
     }
 
     .phase-card.collapsed .phase-chevron { transform: rotate(-90deg); }
+    .phase-card.collapsed .phase-content { display: none; }
 
     .phase-content {
       padding: 0 18px 18px;
       border-top: 1px solid var(--border);
     }
 
-    .phase-card.collapsed .phase-content { display: none; }
-
     .phase-intro {
       margin: 14px 0;
       font-size: 14px;
       color: var(--muted);
+    }
+
+    .subsection-heading {
+      margin: 16px 0 8px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
     .step {
@@ -318,40 +428,69 @@
       line-height: 1.5;
     }
 
-    .fuel-input-grid {
+    .fuel-input-grid,
+    .edit-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
 
-    .fuel-input-card {
+    .fuel-input-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .edit-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .fuel-input-card,
+    .edit-panel {
       background: #1b2531;
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px;
     }
 
-    .fuel-input-card label {
+    .fuel-input-card label,
+    .small-label {
       display: block;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--muted);
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       font-weight: bold;
     }
 
-    .fuel-input-card input {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #111827;
-      color: var(--text);
-      padding: 10px 12px;
-      font-size: 16px;
+    .fuel-helper,
+    .install-help,
+    .footer-note {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 10px;
     }
 
-    .fuel-helper {
+    .summary-card { display: none; }
+    .summary-card.visible { display: block; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .summary-item {
+      background: #1b2531;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .summary-label {
+      display: block;
       font-size: 12px;
       color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .summary-value {
+      font-size: 15px;
+      color: var(--text);
+      font-weight: bold;
     }
 
     .status {
@@ -363,36 +502,9 @@
       margin-top: 2px;
     }
 
-    .status.locked {
-      background: #374151;
-      color: var(--locked);
-    }
-
-    .status.ready {
-      background: #1e3a8a;
-      color: #bfdbfe;
-    }
-
-    .status.done {
-      background: #065f46;
-      color: var(--success);
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+    .status.locked { background: #374151; color: var(--locked); }
+    .status.ready { background: #1e3a8a; color: #bfdbfe; }
+    .status.done { background: #065f46; color: var(--success); }
 
     .confirm-btn {
       background: #374151;
@@ -412,47 +524,6 @@
       color: var(--success);
     }
 
-    .secondary-btn {
-      background: #2b3642;
-      color: var(--text);
-      border: 1px solid var(--border);
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .primary-btn {
-      background: var(--success);
-      color: white;
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .primary-btn:disabled {
-      background: #bbd7c3;
-      cursor: not-allowed;
-    }
-
-    .install-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
-    .install-btn {
-      background: #ffffff;
-      color: #111827;
-      border: 1px solid #ffffff;
-      display: none;
-    }
-
-    .install-help,
-    .footer-note {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 10px;
-    }
-
     @media (display-mode: standalone) {
       .install-area { display: none; }
     }
@@ -460,35 +531,27 @@
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <h1>Bristell B23 Check List</h1>
-      <p class="muted">Ground checklist grouped by phase using your SE-MOA checklist and the Bristell B23 SOP / training manual details. Each item must be confirmed before the next step unlocks.</p>
+    <div class="card" style="position: relative;">
+      <button class="header-icon-btn header-export-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
+      <button class="header-icon-btn header-import-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
+      <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
+      <button class="edit-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
+      <h1 id="appTitle">Bristell B23 Check List</h1>
+      <p class="muted" id="appDescription">Ground checklist grouped by phase using your SE-MOA checklist and the Bristell B23 SOP / training manual details. Each item must be confirmed before the next step unlocks.</p>
 
       <div class="top-meta">
         <button class="emergency-jump-btn" id="emergencyJumpBtn">EMERGENCY</button>
-
-        <div class="header-input-pill">Airport
-          <input id="headerAirport" type="text" value="ESGA">
-        </div>
-
+        <div class="header-input-pill">Airport <input id="headerAirport" type="text" value="ESGA"></div>
         <div class="header-input-pill">Aircraft
           <select id="headerAircraft">
             <option value="SE-MOY" selected>SE-MOY</option>
             <option value="SE-MOA">SE-MOA</option>
           </select>
         </div>
-
         <div class="top-meta-pill" id="todayDate">Date --</div>
         <div class="top-meta-pill" id="zuluTime">Time -- Z</div>
-
-        <div class="header-input-pill">Start
-          <input id="headerStartTime" type="time">
-        </div>
-
-        <div class="header-input-pill">End
-          <input id="headerEndTime" type="time">
-        </div>
-
+        <div class="header-input-pill">Start <span class="header-input-value" id="headerStartTime">--</span></div>
+        <div class="header-input-pill">End <span class="header-input-value" id="headerEndTime">--</span></div>
         <div class="header-input-pill">L Fuel <span class="header-input-value" id="headerFuelLeftValue">--</span></div>
         <div class="header-input-pill">R Fuel <span class="header-input-value" id="headerFuelRightValue">--</span></div>
         <div class="header-input-pill">Hobbs <span class="header-input-value" id="headerHobbsValue">--</span></div>
@@ -496,12 +559,11 @@
 
       <div class="top-actions">
         <button class="secondary-btn" id="topResetBtn" type="button">Reset</button>
+        <button class="mini-btn" id="editHeaderBtn" type="button">Edit header</button>
       </div>
 
       <div class="progress-wrap">
-        <div class="progress-bar">
-          <div id="progressFill" class="progress-fill"></div>
-        </div>
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
         <p id="progressText" class="muted">0 checklist items completed</p>
       </div>
 
@@ -521,10 +583,20 @@
 
     <div class="card">
       <div class="btn-row">
-        <button class="secondary-btn" id="resetBtn">Reset</button>
-        <button class="primary-btn" id="finishBtn" disabled>Finish</button>
+        <button class="secondary-btn" id="resetBtn" type="button">Reset</button>
+        <button class="primary-btn" id="finishBtn" disabled type="button">Finish</button>
       </div>
       <p class="footer-note">Grouped by phase with detailed notes added from the uploaded Bristell B23 SOP and training manual.</p>
+    </div>
+
+    <div class="card summary-card" id="finishSummaryCard">
+      <h2>Checklist complete</h2>
+      <p class="muted">Review the saved summary below.</p>
+      <div class="summary-grid" id="finishSummaryGrid"></div>
+      <div class="btn-row">
+        <button class="secondary-btn" id="keepReviewBtn" type="button">Keep for review</button>
+        <button class="primary-btn" id="summaryResetBtn" type="button">Reset</button>
+      </div>
     </div>
 
     <div class="card install-area">
@@ -538,7 +610,7 @@
   </div>
 
   <script>
-    const phases = [
+    let defaultPhases = [
       {
         title: 'Pre-flight inspection',
         intro: 'Walk-around and exterior inspection before entering the final cockpit setup flow.',
@@ -691,7 +763,7 @@
           { title: 'Set full RPM', detail: 'Set' },
           { title: 'Set Full Throttle', detail: 'Set' },
           { title: 'Release Brakes', detail: 'Check' },
-          { title: 'Airspeed', detail: 'Verify and call “AIRSPEED ALIVE”' },
+          { title: 'Airspeed', detail: 'Verify and call AIRSPEED ALIVE' },
           { title: 'Engine instruments normal indication', detail: 'Check' }
         ]
       },
@@ -791,33 +863,166 @@
     const headerAircraft = document.getElementById('headerAircraft');
     const headerStartTime = document.getElementById('headerStartTime');
     const headerEndTime = document.getElementById('headerEndTime');
+    const editModeBtn = document.getElementById('editModeBtn');
+    const exportProfileBtn = document.getElementById('exportProfileBtn');
+    const importProfileBtn = document.getElementById('importProfileBtn');
+    const importProfileInput = document.getElementById('importProfileInput');
+    const appTitle = document.getElementById('appTitle');
+    const appDescription = document.getElementById('appDescription');
+    const editHeaderBtn = document.getElementById('editHeaderBtn');
+    const finishSummaryCard = document.getElementById('finishSummaryCard');
+    const finishSummaryGrid = document.getElementById('finishSummaryGrid');
+    const keepReviewBtn = document.getElementById('keepReviewBtn');
+    const summaryResetBtn = document.getElementById('summaryResetBtn');
 
-    const storageKey = 'b23-ground-check-progress-v6';
-    const collapsedStorageKey = 'b23-ground-check-collapsed-v4';
+    const storageKey = 'b23-ground-check-progress-v10';
+    const customChecklistKey = 'b23-ground-check-custom-v4';
+    const editModeKey = 'b23-ground-check-edit-mode-v1';
+    const collapsedStorageKey = 'b23-ground-check-collapsed-v7';
     const fuelStorageKey = 'b23-ground-check-fuel-v1';
     const hobbsStorageKey = 'b23-ground-check-hobbs-v1';
+    const headerContentKey = 'b23-ground-check-header-v1';
+    const finishSummaryKey = 'b23-ground-check-last-summary-v1';
 
+    let phases = [];
+    let flatSteps = [];
     let pendingFocusStepIndex = null;
-    let activeFuelInputSide = null;
-    let activeHobbsInput = false;
     let fuelState = { left: '', right: '' };
     let hobbsValue = '';
     let deferredPrompt = null;
+    let isEditMode = localStorage.getItem(editModeKey) === 'true';
+    let editorState = null;
+    let collapsedPhases = [];
+    let lastSummary = null;
+    let focusPhaseIndex = null;
 
-    const flatSteps = [];
-    phases.forEach(function(phase, phaseIndex) {
-      phase.items.forEach(function(item, itemIndex) {
-        flatSteps.push({
-          title: item.title,
-          detail: item.detail,
-          note: item.note || '',
-          confirmed: false,
-          phaseTitle: phase.title,
-          phaseIndex: phaseIndex,
-          itemIndex: itemIndex
+    function cloneDefaultPhases() {
+      return JSON.parse(JSON.stringify(defaultPhases));
+    }
+
+    function specialStepType(phaseTitle, item, itemIndex) {
+      if (phaseTitle === 'Before Engine Start' && item.title === 'Pre-flight inspection') return 'derived_preflight';
+      if (item.title === 'Taxi technique') return 'tip';
+      if (phaseTitle === 'Pre-flight inspection' && itemIndex === 22) return 'fuel_input';
+      if (item.title === 'Hobbs') return 'hobbs_input';
+      return null;
+    }
+
+    function isProtectedStep(phaseTitle, item, itemIndex) {
+      return specialStepType(phaseTitle, item, itemIndex) !== null;
+    }
+
+    function isCountedStep(phaseTitle, item, itemIndex) {
+      const type = specialStepType(phaseTitle, item, itemIndex);
+      return type !== 'tip';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function loadCustomChecklist() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(customChecklistKey) || 'null');
+        if (Array.isArray(saved) && saved.length) {
+          defaultPhases = saved.map(function(phase) {
+            return {
+              title: String(phase.title || ''),
+              intro: String(phase.intro || ''),
+              items: Array.isArray(phase.items)
+                ? phase.items.map(function(item) {
+                    return {
+                      title: String(item.title || ''),
+                      detail: String(item.detail || ''),
+                      note: String(item.note || '')
+                    };
+                  })
+                : []
+            };
+          });
+          localStorage.removeItem(customChecklistKey);
+        }
+      } catch (error) {
+        console.warn('Could not load custom checklist.', error);
+      }
+      phases = cloneDefaultPhases();
+    }
+
+    function saveCustomChecklist() {
+      localStorage.setItem(customChecklistKey, JSON.stringify(phases));
+    }
+
+    function saveHeaderContent() {
+      if (!appTitle || !appDescription) return;
+      localStorage.setItem(headerContentKey, JSON.stringify({
+        title: appTitle.textContent,
+        description: appDescription.textContent
+      }));
+    }
+
+    function loadHeaderContent() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(headerContentKey) || 'null');
+        if (saved && appTitle && appDescription) {
+          if (typeof saved.title === 'string' && saved.title.trim()) {
+            appTitle.textContent = saved.title;
+          }
+          if (typeof saved.description === 'string') {
+            appDescription.textContent = saved.description;
+          }
+        }
+      } catch (error) {
+        console.warn('Could not load header content.', error);
+      }
+    }
+
+    function buildProfileExport() {
+      return {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        airport: headerAirport ? headerAirport.value : 'ESGA',
+        aircraft: headerAircraft ? headerAircraft.value : 'SE-MOY',
+        appTitle: appTitle ? appTitle.textContent : 'Bristell B23 Check List',
+        appDescription: appDescription ? appDescription.textContent : '',
+        phases: phases
+      };
+    }
+
+    function exportChecklistProfile() {
+      const profile = buildProfileExport();
+      const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_');
+      link.href = url;
+      link.download = 'b23-checklist-profile-' + aircraft + '.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function rebuildFlatSteps() {
+      flatSteps = [];
+      phases.forEach(function(phase, phaseIndex) {
+        phase.items.forEach(function(item, itemIndex) {
+          flatSteps.push({
+            title: item.title,
+            detail: item.detail,
+            note: item.note || '',
+            confirmed: false,
+            phaseTitle: phase.title,
+            phaseIndex: phaseIndex,
+            itemIndex: itemIndex
+          });
         });
       });
-    });
+    }
 
     function globalIndexFor(phaseIndex, itemIndex) {
       let count = 0;
@@ -850,12 +1055,13 @@
       try {
         const saved = JSON.parse(localStorage.getItem(collapsedStorageKey) || '[]');
         if (Array.isArray(saved) && saved.length === phases.length) {
-          return saved.map(function(value) { return Boolean(value); });
+          collapsedPhases = saved.map(Boolean);
+          return;
         }
       } catch (error) {
         console.warn('Could not load phase state.', error);
       }
-      return phases.map(function() { return false; });
+      collapsedPhases = phases.map(function() { return false; });
     }
 
     function saveCollapsedState() {
@@ -890,6 +1096,27 @@
       localStorage.setItem(hobbsStorageKey, hobbsValue);
     }
 
+    function saveLastSummary() {
+      if (!lastSummary) return;
+      localStorage.setItem(finishSummaryKey, JSON.stringify(lastSummary));
+    }
+
+    function loadLastSummary() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(finishSummaryKey) || 'null');
+        if (saved) {
+          lastSummary = saved;
+        }
+      } catch (error) {
+        console.warn('Could not load last summary.', error);
+      }
+    }
+
+    function clearLastSummary() {
+      lastSummary = null;
+      localStorage.removeItem(finishSummaryKey);
+    }
+
     function getCurrentZuluParts() {
       const now = new Date();
       const dateFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -904,33 +1131,28 @@
         hour12: false,
         timeZone: 'UTC'
       });
-
       return {
         dateText: dateFormatter.format(now),
         timeText: timeFormatter.format(now)
       };
     }
 
+    function getCurrentZuluTimeValue() {
+      const now = new Date();
+      const hours = String(now.getUTCHours()).padStart(2, '0');
+      const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+      return hours + ':' + minutes;
+    }
+
     function updateTopMeta() {
       const todayDateEl = document.getElementById('todayDate');
       const zuluTimeEl = document.getElementById('zuluTime');
       const parts = getCurrentZuluParts();
-
-      if (todayDateEl) {
-        todayDateEl.textContent = 'Date ' + parts.dateText;
-      }
-      if (zuluTimeEl) {
-        zuluTimeEl.textContent = 'Time ' + parts.timeText + ' Z';
-      }
-      if (headerFuelLeftValue) {
-        headerFuelLeftValue.textContent = fuelState.left || '--';
-      }
-      if (headerFuelRightValue) {
-        headerFuelRightValue.textContent = fuelState.right || '--';
-      }
-      if (headerHobbsValue) {
-        headerHobbsValue.textContent = hobbsValue || '--';
-      }
+      if (todayDateEl) todayDateEl.textContent = 'Date ' + parts.dateText;
+      if (zuluTimeEl) zuluTimeEl.textContent = 'Time ' + parts.timeText + ' Z';
+      if (headerFuelLeftValue) headerFuelLeftValue.textContent = fuelState.left || '--';
+      if (headerFuelRightValue) headerFuelRightValue.textContent = fuelState.right || '--';
+      if (headerHobbsValue) headerHobbsValue.textContent = hobbsValue || '--';
     }
 
     function isIos() {
@@ -969,15 +1191,62 @@
     }
 
     function completedCount() {
-      return flatSteps.filter(function(step) {
-        return step.confirmed;
-      }).length;
+      let count = 0;
+      phases.forEach(function(phase, phaseIndex) {
+        phase.items.forEach(function(item, itemIndex) {
+          if (!isCountedStep(phase.title, item, itemIndex)) return;
+          const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
+          if (step && step.confirmed) count += 1;
+        });
+      });
+      return count;
+    }
+
+    function totalCountedSteps() {
+      let count = 0;
+      phases.forEach(function(phase) {
+        phase.items.forEach(function(item, itemIndex) {
+          if (isCountedStep(phase.title, item, itemIndex)) count += 1;
+        });
+      });
+      return count;
+    }
+
+    function countedStepsInPhase(phaseIndex) {
+      const phase = phases[phaseIndex];
+      if (!phase) return 0;
+      let count = 0;
+      phase.items.forEach(function(item, itemIndex) {
+        if (isCountedStep(phase.title, item, itemIndex)) count += 1;
+      });
+      return count;
+    }
+
+    function completedCountInPhase(phaseIndex) {
+      const phase = phases[phaseIndex];
+      if (!phase) return 0;
+      let count = 0;
+      phase.items.forEach(function(item, itemIndex) {
+        if (!isCountedStep(phase.title, item, itemIndex)) return;
+        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
+        if (step && step.confirmed) count += 1;
+      });
+      return count;
     }
 
     function isPhaseFullyCompleted(phaseIndex) {
-      return phases[phaseIndex].items.every(function(_, itemIndex) {
-        return flatSteps[globalIndexFor(phaseIndex, itemIndex)].confirmed;
-      });
+      const phase = phases[phaseIndex];
+      if (!phase) return false;
+
+      let hasCountedStep = false;
+      for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) {
+        const item = phase.items[itemIndex];
+        if (!isCountedStep(phase.title, item, itemIndex)) continue;
+        hasCountedStep = true;
+        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
+        if (!step || !step.confirmed) return false;
+      }
+      return hasCountedStep;
     }
 
     function syncDerivedSteps() {
@@ -987,21 +1256,15 @@
       const beforeEngineStartPhaseIndex = phases.findIndex(function(phase) {
         return phase.title === 'Before Engine Start';
       });
-
-      if (preflightPhaseIndex === -1 || beforeEngineStartPhaseIndex === -1) {
-        return;
-      }
-
+      if (preflightPhaseIndex === -1 || beforeEngineStartPhaseIndex === -1) return;
       const derivedStepIndex = phases[beforeEngineStartPhaseIndex].items.findIndex(function(item) {
         return item.title === 'Pre-flight inspection';
       });
-
-      if (derivedStepIndex === -1) {
-        return;
-      }
-
+      if (derivedStepIndex === -1) return;
       const globalDerivedIndex = globalIndexFor(beforeEngineStartPhaseIndex, derivedStepIndex);
-      flatSteps[globalDerivedIndex].confirmed = isPhaseFullyCompleted(preflightPhaseIndex);
+      if (flatSteps[globalDerivedIndex]) {
+        flatSteps[globalDerivedIndex].confirmed = isPhaseFullyCompleted(preflightPhaseIndex);
+      }
     }
 
     function getPhaseBorderClass(title) {
@@ -1011,95 +1274,373 @@
       return 'highlight-green';
     }
 
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    function resetProgressForStructureChange() {
+      rebuildFlatSteps();
+      flatSteps.forEach(function(step) { step.confirmed = false; });
+      syncDerivedSteps();
+      saveProgress();
     }
 
-    let collapsedPhases = loadCollapsedState();
+    function openInsertEditor(phaseIndex, insertAt, existingStep) {
+      editorState = {
+        mode: existingStep ? 'edit' : 'insert',
+        phaseIndex: phaseIndex,
+        insertAt: insertAt,
+        existingStep: existingStep || null,
+        title: existingStep ? existingStep.title : '',
+        detail: existingStep ? existingStep.detail : '',
+        note: existingStep ? (existingStep.note || '') : ''
+      };
+      render();
+    }
+
+    function closeEditor() {
+      editorState = null;
+      render();
+    }
+
+    function saveEditorStep() {
+      if (!editorState) return;
+
+      if (editorState.mode === 'edit-header') {
+        if (!appTitle || !appDescription) return;
+        const title = editorState.title.trim();
+        const detail = editorState.detail.trim();
+        if (!title) {
+          alert('Header title is required.');
+          return;
+        }
+        appTitle.textContent = title;
+        appDescription.textContent = detail;
+        saveHeaderContent();
+        closeEditor();
+        return;
+      }
+
+      const phase = phases[editorState.phaseIndex];
+      if (!phase) return;
+      const title = editorState.title.trim();
+      const detail = editorState.detail.trim();
+      const note = editorState.note.trim();
+      if (!title || !detail) {
+        alert('Step title and detail are required.');
+        return;
+      }
+      const newStep = { title: title, detail: detail, note: note };
+      if (editorState.mode === 'edit') {
+        phase.items[editorState.insertAt] = newStep;
+      } else {
+        phase.items.splice(editorState.insertAt, 0, newStep);
+      }
+      saveCustomChecklist();
+      resetProgressForStructureChange();
+      closeEditor();
+    }
+
+    function deleteStep(phaseIndex, itemIndex) {
+      const phase = phases[phaseIndex];
+      if (!phase) return;
+      const item = phase.items[itemIndex];
+      if (!item || isProtectedStep(phase.title, item, itemIndex)) return;
+      phase.items.splice(itemIndex, 1);
+      saveCustomChecklist();
+      resetProgressForStructureChange();
+      render();
+    }
+
+    function buildInlineEditorHtml() {
+      if (!editorState) return '';
+      const isHeaderEditor = editorState.mode === 'edit-header';
+      return `
+        <div class="edit-panel" data-inline-editor="true">
+          ${isHeaderEditor ? `
+          <div>
+            <label class="small-label">Header title</label>
+            <input id="editorTitle" type="text" value="${escapeHtml(editorState.title)}" autofocus>
+          </div>
+          <div>
+            <label class="small-label">Header description</label>
+            <textarea id="editorDetail">${escapeHtml(editorState.detail)}</textarea>
+          </div>
+          ` : `
+          <div class="edit-grid">
+            <div>
+              <label class="small-label">Step title</label>
+              <input id="editorTitle" type="text" value="${escapeHtml(editorState.title)}" autofocus>
+            </div>
+            <div>
+              <label class="small-label">Step detail</label>
+              <input id="editorDetail" type="text" value="${escapeHtml(editorState.detail)}">
+            </div>
+          </div>
+          <div>
+            <label class="small-label">Optional note</label>
+            <textarea id="editorNote">${escapeHtml(editorState.note)}</textarea>
+          </div>
+          `}
+          <div class="step-tools">
+            <button class="mini-btn" id="saveEditorBtn" type="button">${isHeaderEditor ? 'Save header' : 'Save step'}</button>
+            <button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function getDisplayStepTitle(phase, item) {
+      if (phase.title === 'Pre-flight inspection' && item.title.includes(' - ')) {
+        return item.title.split(' - ').slice(1).join(' - ');
+      }
+      return item.title;
+    }
+
+    function getPreflightSubsection(item) {
+      if (!item.title.includes(' - ')) return null;
+      return item.title.split(' - ')[0];
+    }
+
+    function buildStepHtml(phase, phaseIndex, item, itemIndex) {
+      const stepIndex = globalIndexFor(phaseIndex, itemIndex);
+      const step = flatSteps[stepIndex];
+      const unlocked = isUnlocked(stepIndex);
+      const type = specialStepType(phase.title, item, itemIndex);
+      const isDerivedPreflightStep = type === 'derived_preflight';
+      const isTaxiTip = type === 'tip';
+      const showFuelInputs = type === 'fuel_input';
+      const showHobbsInput = type === 'hobbs_input';
+      const stateClass = step && step.confirmed ? 'done' : (unlocked ? 'ready' : 'locked');
+      const stateLabel = isDerivedPreflightStep && step && step.confirmed ? 'Auto completed' : ((step && step.confirmed) ? 'Confirmed' : (unlocked ? 'Ready' : 'Locked'));
+      const focusClass = pendingFocusStepIndex === stepIndex ? 'next-focus' : '';
+      const canConfirm = !isTaxiTip && !isDerivedPreflightStep && unlocked && step && !step.confirmed;
+      const isProtected = isProtectedStep(phase.title, item, itemIndex);
+      const isEditingThisStep = editorState && editorState.mode === 'edit' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex;
+
+      if (isEditingThisStep) {
+        return buildInlineEditorHtml();
+      }
+
+      return `
+        <div class="step ${step && step.confirmed ? 'completed' : ''} ${focusClass}" data-step-card="${stepIndex}">
+          <div class="step-header">
+            <div>
+              ${isTaxiTip ? '' : `<div class="step-number">Step ${itemIndex + 1}</div>`}
+              <h3 class="step-title">${isTaxiTip ? '💡 TIP — Taxi technique' : escapeHtml(getDisplayStepTitle(phase, item))}</h3>
+              <p class="step-detail">${escapeHtml(item.detail)}</p>
+            </div>
+            ${isTaxiTip ? '' : `<span class="status ${stateClass}">${escapeHtml(stateLabel)}</span>`}
+          </div>
+          ${showFuelInputs ? `
+            <div class="fuel-input-grid">
+              <div class="fuel-input-card">
+                <label for="fuel-left-${stepIndex}">Left tank</label>
+                <input id="fuel-left-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.left)}" data-fuel-side="left">
+              </div>
+              <div class="fuel-input-card">
+                <label for="fuel-right-${stepIndex}">Right tank</label>
+                <input id="fuel-right-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.right)}" data-fuel-side="right">
+              </div>
+            </div>
+            <div class="fuel-helper">Enter measured fuel quantity for both tanks. These values remain visible in the collapsed phase header.</div>
+          ` : ''}
+          ${showHobbsInput ? `
+            <div class="fuel-input-grid">
+              <div class="fuel-input-card">
+                <label for="hobbs-${stepIndex}">Hobbs</label>
+                <input id="hobbs-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(hobbsValue)}" data-hobbs-input="true">
+              </div>
+            </div>
+            <div class="fuel-helper">Enter the Hobbs value. This value remains visible in the collapsed phase header.</div>
+          ` : ''}
+          ${step && step.note ? `<div class="step-note">${escapeHtml(step.note)}</div>` : ''}
+          ${isDerivedPreflightStep && (!step || !step.confirmed) ? `<div class="fuel-helper">This step is completed automatically when the Pre-flight inspection phase is fully completed.</div>` : ''}
+          ${isEditMode ? `
+            <div class="step-tools">
+              <button class="mini-btn" data-insert-before="${phaseIndex}:${itemIndex}" type="button">Insert before</button>
+              <button class="mini-btn" data-insert-after="${phaseIndex}:${itemIndex + 1}" type="button">Insert after</button>
+              ${!isProtected ? `<button class="mini-btn" data-edit-step="${phaseIndex}:${itemIndex}" type="button">Edit</button>` : ''}
+              ${!isProtected ? `<button class="mini-btn danger-btn" data-delete-step="${phaseIndex}:${itemIndex}" type="button">Delete</button>` : ''}
+            </div>
+          ` : ''}
+          ${canConfirm ? `<button class="confirm-btn" data-step-index="${stepIndex}" type="button">Confirm step</button>` : ''}
+          ${step && step.confirmed && !isTaxiTip && !isDerivedPreflightStep ? `<button class="confirm-btn done" disabled type="button">Confirmed</button>` : ''}
+        </div>
+      `;
+    }
+
+    function attachRenderEvents() {
+      document.querySelectorAll('.phase-toggle[data-phase-index]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const index = Number(btn.dataset.phaseIndex);
+          collapsedPhases[index] = !collapsedPhases[index];
+          saveCollapsedState();
+          render();
+        });
+      });
+
+      document.querySelectorAll('[data-insert-before]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const parts = btn.dataset.insertBefore.split(':').map(Number);
+          openInsertEditor(parts[0], parts[1], null);
+        });
+      });
+
+      document.querySelectorAll('[data-insert-after]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const parts = btn.dataset.insertAfter.split(':').map(Number);
+          openInsertEditor(parts[0], parts[1], null);
+        });
+      });
+
+      document.querySelectorAll('[data-add-end]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const parts = btn.dataset.addEnd.split(':').map(Number);
+          openInsertEditor(parts[0], parts[1], null);
+        });
+      });
+
+      document.querySelectorAll('[data-edit-step]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const parts = btn.dataset.editStep.split(':').map(Number);
+          const phase = phases[parts[0]];
+          if (!phase || !phase.items[parts[1]]) return;
+          openInsertEditor(parts[0], parts[1], phase.items[parts[1]]);
+        });
+      });
+
+      document.querySelectorAll('[data-delete-step]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const parts = btn.dataset.deleteStep.split(':').map(Number);
+          deleteStep(parts[0], parts[1]);
+        });
+      });
+
+      const saveEditorBtn = document.getElementById('saveEditorBtn');
+      if (saveEditorBtn) {
+        saveEditorBtn.addEventListener('click', function() {
+          const titleEl = document.getElementById('editorTitle');
+          const detailEl = document.getElementById('editorDetail');
+          const noteEl = document.getElementById('editorNote');
+          if (!editorState || !titleEl || !detailEl) return;
+          editorState.title = titleEl.value;
+          editorState.detail = detailEl.value;
+          editorState.note = noteEl ? noteEl.value : '';
+          saveEditorStep();
+        });
+      }
+
+      const cancelEditorBtn = document.getElementById('cancelEditorBtn');
+      if (cancelEditorBtn) {
+        cancelEditorBtn.addEventListener('click', function() {
+          closeEditor();
+        });
+      }
+
+      document.querySelectorAll('input[data-fuel-side]').forEach(function(input) {
+        input.addEventListener('input', function() {
+          fuelState[input.dataset.fuelSide] = input.value;
+          saveFuelState();
+          updateTopMeta();
+        });
+      });
+
+      document.querySelectorAll('input[data-hobbs-input="true"]').forEach(function(input) {
+        input.addEventListener('input', function() {
+          hobbsValue = input.value;
+          saveHobbsValue();
+          updateTopMeta();
+        });
+      });
+
+      document.querySelectorAll('.confirm-btn[data-step-index]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const index = Number(btn.dataset.stepIndex);
+          if (!flatSteps[index] || flatSteps[index].confirmed || !isUnlocked(index)) return;
+          flatSteps[index].confirmed = true;
+          const currentStep = flatSteps[index];
+          maybeAutoRecordTime(currentStep);
+          const nextItemIndex = currentStep.itemIndex + 1;
+          pendingFocusStepIndex = nextItemIndex < phases[currentStep.phaseIndex].items.length
+            ? globalIndexFor(currentStep.phaseIndex, nextItemIndex)
+            : null;
+          syncDerivedSteps();
+          if (isPhaseFullyCompleted(currentStep.phaseIndex)) {
+            const phaseIndex = currentStep.phaseIndex;
+            collapsedPhases[phaseIndex] = true;
+            pendingFocusStepIndex = null;
+            saveCollapsedState();
+
+            // mark phase to focus after render
+            focusPhaseIndex = phaseIndex;
+          }
+          saveProgress();
+          render();
+        });
+      });
+    }
+
+    function renderHeaderEditor() {
+      const existing = document.getElementById('headerInlineEditorWrap');
+      if (existing) existing.remove();
+      if (!(editorState && editorState.mode === 'edit-header')) return;
+      const headerCard = document.querySelector('.container > .card');
+      if (!headerCard) return;
+      const wrap = document.createElement('div');
+      wrap.id = 'headerInlineEditorWrap';
+      wrap.innerHTML = buildInlineEditorHtml();
+      const progressWrap = headerCard.querySelector('.progress-wrap');
+      if (progressWrap) {
+        progressWrap.parentNode.insertBefore(wrap, progressWrap);
+      } else {
+        headerCard.appendChild(wrap);
+      }
+      const inlineEditor = wrap.querySelector('[data-inline-editor="true"]');
+      const editorTitle = document.getElementById('editorTitle');
+      if (inlineEditor) {
+        inlineEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      if (editorTitle) {
+        setTimeout(function() {
+          editorTitle.focus({ preventScroll: true });
+          editorTitle.select();
+        }, 50);
+      }
+    }
 
     function render() {
       syncDerivedSteps();
       stepsContainer.innerHTML = '';
 
       phases.forEach(function(phase, phaseIndex) {
-        const phaseDone = phase.items.filter(function(_, itemIndex) {
-          return flatSteps[globalIndexFor(phaseIndex, itemIndex)].confirmed;
-        }).length;
-        const isPhaseComplete = phaseDone === phase.items.length;
-
+        const phaseDone = completedCountInPhase(phaseIndex);
+        const phaseTotal = countedStepsInPhase(phaseIndex);
+        const isPhaseComplete = phaseTotal > 0 && phaseDone === phaseTotal;
         const fuelSummaryText = phase.title === 'Pre-flight inspection' && (fuelState.left || fuelState.right)
           ? 'Fuel Tank Volume  L: ' + (fuelState.left || '-') + '  R: ' + (fuelState.right || '-')
           : '';
-        const hobbsSummaryText = phase.title === 'Parking' && hobbsValue
-          ? 'Hobbs ' + hobbsValue
-          : '';
+        const hobbsSummaryText = phase.title === 'Parking' && hobbsValue ? 'Hobbs ' + hobbsValue : '';
 
         const phaseCard = document.createElement('div');
         phaseCard.className = 'card phase-card ' + getPhaseBorderClass(phase.title);
-        if (isPhaseComplete) {
-          phaseCard.classList.add('completed');
+        if (isPhaseComplete) phaseCard.classList.add('completed');
+        phaseCard.classList.toggle('collapsed', !!collapsedPhases[phaseIndex]);
+
+        let stepsHtml = '';
+        let lastSubsection = null;
+        phase.items.forEach(function(item, itemIndex) {
+          if (phase.title === 'Pre-flight inspection') {
+            const subsection = getPreflightSubsection(item);
+            if (subsection && subsection !== lastSubsection) {
+              stepsHtml += `<div class="subsection-heading">${escapeHtml(subsection)}</div>`;
+              lastSubsection = subsection;
+            }
+          }
+          if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex) {
+            stepsHtml += buildInlineEditorHtml();
+          }
+          stepsHtml += buildStepHtml(phase, phaseIndex, item, itemIndex);
+        });
+        if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === phase.items.length) {
+          stepsHtml += buildInlineEditorHtml();
         }
-        phaseCard.classList.toggle('collapsed', collapsedPhases[phaseIndex]);
-
-        const stepsHtml = phase.items.map(function(item, itemIndex) {
-          const stepIndex = globalIndexFor(phaseIndex, itemIndex);
-          const step = flatSteps[stepIndex];
-          const unlocked = isUnlocked(stepIndex);
-          const isDerivedPreflightStep = phase.title === 'Before Engine Start' && item.title === 'Pre-flight inspection';
-          const isTaxiTip = item.title === 'Taxi technique';
-          const stateClass = step.confirmed ? 'done' : (unlocked ? 'ready' : 'locked');
-          const stateLabel = isDerivedPreflightStep && step.confirmed
-            ? 'Auto completed'
-            : (step.confirmed ? 'Confirmed' : (unlocked ? 'Ready' : 'Locked'));
-          const focusClass = pendingFocusStepIndex === stepIndex ? 'next-focus' : '';
-          const showFuelInputs = phase.title === 'Pre-flight inspection' && itemIndex === 22;
-          const showHobbsInput = item.title === 'Hobbs';
-          const canConfirm = !isTaxiTip && !isDerivedPreflightStep && unlocked && !step.confirmed;
-
-          return `
-            <div class="step ${step.confirmed ? 'completed' : ''} ${focusClass}" data-step-card="${stepIndex}">
-              <div class="step-header">
-                <div>
-                  ${isTaxiTip ? '' : `<div class="step-number">Step ${itemIndex + 1}</div>`}
-                  <h3 class="step-title">${isTaxiTip ? '💡 TIP — Taxi technique' : escapeHtml(item.title)}</h3>
-                  <p class="step-detail">${escapeHtml(item.detail)}</p>
-                </div>
-                ${isTaxiTip ? '' : `<span class="status ${stateClass}">${escapeHtml(stateLabel)}</span>`}
-              </div>
-              ${showFuelInputs ? `
-                <div class="fuel-input-grid">
-                  <div class="fuel-input-card">
-                    <label for="fuel-left-${stepIndex}">Left tank</label>
-                    <input id="fuel-left-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.left)}" data-fuel-side="left">
-                  </div>
-                  <div class="fuel-input-card">
-                    <label for="fuel-right-${stepIndex}">Right tank</label>
-                    <input id="fuel-right-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.right)}" data-fuel-side="right">
-                  </div>
-                </div>
-                <div class="fuel-helper">Enter measured fuel quantity for both tanks. These values remain visible in the collapsed phase header.</div>
-              ` : ''}
-              ${showHobbsInput ? `
-                <div class="fuel-input-grid">
-                  <div class="fuel-input-card">
-                    <label for="hobbs-${stepIndex}">Hobbs</label>
-                    <input id="hobbs-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(hobbsValue)}" data-hobbs-input="true">
-                  </div>
-                </div>
-                <div class="fuel-helper">Enter the Hobbs value. This value remains visible in the collapsed phase header.</div>
-              ` : ''}
-              ${step.note ? `<div class="step-note">${escapeHtml(step.note)}</div>` : ''}
-              ${isDerivedPreflightStep && !step.confirmed ? `<div class="fuel-helper">This step is completed automatically when the Pre-flight inspection phase is fully completed.</div>` : ''}
-              ${canConfirm ? `<button class="confirm-btn" data-step-index="${stepIndex}">Confirm step</button>` : ''}
-              ${step.confirmed && !isTaxiTip && !isDerivedPreflightStep ? `<button class="confirm-btn done" disabled>Confirmed</button>` : ''}
-            </div>
-          `;
-        }).join('');
 
         phaseCard.innerHTML = `
           <button class="phase-toggle" data-phase-index="${phaseIndex}" type="button">
@@ -1111,7 +1652,7 @@
                 <div class="phase-meta">
                   ${fuelSummaryText ? `<div class="fuel-summary">${escapeHtml(fuelSummaryText)}</div>` : ''}
                   ${hobbsSummaryText ? `<div class="value-summary">${escapeHtml(hobbsSummaryText)}</div>` : ''}
-                  <span class="status ${isPhaseComplete ? 'done' : 'ready'}">${phaseDone} / ${phase.items.length}</span>
+                  <span class="status ${isPhaseComplete ? 'done' : 'ready'}">${phaseDone} / ${phaseTotal}</span>
                 </div>
                 <span class="phase-chevron">▾</span>
               </div>
@@ -1119,6 +1660,7 @@
           </button>
           <div class="phase-content">
             <p class="phase-intro">${escapeHtml(phase.intro)}</p>
+            ${isEditMode ? `<div class="phase-tools"><button class="mini-btn" data-add-end="${phaseIndex}:${phase.items.length}" type="button">Add step at end</button></div>` : ''}
             ${stepsHtml}
           </div>
         `;
@@ -1126,91 +1668,45 @@
         stepsContainer.appendChild(phaseCard);
       });
 
-      document.querySelectorAll('.phase-toggle[data-phase-index]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const index = Number(btn.dataset.phaseIndex);
-          collapsedPhases[index] = !collapsedPhases[index];
-          saveCollapsedState();
-          render();
-        });
-      });
+      renderHeaderEditor();
+      attachRenderEvents();
+      renderSummaryCard();
 
-      const emergencyBtn = document.getElementById('emergencyJumpBtn');
-      if (emergencyBtn) {
-        emergencyBtn.onclick = function() {
-          const emergencyIndex = phases.findIndex(function(phase) {
-            return phase.title === 'Emergency';
-          });
-          if (emergencyIndex === -1) return;
-
-          collapsedPhases[emergencyIndex] = false;
-          saveCollapsedState();
-          render();
-
-          setTimeout(function() {
-            const phaseCards = document.querySelectorAll('.phase-card');
-            const target = phaseCards[emergencyIndex];
-            if (!target) return;
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            const header = target.querySelector('.phase-toggle');
-            if (header) {
-              header.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.6)';
-              setTimeout(function() {
-                header.style.boxShadow = '';
-              }, 1500);
-            }
-          }, 50);
-        };
+      // focus collapsed phase after render
+      if (focusPhaseIndex !== null) {
+        const phaseCards = document.querySelectorAll('.phase-card');
+        const target = phaseCards[focusPhaseIndex];
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const header = target.querySelector('.phase-toggle');
+          if (header) {
+            header.style.boxShadow = '0 0 0 3px rgba(96,165,250,0.6)';
+            setTimeout(function() {
+              header.style.boxShadow = '';
+            }, 1200);
+          }
+        }
+        focusPhaseIndex = null;
       }
 
-      document.querySelectorAll('input[data-fuel-side]').forEach(function(input) {
-        input.addEventListener('input', function() {
-          fuelState[input.dataset.fuelSide] = input.value;
-          activeFuelInputSide = input.dataset.fuelSide;
-          activeHobbsInput = false;
-          saveFuelState();
-          updateTopMeta();
-          render();
-        });
-      });
-
-      document.querySelectorAll('input[data-hobbs-input="true"]').forEach(function(input) {
-        input.addEventListener('input', function() {
-          hobbsValue = input.value;
-          activeFuelInputSide = null;
-          activeHobbsInput = true;
-          saveHobbsValue();
-          updateTopMeta();
-          render();
-        });
-      });
-
-      document.querySelectorAll('.confirm-btn[data-step-index]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const index = Number(btn.dataset.stepIndex);
-          if (!flatSteps[index] || flatSteps[index].confirmed || !isUnlocked(index)) return;
-
-          flatSteps[index].confirmed = true;
-          const currentStep = flatSteps[index];
-          const nextItemIndex = currentStep.itemIndex + 1;
-          if (nextItemIndex < phases[currentStep.phaseIndex].items.length) {
-            pendingFocusStepIndex = globalIndexFor(currentStep.phaseIndex, nextItemIndex);
-          } else {
-            pendingFocusStepIndex = null;
-          }
-
-          syncDerivedSteps();
-          saveProgress();
-          render();
-        });
-      });
+      if (editorState && editorState.mode !== 'edit-header') {
+        const inlineEditor = document.querySelector('[data-inline-editor="true"]');
+        const editorTitle = document.getElementById('editorTitle');
+        if (inlineEditor) {
+          inlineEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (editorTitle) {
+          setTimeout(function() {
+            editorTitle.focus({ preventScroll: true });
+            editorTitle.select();
+          }, 50);
+        }
+      }
 
       if (pendingFocusStepIndex !== null) {
         const nextStepCard = document.querySelector('[data-step-card="' + pendingFocusStepIndex + '"]');
         const nextStepButton = document.querySelector('.confirm-btn[data-step-index="' + pendingFocusStepIndex + '"]');
-        if (nextStepCard) {
-          nextStepCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        if (nextStepCard) nextStepCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         if (nextStepButton) {
           setTimeout(function() {
             nextStepButton.focus({ preventScroll: true });
@@ -1218,25 +1714,35 @@
         }
       }
 
-      const done = completedCount();
-      const total = flatSteps.length;
-      const percent = total ? (done / total) * 100 : 0;
-      progressFill.style.width = percent + '%';
-      progressText.textContent = done + ' of ' + total + ' completed';
-      finishBtn.disabled = done !== total;
+      // Phase-based progress
+      let completedPhases = 0;
+      phases.forEach(function(_, phaseIndex) {
+        if (isPhaseFullyCompleted(phaseIndex)) completedPhases += 1;
+      });
+      const totalPhases = phases.length;
+
+      progressFill.style.width = (totalPhases ? (completedPhases / totalPhases) * 100 : 0) + '%';
+      progressText.textContent = completedPhases + ' of ' + totalPhases + ' phases completed';
+
+      finishBtn.disabled = completedPhases !== totalPhases;
       updateInstallButton();
     }
 
     function resetChecklist() {
-      flatSteps.forEach(function(step) {
-        step.confirmed = false;
-      });
+      flatSteps.forEach(function(step) { step.confirmed = false; });
       fuelState = { left: '', right: '' };
       hobbsValue = '';
       pendingFocusStepIndex = null;
-      activeFuelInputSide = null;
-      activeHobbsInput = false;
       collapsedPhases = phases.map(function() { return true; });
+      if (headerStartTime) {
+        headerStartTime.textContent = '';
+        localStorage.setItem('b23-start-time', '');
+      }
+      if (headerEndTime) {
+        headerEndTime.textContent = '';
+        localStorage.setItem('b23-end-time', '');
+      }
+      clearLastSummary();
       syncDerivedSteps();
       saveProgress();
       saveCollapsedState();
@@ -1247,43 +1753,288 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    resetBtn.addEventListener('click', resetChecklist);
-    if (topResetBtn) {
-      topResetBtn.addEventListener('click', resetChecklist);
-    }
-    if (collapseAllBtn) {
-      collapseAllBtn.addEventListener('click', function() {
-        collapsedPhases = phases.map(function() { return true; });
-        saveCollapsedState();
-        render();
-      });
-    }
-    if (expandAllBtn) {
-      expandAllBtn.addEventListener('click', function() {
-        collapsedPhases = phases.map(function() { return false; });
-        saveCollapsedState();
-        render();
-      });
-    }
-
-    finishBtn.addEventListener('click', function() {
-      if (completedCount() === flatSteps.length) {
-        alert('Ground checklist complete.');
+    function renderSummaryCard() {
+      if (!finishSummaryCard || !finishSummaryGrid) return;
+      if (!lastSummary) {
+        finishSummaryCard.classList.remove('visible');
+        finishSummaryGrid.innerHTML = '';
+        return;
       }
-    });
+      const fields = [
+        ['Aircraft', lastSummary.aircraft],
+        ['Airport', lastSummary.airport],
+        ['Date (UTC)', lastSummary.date],
+        ['Start time (Z)', lastSummary.startTime],
+        ['End time (Z)', lastSummary.endTime],
+        ['Hobbs', lastSummary.hobbs],
+        ['Fuel left', lastSummary.fuelLeft],
+        ['Fuel right', lastSummary.fuelRight],
+        ['Completed at (Z)', lastSummary.completedAt]
+      ];
+      finishSummaryGrid.innerHTML = fields.map(function(entry) {
+        return `<div class="summary-item"><span class="summary-label">${escapeHtml(entry[0])}</span><div class="summary-value">${escapeHtml(entry[1] || '--')}</div></div>`;
+      }).join('');
+      finishSummaryCard.classList.add('visible');
+    }
 
-    if (installBtn) {
-      installBtn.addEventListener('click', async function() {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        try {
-          await deferredPrompt.userChoice;
-        } catch (error) {
-          // no-op
-        }
-        deferredPrompt = null;
-        updateInstallButton();
+    function buildCompletionSummary() {
+      const parts = getCurrentZuluParts();
+      return {
+        aircraft: headerAircraft ? headerAircraft.value : '',
+        airport: headerAirport ? headerAirport.value : '',
+        date: parts.dateText,
+        startTime: headerStartTime ? headerStartTime.textContent : '',
+        endTime: headerEndTime ? headerEndTime.textContent : '',
+        hobbs: hobbsValue || '',
+        fuelLeft: fuelState.left || '',
+        fuelRight: fuelState.right || '',
+        completedAt: parts.timeText
+      };
+    }
+
+    function maybeAutoRecordTime(step) {
+      if (!step) return;
+      if (step.phaseTitle === 'Engine Start' && step.title === 'Master switch' && headerStartTime && !headerStartTime.textContent) {
+        headerStartTime.textContent = getCurrentZuluTimeValue();
+        localStorage.setItem('b23-start-time', headerStartTime.textContent);
+      }
+      if (step.phaseTitle === 'Parking' && step.title === 'Master Switch' && headerEndTime) {
+        headerEndTime.textContent = getCurrentZuluTimeValue();
+        localStorage.setItem('b23-end-time', headerEndTime.textContent);
+      }
+    }
+
+    function showFinishSummary() {
+      lastSummary = buildCompletionSummary();
+      saveLastSummary();
+      renderSummaryCard();
+      if (finishSummaryCard) {
+        finishSummaryCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function importChecklistProfileObject(profile) {
+      if (!profile || !Array.isArray(profile.phases) || !profile.phases.length) {
+        throw new Error('Invalid checklist profile file.');
+      }
+      phases = profile.phases.map(function(phase) {
+        return {
+          title: String(phase.title || ''),
+          intro: String(phase.intro || ''),
+          items: Array.isArray(phase.items)
+            ? phase.items.map(function(item) {
+                return {
+                  title: String(item.title || ''),
+                  detail: String(item.detail || ''),
+                  note: String(item.note || '')
+                };
+              })
+            : []
+        };
       });
+      defaultPhases = JSON.parse(JSON.stringify(phases));
+      if (appTitle && typeof profile.appTitle === 'string' && profile.appTitle.trim()) {
+        appTitle.textContent = profile.appTitle;
+      }
+      if (appDescription && typeof profile.appDescription === 'string') {
+        appDescription.textContent = profile.appDescription;
+      }
+      saveHeaderContent();
+      if (headerAirport && typeof profile.airport === 'string') {
+        headerAirport.value = profile.airport;
+        localStorage.setItem('b23-airport', headerAirport.value);
+      }
+      if (headerAircraft && typeof profile.aircraft === 'string') {
+        headerAircraft.value = profile.aircraft;
+        localStorage.setItem('b23-aircraft', headerAircraft.value);
+      }
+      editorState = null;
+      pendingFocusStepIndex = null;
+      saveCustomChecklist();
+      rebuildFlatSteps();
+      flatSteps.forEach(function(step) { step.confirmed = false; });
+      loadCollapsedState();
+      syncDerivedSteps();
+      saveProgress();
+      saveCollapsedState();
+      updateTopMeta();
+      render();
+    }
+
+    function attachStaticEvents() {
+      const emergencyBtn = document.getElementById('emergencyJumpBtn');
+      if (emergencyBtn) {
+        emergencyBtn.addEventListener('click', function() {
+          const emergencyIndex = phases.findIndex(function(phase) {
+            return phase.title === 'Emergency';
+          });
+          if (emergencyIndex === -1) return;
+          collapsedPhases[emergencyIndex] = false;
+          saveCollapsedState();
+          render();
+          setTimeout(function() {
+            const phaseCards = document.querySelectorAll('.phase-card');
+            const target = phaseCards[emergencyIndex];
+            if (!target) return;
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const header = target.querySelector('.phase-toggle');
+            if (header) {
+              header.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.6)';
+              setTimeout(function() { header.style.boxShadow = ''; }, 1500);
+            }
+          }, 50);
+        });
+      }
+
+      if (resetBtn) resetBtn.addEventListener('click', resetChecklist);
+      if (topResetBtn) topResetBtn.addEventListener('click', resetChecklist);
+
+      if (collapseAllBtn) {
+        collapseAllBtn.addEventListener('click', function() {
+          collapsedPhases = phases.map(function() { return true; });
+          saveCollapsedState();
+          render();
+        });
+      }
+
+      if (expandAllBtn) {
+        expandAllBtn.addEventListener('click', function() {
+          collapsedPhases = phases.map(function() { return false; });
+          saveCollapsedState();
+          render();
+        });
+      }
+
+      if (finishBtn) {
+        finishBtn.addEventListener('click', function() {
+          if (completedCount() === totalCountedSteps()) {
+            showFinishSummary();
+          }
+        });
+      }
+
+      if (keepReviewBtn) {
+        keepReviewBtn.addEventListener('click', function() {
+          if (finishSummaryCard) {
+            finishSummaryCard.classList.remove('visible');
+          }
+        });
+      }
+
+      if (summaryResetBtn) {
+        summaryResetBtn.addEventListener('click', function() {
+          resetChecklist();
+        });
+      }
+
+      if (installBtn) {
+        installBtn.addEventListener('click', async function() {
+          if (!deferredPrompt) return;
+          deferredPrompt.prompt();
+          try {
+            await deferredPrompt.userChoice;
+          } catch (error) {
+          }
+          deferredPrompt = null;
+          updateInstallButton();
+        });
+      }
+
+      if (headerAirport) {
+        headerAirport.value = localStorage.getItem('b23-airport') || 'ESGA';
+        headerAirport.addEventListener('input', function() {
+          localStorage.setItem('b23-airport', headerAirport.value);
+        });
+      }
+
+      if (headerAircraft) {
+        headerAircraft.value = localStorage.getItem('b23-aircraft') || 'SE-MOY';
+        headerAircraft.addEventListener('change', function() {
+          localStorage.setItem('b23-aircraft', headerAircraft.value);
+        });
+      }
+
+      if (headerStartTime) {
+        headerStartTime.textContent = localStorage.getItem('b23-start-time') || '';
+      }
+
+      if (headerEndTime) {
+        headerEndTime.textContent = localStorage.getItem('b23-end-time') || '';
+      }
+
+      if (editModeBtn) {
+        editModeBtn.textContent = isEditMode ? '✓' : '✏️';
+        editModeBtn.addEventListener('click', function() {
+          isEditMode = !isEditMode;
+          if (editHeaderBtn) {
+            editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+          }
+          localStorage.setItem(editModeKey, String(isEditMode));
+          if (editorState && editorState.mode !== 'edit-header') {
+            editorState = null;
+          }
+          editModeBtn.textContent = isEditMode ? '✓' : '✏️';
+          render();
+        });
+      }
+
+      if (editHeaderBtn) {
+        editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+        editHeaderBtn.addEventListener('click', function() {
+          editorState = {
+            mode: 'edit-header',
+            title: appTitle ? appTitle.textContent : '',
+            detail: appDescription ? appDescription.textContent : '',
+            note: ''
+          };
+          render();
+        });
+      }
+
+      if (exportProfileBtn) {
+        exportProfileBtn.addEventListener('click', function() {
+          exportChecklistProfile();
+        });
+      }
+
+      if (importProfileBtn && importProfileInput) {
+        importProfileBtn.addEventListener('click', function() {
+          importProfileInput.click();
+        });
+        importProfileInput.addEventListener('change', function(event) {
+          const file = event.target.files && event.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function(loadEvent) {
+            try {
+              const parsed = JSON.parse(String(loadEvent.target.result || ''));
+              importChecklistProfileObject(parsed);
+            } catch (error) {
+              alert(error && error.message ? error.message : 'Could not import checklist profile.');
+            } finally {
+              importProfileInput.value = '';
+            }
+          };
+          reader.readAsText(file);
+        });
+      }
+    }
+
+    function initialize() {
+      loadCustomChecklist();
+      loadHeaderContent();
+      rebuildFlatSteps();
+      loadCollapsedState();
+      loadProgress();
+      loadFuelState();
+      loadHobbsValue();
+      loadLastSummary();
+      syncDerivedSteps();
+      updateTopMeta();
+      updateInstallButton();
+      attachStaticEvents();
+      setInterval(updateTopMeta, 30000);
+      render();
     }
 
     window.addEventListener('beforeinstallprompt', function(event) {
@@ -1305,43 +2056,7 @@
       });
     }
 
-    loadProgress();
-    loadFuelState();
-    loadHobbsValue();
-    syncDerivedSteps();
-    updateTopMeta();
-    updateInstallButton();
-
-    if (headerAirport) {
-      headerAirport.value = localStorage.getItem('b23-airport') || 'ESGA';
-      headerAirport.addEventListener('input', function() {
-        localStorage.setItem('b23-airport', headerAirport.value);
-      });
-    }
-
-    if (headerAircraft) {
-      headerAircraft.value = localStorage.getItem('b23-aircraft') || 'SE-MOY';
-      headerAircraft.addEventListener('change', function() {
-        localStorage.setItem('b23-aircraft', headerAircraft.value);
-      });
-    }
-
-    if (headerStartTime) {
-      headerStartTime.value = localStorage.getItem('b23-start-time') || '';
-      headerStartTime.addEventListener('change', function() {
-        localStorage.setItem('b23-start-time', headerStartTime.value);
-      });
-    }
-
-    if (headerEndTime) {
-      headerEndTime.value = localStorage.getItem('b23-end-time') || '';
-      headerEndTime.addEventListener('change', function() {
-        localStorage.setItem('b23-end-time', headerEndTime.value);
-      });
-    }
-
-    setInterval(updateTopMeta, 30000);
-    render();
+    initialize();
   </script>
 </body>
 </html>
