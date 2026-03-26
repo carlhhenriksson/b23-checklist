@@ -209,6 +209,13 @@
 
     .header-import-btn { right: 52px; }
     .header-export-btn { right: 92px; }
+    .header-audio-btn { right: 132px; }
+
+    .header-icon-btn.active {
+      background: #1e3a8a;
+      color: #dbeafe;
+      border-color: #3b82f6;
+    }
 
     .primary-btn {
       background: var(--success);
@@ -282,6 +289,11 @@
       background: var(--success-soft);
       border-color: #9fd2b0;
       box-shadow: 0 0 0 3px rgba(34,197,94,0.7);
+    }
+
+    .phase-card.active-phase {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96,165,250,0.35);
     }
 
     .phase-toggle {
@@ -370,8 +382,13 @@
       border-radius: 14px;
       background: #243140;
       margin-bottom: 12px;
-      transition: background 0.2s ease, border-color 0.2s ease;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
       scroll-margin-top: 24px;
+      cursor: pointer;
+    }
+
+    .step:active {
+      transform: scale(0.995);
     }
 
     .step:last-child { margin-bottom: 0; }
@@ -532,6 +549,7 @@
 <body>
   <div class="container">
     <div class="card" style="position: relative;">
+      <button class="header-icon-btn header-audio-btn" id="audioToggleBtn" type="button" title="Audio">🔊</button>
       <button class="header-icon-btn header-export-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
       <button class="header-icon-btn header-import-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
       <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
@@ -867,6 +885,7 @@
     const exportProfileBtn = document.getElementById('exportProfileBtn');
     const importProfileBtn = document.getElementById('importProfileBtn');
     const importProfileInput = document.getElementById('importProfileInput');
+    const audioToggleBtn = document.getElementById('audioToggleBtn');
     const appTitle = document.getElementById('appTitle');
     const appDescription = document.getElementById('appDescription');
     const editHeaderBtn = document.getElementById('editHeaderBtn');
@@ -883,6 +902,7 @@
     const hobbsStorageKey = 'b23-ground-check-hobbs-v1';
     const headerContentKey = 'b23-ground-check-header-v1';
     const finishSummaryKey = 'b23-ground-check-last-summary-v1';
+    const audioEnabledKey = 'b23-ground-check-audio-enabled-v1';
 
     let phases = [];
     let flatSteps = [];
@@ -895,6 +915,8 @@
     let collapsedPhases = [];
     let lastSummary = null;
     let focusPhaseIndex = null;
+    let activePhaseIndex = null;
+    let isAudioEnabled = localStorage.getItem(audioEnabledKey) === 'true';
 
     function cloneDefaultPhases() {
       return JSON.parse(JSON.stringify(defaultPhases));
@@ -929,6 +951,126 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    let preferredVoice = null;
+
+    function pickPreferredVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices() || [];
+      if (!voices.length) return null;
+
+      // Prefer common female voices / natural sounding ones
+      const preferredNames = [
+        'Google UK English Female', 'Google US English',
+        'Samantha', 'Victoria', 'Karen',
+        'Microsoft Zira', 'Microsoft Jenny', 'Microsoft Aria'
+      ];
+
+      // Try exact preferred list first
+      for (const name of preferredNames) {
+        const v = voices.find(v => (v.name || '').toLowerCase().includes(name.toLowerCase()));
+        if (v) return v;
+      }
+
+      // Fallback: any English female-like voice
+      const femaleHint = voices.find(v => {
+        const n = (v.name || '').toLowerCase();
+        return (v.lang || '').toLowerCase().startsWith('en') && (n.includes('female') || n.includes('woman'));
+      });
+      if (femaleHint) return femaleHint;
+
+      // Fallback: any English voice
+      const anyEn = voices.find(v => (v.lang || '').toLowerCase().startsWith('en'));
+      if (anyEn) return anyEn;
+
+      // Last resort: first voice
+      return voices[0] || null;
+    }
+
+    function ensureVoiceReady() {
+      if (!('speechSynthesis' in window)) return;
+      if (!preferredVoice) {
+        preferredVoice = pickPreferredVoice();
+      }
+    }
+
+    if ('speechSynthesis' in window) {
+      // Some browsers load voices asynchronously
+      window.speechSynthesis.onvoiceschanged = function() {
+        preferredVoice = pickPreferredVoice();
+      };
+    }
+
+    function speakText(text) {
+      if (!isAudioEnabled) return;
+      if (!('speechSynthesis' in window)) return;
+
+      ensureVoiceReady();
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        utterance.lang = preferredVoice.lang || 'en-US';
+      } else {
+        utterance.lang = 'en-US';
+      }
+
+      // Tune for less robotic feel
+      utterance.rate = 1.15;   // slightly faster
+      utterance.pitch = 1.05;  // slightly more natural
+      utterance.volume = 1;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function updateAudioToggleUi() {
+      if (!audioToggleBtn) return;
+      audioToggleBtn.classList.toggle('active', isAudioEnabled);
+      audioToggleBtn.textContent = isAudioEnabled ? '🔊' : '🔈';
+      audioToggleBtn.title = isAudioEnabled ? 'Audio on' : 'Audio off';
+    }
+
+    function confirmStep(index) {
+      if (!flatSteps[index] || flatSteps[index].confirmed || !isUnlocked(index)) return;
+      flatSteps[index].confirmed = true;
+      const currentStep = flatSteps[index];
+      maybeAutoRecordTime(currentStep);
+
+      const phase = phases[currentStep.phaseIndex];
+      const item = phase && phase.items[currentStep.itemIndex] ? phase.items[currentStep.itemIndex] : null;
+      if (item) {
+        const title = getDisplayStepTitle(phase, item);
+        speakText(title + '. ' + currentStep.detail);
+      }
+
+      const nextItemIndex = currentStep.itemIndex + 1;
+      pendingFocusStepIndex = nextItemIndex < phases[currentStep.phaseIndex].items.length
+        ? globalIndexFor(currentStep.phaseIndex, nextItemIndex)
+        : null;
+      syncDerivedSteps();
+      if (isPhaseFullyCompleted(currentStep.phaseIndex)) {
+        const phaseIndex = currentStep.phaseIndex;
+        collapsedPhases[phaseIndex] = true;
+        pendingFocusStepIndex = null;
+        saveCollapsedState();
+        focusPhaseIndex = phaseIndex;
+      }
+      saveProgress();
+      render();
+    }
+
+    function getActivePhaseIndex() {
+      for (let phaseIndex = 0; phaseIndex < phases.length; phaseIndex += 1) {
+        if (!isRequiredPhase(phases[phaseIndex].title)) continue;
+        if (!isPhaseFullyCompleted(phaseIndex)) return phaseIndex;
+      }
+      for (let phaseIndex = 0; phaseIndex < phases.length; phaseIndex += 1) {
+        if (!isPhaseFullyCompleted(phaseIndex)) return phaseIndex;
+      }
+      return null;
     }
 
     function loadCustomChecklist() {
@@ -1424,7 +1566,7 @@
       }
 
       return `
-        <div class="step ${step && step.confirmed ? 'completed' : ''} ${focusClass}" data-step-card="${stepIndex}">
+        <div class="step ${step && step.confirmed ? 'completed' : ''} ${focusClass}" data-step-card="${stepIndex}" data-step-index="${stepIndex}">
           <div class="step-header">
             <div>
               ${isTaxiTip ? '' : `<div class="step-number">Step ${itemIndex + 1}</div>`}
@@ -1465,8 +1607,7 @@
               ${!isProtected ? `<button class="mini-btn danger-btn" data-delete-step="${phaseIndex}:${itemIndex}" type="button">Delete</button>` : ''}
             </div>
           ` : ''}
-          ${canConfirm ? `<button class="confirm-btn" data-step-index="${stepIndex}" type="button">Confirm step</button>` : ''}
-          ${step && step.confirmed && !isTaxiTip && !isDerivedPreflightStep ? `<button class="confirm-btn done" disabled type="button">Confirmed</button>` : ''}
+          
         </div>
       `;
     }
@@ -1555,29 +1696,11 @@
         });
       });
 
-      document.querySelectorAll('.confirm-btn[data-step-index]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const index = Number(btn.dataset.stepIndex);
-          if (!flatSteps[index] || flatSteps[index].confirmed || !isUnlocked(index)) return;
-          flatSteps[index].confirmed = true;
-          const currentStep = flatSteps[index];
-          maybeAutoRecordTime(currentStep);
-          const nextItemIndex = currentStep.itemIndex + 1;
-          pendingFocusStepIndex = nextItemIndex < phases[currentStep.phaseIndex].items.length
-            ? globalIndexFor(currentStep.phaseIndex, nextItemIndex)
-            : null;
-          syncDerivedSteps();
-          if (isPhaseFullyCompleted(currentStep.phaseIndex)) {
-            const phaseIndex = currentStep.phaseIndex;
-            collapsedPhases[phaseIndex] = true;
-            pendingFocusStepIndex = null;
-            saveCollapsedState();
-
-            // mark phase to focus after render
-            focusPhaseIndex = phaseIndex;
-          }
-          saveProgress();
-          render();
+      document.querySelectorAll('[data-step-card][data-step-index]').forEach(function(card) {
+        card.addEventListener('click', function(event) {
+          if (event.target.closest('button, input, textarea, select, label')) return;
+          const index = Number(card.dataset.stepIndex);
+          confirmStep(index);
         });
       });
     }
@@ -1612,6 +1735,7 @@
 
     function render() {
       syncDerivedSteps();
+      activePhaseIndex = getActivePhaseIndex();
       stepsContainer.innerHTML = '';
 
       phases.forEach(function(phase, phaseIndex) {
@@ -1627,6 +1751,7 @@
         const phaseCard = document.createElement('div');
         phaseCard.className = 'card phase-card ' + getPhaseBorderClass(phase.title);
         if (isPhaseComplete) phaseCard.classList.add('completed');
+        if (activePhaseIndex === phaseIndex) phaseCard.classList.add('active-phase');
         phaseCard.classList.toggle('collapsed', !!collapsedPhases[phaseIndex]);
 
         let stepsHtml = '';
@@ -1734,6 +1859,7 @@
 
       finishBtn.disabled = completedPhases !== totalPhases;
       updateInstallButton();
+      updateAudioToggleUi();
     }
 
     function resetChecklist() {
@@ -2003,6 +2129,18 @@
             note: ''
           };
           render();
+        });
+      }
+
+      if (audioToggleBtn) {
+        updateAudioToggleUi();
+        audioToggleBtn.addEventListener('click', function() {
+          isAudioEnabled = !isAudioEnabled;
+          localStorage.setItem(audioEnabledKey, String(isAudioEnabled));
+          updateAudioToggleUi();
+          if (!isAudioEnabled && 'speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+          }
         });
       }
 
