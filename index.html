@@ -912,6 +912,11 @@
       return specialStepType(phaseTitle, item, itemIndex) !== null;
     }
 
+    function isRequiredPhase(phaseTitle) {
+      const optionalPhases = ['Emergency', 'Cruise', 'Take off', 'After Take off', 'Approach', 'After Landing'];
+      return !optionalPhases.includes(phaseTitle);
+    }
+
     function isCountedStep(phaseTitle, item, itemIndex) {
       const type = specialStepType(phaseTitle, item, itemIndex);
       return type !== 'tip';
@@ -1613,6 +1618,7 @@
         const phaseDone = completedCountInPhase(phaseIndex);
         const phaseTotal = countedStepsInPhase(phaseIndex);
         const isPhaseComplete = phaseTotal > 0 && phaseDone === phaseTotal;
+        const isRequired = isRequiredPhase(phase.title);
         const fuelSummaryText = phase.title === 'Pre-flight inspection' && (fuelState.left || fuelState.right)
           ? 'Fuel Tank Volume  L: ' + (fuelState.left || '-') + '  R: ' + (fuelState.right || '-')
           : '';
@@ -1652,7 +1658,7 @@
                 <div class="phase-meta">
                   ${fuelSummaryText ? `<div class="fuel-summary">${escapeHtml(fuelSummaryText)}</div>` : ''}
                   ${hobbsSummaryText ? `<div class="value-summary">${escapeHtml(hobbsSummaryText)}</div>` : ''}
-                  <span class="status ${isPhaseComplete ? 'done' : 'ready'}">${phaseDone} / ${phaseTotal}</span>
+                  <span class="status ${isPhaseComplete ? 'done' : (isRequired ? 'ready' : 'locked')}">${phaseDone} / ${phaseTotal}${isRequired ? '' : ' optional'}</span>
                 </div>
                 <span class="phase-chevron">▾</span>
               </div>
@@ -1714,15 +1720,17 @@
         }
       }
 
-      // Phase-based progress
+      // Required-phase progress
       let completedPhases = 0;
-      phases.forEach(function(_, phaseIndex) {
+      let totalPhases = 0;
+      phases.forEach(function(phase, phaseIndex) {
+        if (!isRequiredPhase(phase.title)) return;
+        totalPhases += 1;
         if (isPhaseFullyCompleted(phaseIndex)) completedPhases += 1;
       });
-      const totalPhases = phases.length;
 
       progressFill.style.width = (totalPhases ? (completedPhases / totalPhases) * 100 : 0) + '%';
-      progressText.textContent = completedPhases + ' of ' + totalPhases + ' phases completed';
+      progressText.textContent = completedPhases + ' of ' + totalPhases + ' required phases completed';
 
       finishBtn.disabled = completedPhases !== totalPhases;
       updateInstallButton();
@@ -1907,7 +1915,14 @@
 
       if (finishBtn) {
         finishBtn.addEventListener('click', function() {
-          if (completedCount() === totalCountedSteps()) {
+          let completedRequiredPhases = 0;
+          let totalRequiredPhases = 0;
+          phases.forEach(function(phase, phaseIndex) {
+            if (!isRequiredPhase(phase.title)) return;
+            totalRequiredPhases += 1;
+            if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1;
+          });
+          if (completedRequiredPhases === totalRequiredPhases) {
             showFinishSummary();
           }
         });
