@@ -80,6 +80,13 @@
       margin-top: 12px;
     }
 
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
     .top-meta-pill,
     .header-input-pill {
       display: inline-flex;
@@ -487,6 +494,10 @@
         <div class="header-input-pill">Hobbs <span class="header-input-value" id="headerHobbsValue">--</span></div>
       </div>
 
+      <div class="top-actions">
+        <button class="secondary-btn" id="topResetBtn" type="button">Reset</button>
+      </div>
+
       <div class="progress-wrap">
         <div class="progress-bar">
           <div id="progressFill" class="progress-fill"></div>
@@ -496,6 +507,13 @@
 
       <div class="header-disclaimer">
         ⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="btn-row" style="margin-top:0;">
+        <button class="secondary-btn" id="collapseAllBtn" type="button">Collapse all</button>
+        <button class="secondary-btn" id="expandAllBtn" type="button">Expand all</button>
       </div>
     </div>
 
@@ -761,6 +779,9 @@
     const progressText = document.getElementById('progressText');
     const finishBtn = document.getElementById('finishBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const topResetBtn = document.getElementById('topResetBtn');
+    const collapseAllBtn = document.getElementById('collapseAllBtn');
+    const expandAllBtn = document.getElementById('expandAllBtn');
     const installBtn = document.getElementById('installBtn');
     const installHelp = document.getElementById('installHelp');
     const headerFuelLeftValue = document.getElementById('headerFuelLeftValue');
@@ -1215,7 +1236,7 @@
       pendingFocusStepIndex = null;
       activeFuelInputSide = null;
       activeHobbsInput = false;
-      collapsedPhases = phases.map(function() { return false; });
+      collapsedPhases = phases.map(function() { return true; });
       syncDerivedSteps();
       saveProgress();
       saveCollapsedState();
@@ -1223,9 +1244,27 @@
       saveHobbsValue();
       updateTopMeta();
       render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     resetBtn.addEventListener('click', resetChecklist);
+    if (topResetBtn) {
+      topResetBtn.addEventListener('click', resetChecklist);
+    }
+    if (collapseAllBtn) {
+      collapseAllBtn.addEventListener('click', function() {
+        collapsedPhases = phases.map(function() { return true; });
+        saveCollapsedState();
+        render();
+      });
+    }
+    if (expandAllBtn) {
+      expandAllBtn.addEventListener('click', function() {
+        collapsedPhases = phases.map(function() { return false; });
+        saveCollapsedState();
+        render();
+      });
+    }
 
     finishBtn.addEventListener('click', function() {
       if (completedCount() === flatSteps.length) {
