@@ -313,11 +313,10 @@
 
     .tabs {
       display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
-      min-height: 38px;
-      flex: 1;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      width: 100%;
     }
 
     .tabs-actions {
@@ -340,7 +339,7 @@
     }
 
     .tab {
-      padding: 4px 8px;
+      padding: 10px 12px;
       border-radius: 7px 7px 0 0;
       background: #1b2531;
       color: var(--muted);
@@ -358,12 +357,12 @@
     }
 
     .tab.active {
-      background: var(--card);
-      color: var(--text);
-      border-color: var(--border);
-      border-bottom: 1px solid var(--card);
-      position: relative;
-      top: 1px;
+      background: #1e3a8a;
+      color: #ffffff;
+      border: 1px solid #3b82f6;
+      outline: 2px solid #60a5fa;
+      outline-offset: -2px;
+      font-weight: 700;
       opacity: 1;
     }
 
@@ -407,19 +406,27 @@
     }
 
     .phase-card.active-phase {
-      border-color: var(--accent);
+      border: 4px solid #22c55e;
+      background: rgba(34, 197, 94, 0.08);
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 12px rgba(34, 197, 94, 0.4);
+    }
+
+    .phase-card.completed {
+      border: 4px solid #22c55e;
+      background: rgba(34, 197, 94, 0.15);
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 12px rgba(34, 197, 94, 0.4);
     }
 
     .phase-card.highlight-green {
-      border: 2px solid var(--success);
+      border: 1px solid var(--border);
     }
 
     .phase-card.highlight-blue {
-      border: 2px solid var(--accent);
+      border: 1px solid var(--border);
     }
 
     .phase-card.emergency-phase {
-      border: 2px solid #ef4444;
+      border: 1px solid var(--border);
     }
 
     .phase-card.collapsed .phase-content {
@@ -636,15 +643,15 @@
         <p id="progressText" class="muted">0 required phases completed</p>
       </div>
     </div>
-    <div class="tabs-bar">
-      <div class="tabs" id="tabsContainer"></div>
-      <div class="tabs-actions">
+    <div class="tabs-actions" style="margin-bottom:6px;">
         <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
         <button class="mini-btn" id="audioModeBtn" type="button" title="Audio and voice">🎙️🔊</button>
         <button class="secondary-btn" id="topResetBtn" type="button">Reset</button>
         <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
       </div>
-    </div>
+      <div class="tabs-bar">
+        <div class="tabs" id="tabsContainer"></div>
+      </div>
     <div class="tab-tools" id="tabTools"></div>
     <div id="stepsContainer"></div>
     <div class="card">
@@ -1107,11 +1114,30 @@
         currentVoicePhaseIndex = nextPhaseIndex;
         saveCollapsedState();
         render();
+
+        // scroll next phase into center
+        if (nextPhaseIndex !== null) {
+          setTimeout(function() {
+            const btn = document.querySelector('[data-phase-index="' + nextPhaseIndex + '"]');
+            const card = btn ? btn.closest('.phase-card') : null;
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 60);
+        }
+
         if (isAudioEnabled) { speakText(phases[completedPhaseIndex].title + '. Checks completed.'); }
         return;
       }
       saveProgress();
       render();
+
+      // scroll next step into center
+      if (pendingFocusStepIndex !== null) {
+        setTimeout(function() {
+          const el = document.querySelector('[data-step-index="' + pendingFocusStepIndex + '"]');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
+      }
+
       if (isVoiceModeEnabled) { speakCurrentActionableStep(false, currentVoicePhaseIndex); }
     }
     function renderHeaderEditor() { const existing = document.getElementById('headerInlineEditorWrap'); if (existing) existing.remove(); if (!(editorState && editorState.mode === 'edit-header')) return; const headerCard = document.querySelector('.container > .card'); if (!headerCard) return; const wrap = document.createElement('div'); wrap.id = 'headerInlineEditorWrap'; wrap.innerHTML = buildInlineEditorHtml(); const progressWrap = headerCard.querySelector('.progress-wrap'); if (progressWrap) progressWrap.parentNode.insertBefore(wrap, progressWrap); else headerCard.appendChild(wrap); }
