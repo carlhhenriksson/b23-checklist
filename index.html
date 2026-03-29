@@ -323,8 +323,12 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      align-items: flex-end;
+      align-items: center;
       padding-bottom: 6px;
+    }
+
+    #collapseAllBtn {
+      margin-left: auto;
     }
 
     .tabs-actions .secondary-btn,
@@ -609,8 +613,6 @@
 <body>
   <div class="container">
     <div class="card" style="position: relative;">
-      <button class="header-icon-btn header-export-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
-      <button class="header-icon-btn header-import-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
       <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
       
       <h1 id="appTitle">Bristell B23 Check List</h1>
@@ -645,6 +647,8 @@
     </div>
     <div class="tabs-actions" style="margin-bottom:6px;">
         <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
+        <button class="mini-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
+        <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
         <button class="mini-btn" id="audioModeBtn" type="button" title="Audio and voice">🎙️🔊</button>
         <button class="secondary-btn" id="topResetBtn" type="button">Reset</button>
         <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
