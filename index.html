@@ -313,10 +313,10 @@
 
     .tabs {
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 4px;
-      width: 100%;
+      align-items: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-height: 38px;
     }
 
     .tabs-actions {
@@ -328,7 +328,8 @@
     }
 
     #collapseAllBtn {
-      margin-left: auto;
+      margin-left: 8px;
+      margin-bottom: 3px;
     }
 
     .tabs-actions .secondary-btn,
@@ -344,7 +345,7 @@
 
     .tab {
       padding: 10px 12px;
-      border-radius: 7px 7px 0 0;
+      border-radius: 10px 10px 0 0;
       background: #1b2531;
       color: var(--muted);
       border: 1px solid var(--border);
@@ -361,10 +362,10 @@
     }
 
     .tab.active {
-      background: #1e3a8a;
+      background: #1b2531;
       color: #ffffff;
-      border: 1px solid #3b82f6;
-      outline: 2px solid #60a5fa;
+      border: 1px solid var(--border);
+      outline: 2px solid #22c55e;
       outline-offset: -2px;
       font-weight: 700;
       opacity: 1;
@@ -377,10 +378,11 @@
     }
 
     .tab[data-tab-id="emergency"].active {
-      background: #7f1d1d;
+      background: #1b2531;
       color: #fee2e2;
-      border-color: #ef4444;
-      border-bottom: 1px solid #7f1d1d;
+      border: 1px solid var(--border);
+      outline: 2px solid #ef4444;
+      outline-offset: -2px;
     }
 
     .tab.icon-tab,
@@ -430,7 +432,8 @@
     }
 
     .phase-card.emergency-phase {
-      border: 1px solid var(--border);
+      border: 4px solid #ef4444 !important;
+      background: rgba(239, 68, 68, 0.08);
     }
 
     .phase-card.collapsed .phase-content {
@@ -651,10 +654,11 @@
         <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
         <button class="mini-btn" id="audioModeBtn" type="button" title="Audio and voice">🎙️🔊</button>
         <button class="secondary-btn" id="topResetBtn" type="button">Reset</button>
-        <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
+        
       </div>
       <div class="tabs-bar">
         <div class="tabs" id="tabsContainer"></div>
+        <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
       </div>
     <div class="tab-tools" id="tabTools"></div>
     <div id="stepsContainer"></div>
@@ -1050,11 +1054,17 @@
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       if (preferredVoice) { utterance.voice = preferredVoice; utterance.lang = preferredVoice.lang || 'en-US'; } else { utterance.lang = 'en-US'; }
-      utterance.rate = 1.0;
+      utterance.rate = 1.2;
       utterance.pitch = 0.92;
       utterance.volume = 1;
-      utterance.onend = function() { isSpeaking = false; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 250); } };
-      utterance.onerror = function() { isSpeaking = false; lastRecognitionError = 'speech error'; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 250); } };
+      utterance.onend = function() { isSpeaking = false; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() {
+            recognitionRestartTimer = null;
+            startVoiceRecognition();
+          }, 100); } };
+      utterance.onerror = function() { isSpeaking = false; lastRecognitionError = 'speech error'; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() {
+            recognitionRestartTimer = null;
+            startVoiceRecognition();
+          }, 100); } };
       window.speechSynthesis.speak(utterance);
     }
     function speakStepWithPhase(index, forcePhaseHeader) {
@@ -1075,7 +1085,10 @@
       currentVoicePhaseIndex = flatSteps[index] ? flatSteps[index].phaseIndex : currentVoicePhaseIndex;
       speakStepWithPhase(index, forcePhaseHeader);
     }
-    function schedulePhaseActivationAnnouncement(phaseIndex) { if (!isVoiceModeEnabled || !isAudioEnabled) return; const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex); if (actionableIndex === null) return; clearPhaseAnnouncementTimer(); phaseAnnouncementTimer = setTimeout(function() { phaseAnnouncementTimer = null; speakStepWithPhase(actionableIndex, true); }, 180); }
+    function schedulePhaseActivationAnnouncement(phaseIndex) { if (!isVoiceModeEnabled || !isAudioEnabled) return; const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex); if (actionableIndex === null) return; clearPhaseAnnouncementTimer(); phaseAnnouncementTimer = setTimeout(function() {
+        phaseAnnouncementTimer = null;
+        speakStepWithPhase(actionableIndex, true);
+      }, 0); }
     function clearPhaseAnnouncementTimer() { if (phaseAnnouncementTimer) { clearTimeout(phaseAnnouncementTimer); phaseAnnouncementTimer = null; } }
     function startVoiceRecognition() { if (!recognition || !recognitionAvailable || recognitionStarting || recognitionActive || isSpeaking) return; recognitionStarting = true; lastRecognitionError = ''; updateVoiceModeUi(); try { recognition.start(); } catch { recognitionStarting = false; lastRecognitionError = 'mic start failed'; updateVoiceModeUi(); } setTimeout(function() { recognitionStarting = false; updateVoiceModeUi(); }, 500); }
     function stopVoiceRecognition() { if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; } recognitionActive = false; recognitionStarting = false; updateVoiceModeUi(); if (!recognition || !recognitionAvailable) return; try { recognition.stop(); } catch {} }
@@ -1125,7 +1138,7 @@
             const btn = document.querySelector('[data-phase-index="' + nextPhaseIndex + '"]');
             const card = btn ? btn.closest('.phase-card') : null;
             if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 60);
+          }, 0);
         }
 
         if (isAudioEnabled) { speakText(phases[completedPhaseIndex].title + '. Checks completed.'); }
@@ -1139,7 +1152,7 @@
         setTimeout(function() {
           const el = document.querySelector('[data-step-index="' + pendingFocusStepIndex + '"]');
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 50);
+        }, 0);
       }
 
       if (isVoiceModeEnabled) { speakCurrentActionableStep(false, currentVoicePhaseIndex); }
