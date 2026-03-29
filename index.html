@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="B23 Checklist" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <title>Bristell B23 Check List</title>
+  <title>Bristell B23</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <style>
@@ -63,6 +63,10 @@
     h2 {
       margin: 0;
       font-size: 20px;
+    }
+
+    h3 {
+      margin: 0;
     }
 
     p {
@@ -137,12 +141,13 @@
       outline-offset: 1px;
     }
 
-    .header-input-pill input:disabled {
-      opacity: 0.9;
-      cursor: not-allowed;
-    }
-
     .header-input-value { color: #ffffff; }
+
+    .voice-status {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
 
     button {
       border: none;
@@ -170,7 +175,7 @@
 
     .secondary-btn,
     .edit-btn,
-    .primary-btn { min-width: 140px; }
+    .primary-btn { min-width: auto; }
 
     .edit-btn {
       position: absolute;
@@ -207,9 +212,10 @@
       justify-content: center;
     }
 
-    .header-import-btn { right: 52px; }
-    .header-export-btn { right: 92px; }
+    .header-import-btn { right: 12px; }
+    .header-export-btn { right: 52px; }
     .header-audio-btn { right: 132px; }
+    .header-voice-btn { right: 172px; }
 
     .header-icon-btn.active {
       background: #1e3a8a;
@@ -245,6 +251,23 @@
       display: none;
     }
 
+    .install-help {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.3;
+    }
+
+    /* Make install section text ~50% smaller */
+    .install-area h2 {
+      font-size: 10px;
+    }
+
+    .install-area p {
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
     .progress-wrap { margin-top: 14px; }
 
     .progress-bar {
@@ -276,56 +299,151 @@
       text-align: center;
     }
 
-    .phase-card {
-      overflow: hidden;
-      padding: 0;
-      transition: background 0.25s ease, border-color 0.25s ease;
+    .tabs-bar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 8px 0 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
     }
 
-    .phase-card.highlight-green { border: 2px solid #22c55e; }
-    .phase-card.highlight-blue { border: 2px solid #3b82f6; }
-    .phase-card.emergency { border: 2px solid #ef4444; }
-    .phase-card.completed {
-      background: var(--success-soft);
-      border-color: #9fd2b0;
-      box-shadow: 0 0 0 3px rgba(34,197,94,0.7);
+    .tabs {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-height: 38px;
+    }
+
+    .tabs-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      padding-bottom: 6px;
+    }
+
+    /* Make action buttons match tab height */
+    .tabs-actions .secondary-btn,
+    .tabs-actions .mini-btn {
+      height: 36px;
+      padding: 0 12px;
+      font-size: 13px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab {
+      padding: 8px 12px;
+      border-radius: 10px 10px 0 0;
+      background: #1b2531;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+
+    .tab:hover {
+      opacity: 1;
+      background: #243140;
+    }
+
+    .tab.active {
+      background: var(--card);
+      color: var(--text);
+      border-color: var(--border);
+      border-bottom: 1px solid var(--card);
+      position: relative;
+      top: 1px;
+      opacity: 1;
+    }
+
+    .tab[data-tab-id="emergency"] {
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.06);
+    }
+
+    .tab[data-tab-id="emergency"].active {
+      background: #7f1d1d;
+      color: #fee2e2;
+      border-color: #ef4444;
+      border-bottom: 1px solid #7f1d1d;
+    }
+
+    .tab-tools {
+      display: none;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 0 0 14px;
+    }
+
+    .tab-tools.visible {
+      display: flex;
+    }
+
+    .summary-card { display: none; }
+    .summary-card.visible { display: block; }
+
+    .footer-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .phase-card.active-phase {
-      border-color: #60a5fa;
-      box-shadow: 0 0 0 3px rgba(96,165,250,0.35);
+      border-color: var(--accent);
+    }
+
+    /* Default phase outlines */
+    .phase-card.highlight-green {
+      border: 2px solid var(--success);
+    }
+
+    .phase-card.highlight-blue {
+      border: 2px solid var(--accent);
+    }
+
+    /* Emergency phase always red outline */
+    .phase-card.emergency-phase {
+      border: 2px solid #ef4444;
+    }
+
+    /* Emergency phase always red outline */
+    .phase-card.emergency-phase {
+      border: 2px solid #ef4444;
+    }
+
+    .phase-card.collapsed .phase-content {
+      display: none;
     }
 
     .phase-toggle {
       width: 100%;
-      border: none;
       background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      color: inherit;
+      padding: 0;
       text-align: left;
-      padding: 18px;
-      cursor: pointer;
     }
-
-    .phase-toggle:hover { background: #344150; }
 
     .phase-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
       gap: 12px;
-      width: 100%;
+      align-items: center;
     }
-
-    .phase-title-wrap h2 { color: #ffffff; }
 
     .phase-summary {
       display: flex;
       align-items: center;
       gap: 10px;
-      flex-shrink: 0;
     }
 
     .phase-meta {
@@ -335,88 +453,43 @@
       gap: 6px;
     }
 
-    .fuel-summary,
-    .value-summary {
-      font-size: 12px;
-      color: var(--muted);
-      text-align: right;
-    }
-
-    .phase-chevron {
-      font-size: 18px;
-      color: var(--muted);
-      transition: transform 0.2s ease;
-    }
-
-    .phase-card.collapsed .phase-chevron { transform: rotate(-90deg); }
-    .phase-card.collapsed .phase-content { display: none; }
-
     .phase-content {
-      padding: 0 18px 18px;
-      border-top: 1px solid var(--border);
+      margin-top: 14px;
     }
 
     .phase-intro {
-      margin: 14px 0;
-      font-size: 14px;
+      margin-bottom: 14px;
       color: var(--muted);
-    }
-
-    .subsection-heading {
-      margin: 16px 0 8px;
-      padding: 0;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
     }
 
     .step {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border);
       border-radius: 14px;
-      background: #243140;
+      padding: 14px;
       margin-bottom: 12px;
-      transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
-      scroll-margin-top: 24px;
-      cursor: pointer;
+      background: #18212d;
     }
-
-    .step:active {
-      transform: scale(0.995);
-    }
-
-    .step:last-child { margin-bottom: 0; }
 
     .step.completed {
-      background: var(--success-soft);
-      border-color: #9fd2b0;
+      border-color: var(--success);
+      background: #11241d;
     }
 
     .step.next-focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      outline: 2px solid var(--accent);
     }
 
     .step-header {
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
+      align-items: flex-start;
     }
 
     .step-number {
       font-size: 12px;
-      font-weight: bold;
       color: var(--muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      margin-bottom: 4px;
     }
 
     .step-title {
@@ -425,120 +498,98 @@
     }
 
     .step-detail {
-      font-size: 15px;
       color: var(--muted);
     }
 
-    .step.completed .step-number,
-    .step.completed .step-detail,
-    .step.completed .step-title {
-      color: var(--success);
+    .step-note,
+    .fuel-helper {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
     }
 
-    .step-note {
-      background: #3b2f1f;
-      border: 1px solid #5a472f;
-      color: var(--warning);
-      border-radius: 12px;
-      padding: 10px 12px;
+    .status {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid var(--border);
+    }
+
+    .status.done {
+      background: var(--success-soft);
+      color: #d1fae5;
+      border-color: var(--success);
+    }
+
+    .status.ready {
+      background: #1e3a8a;
+      color: #dbeafe;
+      border-color: #60a5fa;
+    }
+
+    .status.locked {
+      background: #374151;
+      color: #d1d5db;
+      border-color: #6b7280;
+    }
+
+    .subsection-heading {
+      margin: 18px 0 10px;
       font-size: 13px;
-      line-height: 1.5;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
     }
 
     .fuel-input-grid,
-    .edit-grid {
+    .edit-grid,
+    .summary-grid {
       display: grid;
       gap: 12px;
     }
 
-    .fuel-input-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .edit-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .fuel-input-card,
-    .edit-panel {
-      background: #1b2531;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
+    .fuel-input-grid,
+    .edit-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin-top: 12px;
     }
-
-    .fuel-input-card label,
-    .small-label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 4px;
-      font-weight: bold;
-    }
-
-    .fuel-helper,
-    .install-help,
-    .footer-note {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 10px;
-    }
-
-    .summary-card { display: none; }
-    .summary-card.visible { display: block; }
 
     .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       margin-top: 14px;
     }
 
     .summary-item {
-      background: #1b2531;
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px;
+      background: #18212d;
     }
 
-    .summary-label {
+    .summary-label,
+    .small-label {
       display: block;
+      margin-bottom: 6px;
       font-size: 12px;
       color: var(--muted);
-      margin-bottom: 4px;
-      font-weight: bold;
     }
 
     .summary-value {
-      font-size: 15px;
-      color: var(--text);
-      font-weight: bold;
-    }
-
-    .status {
-      font-size: 14px;
-      font-weight: bold;
-      padding: 6px 10px;
-      border-radius: 999px;
-      white-space: nowrap;
-      margin-top: 2px;
-    }
-
-    .status.locked { background: #374151; color: var(--locked); }
-    .status.ready { background: #1e3a8a; color: #bfdbfe; }
-    .status.done { background: #065f46; color: var(--success); }
-
-    .confirm-btn {
-      background: #374151;
-      color: #ffffff;
-      width: 100%;
       font-size: 16px;
+      font-weight: bold;
     }
 
-    .confirm-btn:not(:disabled):not(.done) {
-      background: var(--accent);
-      color: #0b1220;
-    }
-
-    .confirm-btn.done,
-    .confirm-btn.done:disabled {
-      background: #065f46;
-      color: var(--success);
+    .edit-panel {
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 0;
+      background: #162133;
     }
 
     @media (display-mode: standalone) {
@@ -549,16 +600,13 @@
 <body>
   <div class="container">
     <div class="card" style="position: relative;">
-      <button class="header-icon-btn header-audio-btn" id="audioToggleBtn" type="button" title="Audio">🔊</button>
       <button class="header-icon-btn header-export-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
       <button class="header-icon-btn header-import-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
       <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
-      <button class="edit-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
+      
       <h1 id="appTitle">Bristell B23 Check List</h1>
       <p class="muted" id="appDescription">Ground checklist grouped by phase using your SE-MOA checklist and the Bristell B23 SOP / training manual details. Each item must be confirmed before the next step unlocks.</p>
-
       <div class="top-meta">
-        <button class="emergency-jump-btn" id="emergencyJumpBtn">EMERGENCY</button>
         <div class="header-input-pill">Airport <input id="headerAirport" type="text" value="ESGA"></div>
         <div class="header-input-pill">Aircraft
           <select id="headerAircraft">
@@ -574,39 +622,35 @@
         <div class="header-input-pill">R Fuel <span class="header-input-value" id="headerFuelRightValue">--</span></div>
         <div class="header-input-pill">Hobbs <span class="header-input-value" id="headerHobbsValue">--</span></div>
       </div>
-
       <div class="top-actions">
-        <button class="secondary-btn" id="topResetBtn" type="button">Reset</button>
         <button class="mini-btn" id="editHeaderBtn" type="button">Edit header</button>
       </div>
-
-      <div class="progress-wrap">
-        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-        <p id="progressText" class="muted">0 checklist items completed</p>
-      </div>
-
+      <div class="voice-status" id="voiceStatusText">Voice: off</div>
       <div class="header-disclaimer">
         ⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.
+            </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+        <p id="progressText" class="muted">0 required phases completed</p>
       </div>
     </div>
-
-    <div class="card">
-      <div class="btn-row" style="margin-top:0;">
-        <button class="secondary-btn" id="collapseAllBtn" type="button">Collapse all</button>
-        <button class="secondary-btn" id="expandAllBtn" type="button">Expand all</button>
+    <div class="tabs-bar">
+      <div class="tabs" id="tabsContainer"></div>
+      <div class="tabs-actions">
+        <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
+        <button class="mini-btn" id="audioModeBtn" type="button" title="Audio and voice">🎙️🔊</button>
+        <button class="secondary-btn" id="topResetBtn" type="button">Reset</button>
+        <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
       </div>
     </div>
-
+    <div class="tab-tools" id="tabTools"></div>
     <div id="stepsContainer"></div>
-
     <div class="card">
       <div class="btn-row">
-        <button class="secondary-btn" id="resetBtn" type="button">Reset</button>
-        <button class="primary-btn" id="finishBtn" disabled type="button">Finish</button>
+        <button class="primary-btn" id="finishBtn" disabled type="button">Final Report</button>
       </div>
       <p class="footer-note">Grouped by phase with detailed notes added from the uploaded Bristell B23 SOP and training manual.</p>
     </div>
-
     <div class="card summary-card" id="finishSummaryCard">
       <h2>Checklist complete</h2>
       <p class="muted">Review the saved summary below.</p>
@@ -616,7 +660,6 @@
         <button class="primary-btn" id="summaryResetBtn" type="button">Reset</button>
       </div>
     </div>
-
     <div class="card install-area">
       <h2>Install app</h2>
       <p class="muted">Add this checklist to your Home Screen for a cleaner app-like experience and offline access after the first load.</p>
@@ -626,252 +669,194 @@
       <p class="install-help" id="installHelp">On iPhone: open in Safari, tap Share, then Add to Home Screen.</p>
     </div>
   </div>
-
   <script>
     let defaultPhases = [
-      {
-        title: 'Pre-flight inspection',
-        intro: 'Walk-around and exterior inspection before entering the final cockpit setup flow.',
-        items: [
-          { title: 'Cabin - Ignition', detail: 'OFF' },
-          { title: 'Cabin - Avionics/Instruments', detail: 'Check condition' },
-          { title: 'Cabin - Cockpit', detail: 'Check for loose objects and general condition' },
-          { title: 'Cabin - Loading', detail: 'Check weight and balance, and that loading is secured' },
-          { title: 'Cabin - Master switch', detail: 'ON' },
-          { title: 'Cabin - Avionics switch', detail: 'ON' },
-          { title: 'Cabin - Fuel quantity indication (ref)', detail: 'Check' },
-          { title: 'Cabin - Flap', detail: 'Check operation, select down for inspection' },
-          { title: 'Cabin - Lights', detail: 'Check for VFR night flight, then set dimmers OFF' },
-          { title: 'Cabin - Pitot tube heating', detail: 'Check' },
-          { title: 'Cabin - Avionics switch', detail: 'OFF' },
-          { title: 'Cabin - Master switch', detail: 'OFF' },
-          { title: 'Cabin - Canopy', detail: 'Condition of attachment and cleanness' },
-          { title: 'Engine - Cowling condition', detail: 'Check' },
-          { title: 'Engine - Propeller, blades and spinner', detail: 'Check condition' },
-          { title: 'Engine - Oil quantity', detail: 'Check', note: 'Open the oil access hatch and remove the oil filler cap. Rotate the propeller slowly in the normal direction until a gurgling sound is heard four times; only then will the dipstick indicate correctly.' },
-          { title: 'Engine - Inlet', detail: 'Verify free of obstructions' },
-          { title: 'Engine - Fuel system draining / gascolator', detail: 'Sample' },
-          { title: 'Engine - Nose gear condition', detail: 'Check' },
-          { title: 'Right-hand leading edge - Wing surface', detail: 'Check condition' },
-          { title: 'Right-hand leading edge - Leading edge', detail: 'Check condition' },
-          { title: 'Right-hand leading edge - Stall strips', detail: 'Check condition' },
-          { title: 'Right-hand leading edge - Actual fuel quantity', detail: 'Check against indication by opening filler cap' },
-          { title: 'Right-hand leading edge - Filler cap', detail: 'Check closing' },
-          { title: 'Right-hand leading edge - Fuel vent openings', detail: 'Check' },
-          { title: 'Right-hand trailing edge - Wing tip', detail: 'Check surface condition, attachment and light attachment' },
-          { title: 'Right-hand trailing edge - Aileron', detail: 'Check surface condition, attachment, clearance, movement and trim tab condition' },
-          { title: 'Right-hand trailing edge - Flap', detail: 'Check surface condition, attachment, clearance and hinge bolts', note: 'The left flap has a one degree offset versus the right flap. When retracted, the left flap sits about 7 mm below the stub wing contour, while the right flap is streamlined.' },
-          { title: 'Right-hand trailing edge - Wing locker', detail: 'Check loading, inspect drain hole and lock' },
-          { title: 'Rear fuselage - Landing gear', detail: 'Check damage, wheel attachment, brakes, and tire condition/pressure' },
-          { title: 'Rear fuselage - Static port', detail: 'Check clean and clear of obstructions' },
-          { title: 'Tailplane - Vertical stabilizer', detail: 'Check surface and attachment' },
-          { title: 'Tailplane - Horizontal stabilizer', detail: 'Check surface, attachment, free elevator movement and elevator stops' },
-          { title: 'Tailplane - Elevator tips attachment', detail: 'Check' },
-          { title: 'Tailplane - Trim / anti-servo tab', detail: 'Check' },
-          { title: 'Left side check', detail: 'Repeat right-side wing and fuselage checks on the left side', note: 'On the left wing, also check pitot tube condition and remove the cover.' },
-          { title: 'Before entering cockpit - Chocks', detail: 'Removed' },
-          { title: 'Before entering cockpit - Pitot cover', detail: 'Off' },
-          { title: 'Before entering cockpit - Tow bar', detail: 'Removed if used' },
-          { title: 'Before entering cockpit - Prop area and taxi path', detail: 'Clear, including wingtips and stabilizer if immediate turn is planned' }
-        ]
-      },
-      {
-        title: 'Before Engine Start',
-        intro: 'Final cockpit checks before engine start.',
-        items: [
-          { title: 'Flight log / remarks', detail: 'Checked' },
-          { title: 'Weight and balance', detail: 'Checked' },
-          { title: 'Pre-flight inspection', detail: 'Completed' },
-          { title: 'Rudder pedal position', detail: 'SET', note: 'Verify that the rudder pedal position is set according to the length of the pilot. Full deflection should be possible without overlocking the knee to prevent inadvertent stuck deflection.' },
-          { title: 'Seatbelts', detail: 'ON' },
-          { title: 'Parking brake', detail: 'SET', note: 'Even if the parking brake is set during start-up the pilot should guard the brakes with his feet in order to stop should the parking brake not hold.' },
-          { title: 'Canopy', detail: 'Closed and locked', note: 'May be postponed to a later stage in case of hot OAT.' },
-          { title: 'Flight controls', detail: 'Check free and correct', note: 'Smooth movements of the control stick is strongly advised.' }
-        ]
-      },
-      {
-        title: 'Engine Start',
-        intro: 'Cockpit setup and engine start preparation.',
-        items: [
-          { title: 'Backup BATT', detail: 'ON' },
-          { title: 'Master switch', detail: 'ON' },
-          { title: 'Choke', detail: 'Use as needed', note: 'The Rotax enricher is not a conventional choke. If using choke, leave the throttle fully closed or the added air will cancel the enrichment effect.' },
-          { title: 'Dimmer', detail: 'Adjust' },
-          { title: 'Circuit breakers', detail: 'Check' },
-          { title: 'BPRS', detail: 'Arm' },
-          { title: 'Prop lever', detail: 'Max RPM' },
-          { title: 'Throttle', detail: 'Closed (max 5 mm open)' },
-          { title: 'Fuel selector', detail: 'LEFT', note: 'The engine fuel return line runs to the left tank. Do not start or take off on RIGHT if the left tank is full, or returning fuel may overpressure and vent from the left tank.' },
-          { title: 'PFD / fuel quantity', detail: 'Check fuel quantity' },
-          { title: 'Strobe light', detail: 'ON', note: 'Strobe power draw may cause a fluctuating fuel pump sound.' },
-          { title: 'Fuel pump', detail: 'ON' },
-          { title: 'Prop area', detail: 'Clear' },
-          { title: 'Starter', detail: 'Engage' }
-        ]
-      },
-      {
-        title: 'After Start',
-        intro: 'Initial engine checks after engine start.',
-        items: [
-          { title: 'Oil pressure', detail: 'Check within 10 seconds', note: 'Oil pressure up to 7 bar for a short period is admissible at cold start.' },
-          { title: 'Choke', detail: 'OFF' },
-          { title: 'Throttle', detail: 'Adjust for 2000 RPM' },
-          { title: 'Backup BATT', detail: 'OFF' },
-          { title: 'ALT 1 and 2', detail: 'ON' },
-          { title: 'ALT-1', detail: 'ON' },
-          { title: 'Voltage after ALT-1', detail: 'Check about 13.4 V' },
-          { title: 'ALT-2', detail: 'ON' },
-          { title: 'Voltage after ALT-2', detail: 'Check about 13.8 V' },
-          { title: 'Fuel pump', detail: 'OFF', note: 'Low fuel pressure indications may appear briefly, but pressure must stabilize within operating limits in 10 seconds.' },
-          { title: 'Avionics', detail: 'ON' },
-          { title: 'MFD', detail: 'Engine page' },
-          { title: 'Voltage', detail: 'Check above 11.0 V' },
-          { title: 'EFIS', detail: 'ON' },
-          { title: 'Altimeter', detail: 'SET QNH' }
-        ]
-      },
-      {
-        title: 'Taxi',
-        intro: 'Taxi checks and techniques.',
-        items: [
-          { title: 'Brakes', detail: 'Check', note: 'No abrupt braking is needed. A light smooth application and slight deceleration is enough to verify function.' },
-          { title: 'Flight instruments', detail: 'Check' },
-          { title: 'Taxi technique', detail: 'Apply power as needed and keep RPM below 2500 until oil temperature reaches 50 C', note: 'Avoid using more than idle power and brakes simultaneously. Use caution above 20 kt wind and position the control stick correctly for crosswind.' }
-        ]
-      },
-      {
-        title: 'Engine run-up / before departure',
-        intro: 'Run-up and final checks before line-up.',
-        items: [
-          { title: 'Parking brake', detail: 'ON / Set' },
-          { title: 'Oil temperature', detail: 'Above 50 C' },
-          { title: 'Propeller control', detail: 'Max RPM' },
-          { title: 'Throttle', detail: '4000 RPM' },
-          { title: 'Ignition left/right', detail: '300 RPM / 115 RPM' },
-          { title: 'Ignition', detail: 'Both' },
-          { title: 'Carburetor heat', detail: 'Check' },
-          { title: 'Propeller control', detail: 'Cycle 4 times' },
-          { title: 'Oil pressure / temperature', detail: 'Check' },
-          { title: 'Throttle', detail: 'IDLE' },
-          { title: 'Trim', detail: 'SET / Neutral' },
-          { title: 'Flaps', detail: 'Set 1' },
-          { title: 'Canopy', detail: 'Closed / locked' },
-          { title: 'Annunciators', detail: 'Extinguished' },
-          { title: 'Fuel pump', detail: 'ON' },
-          { title: 'Departure briefing', detail: 'Completed', note: 'Keep it short and standardised. Example items include runway, braking action, wind and initial clearance.' },
-          { title: 'Emergency checklist', detail: 'Repeat' },
-          { title: 'Fuel selector', detail: 'Verify LEFT tank', note: 'The return line goes to the left tank. Do not operate on RIGHT if the left tank is full.' }
-        ]
-      },
-      {
-        title: 'Before Departure',
-        intro: 'Final checks before entering runway.',
-        items: [
-          { title: 'Approach sector', detail: 'Checked' },
-          { title: 'Transponder', detail: 'GND/ALT', note: 'Once line-up clearance is obtained, select transponder to ALT and verify strobe lights ON before entering an active runway.' },
-          { title: 'ON RWY - Compasses', detail: 'Checked' },
-          { title: 'Landing lights', detail: 'ON when take-off clearance is received' }
-        ]
-      },
-      {
-        title: 'Take off',
-        intro: 'Take-off roll and initial climb actions.',
-        items: [
-          { title: 'Brakes applied', detail: 'Check' },
-          { title: 'Set full RPM', detail: 'Set' },
-          { title: 'Set Full Throttle', detail: 'Set' },
-          { title: 'Release Brakes', detail: 'Check' },
-          { title: 'Airspeed', detail: 'Verify and call AIRSPEED ALIVE' },
-          { title: 'Engine instruments normal indication', detail: 'Check' }
-        ]
-      },
-      {
-        title: 'After Take off',
-        intro: 'Post take-off configuration and checks.',
-        items: [
-          { title: 'Prop Lever', detail: '5500 RPM' },
-          { title: 'Flaps', detail: '0 (Zero)' },
-          { title: 'Landing Lights', detail: 'OFF' },
-          { title: 'Engine Instruments', detail: 'Monitor' }
-        ]
-      },
-      {
-        title: 'Cruise',
-        intro: 'Cruise configuration and monitoring.',
-        items: [
-          { title: 'Throttle/Prop', detail: 'Set' },
-          { title: 'Fuel Selector', detail: 'Left or Right' },
-          { title: 'Fuel Pump', detail: 'OFF' },
-          { title: 'ENG Instruments', detail: 'Monitor' }
-        ]
-      },
-      {
-        title: 'Approach',
-        intro: 'Preparation for landing.',
-        items: [
-          { title: 'LDG Briefing', detail: 'Completed' },
-          { title: 'Altimeter', detail: 'Set QNH' },
-          { title: 'Landing Light', detail: 'ON' },
-          { title: 'Fuel Pump', detail: 'ON' },
-          { title: 'Carb Heat', detail: 'ON (OAT<10)' }
-        ]
-      },
-      {
-        title: 'After Landing',
-        intro: 'Post-landing actions after runway vacated.',
-        items: [
-          { title: 'Flaps', detail: '0 (Zero)' },
-          { title: 'Transponder', detail: '7000 STBY' },
-          { title: 'Landing Lights', detail: 'OFF' },
-          { title: 'Fuel Pump', detail: 'OFF' },
-          { title: 'Pitch Trim', detail: 'Neutral' }
-        ]
-      },
-      {
-        title: 'Parking',
-        intro: 'Shutdown and securing the aircraft.',
-        items: [
-          { title: 'Parking brake', detail: 'ON' },
-          { title: 'Throttle', detail: 'Idle' },
-          { title: 'Ignition', detail: 'OFF' },
-          { title: 'ALT 1 and 2', detail: 'OFF' },
-          { title: 'Hobbs', detail: 'Note' },
-          { title: 'Avionics', detail: 'OFF' },
-          { title: 'EFIS', detail: 'OFF' },
-          { title: 'Ext Lights', detail: 'OFF' },
-          { title: 'Master Switch', detail: 'OFF' },
-          { title: 'BPRS PIN', detail: 'INSERT' },
-          { title: 'Parking brake', detail: 'As Req.' },
-          { title: 'Flightplan', detail: 'Closed.' }
-        ]
-      },
-      {
-        title: 'Emergency',
-        intro: 'Engine failure / emergency actions.',
-        items: [
-          { title: 'Speed', detail: '67 KTS' },
-          { title: 'Field', detail: 'Select' },
-          { title: 'Fuel Selector', detail: 'Switch' },
-          { title: 'Fuel Pump', detail: 'ON' },
-          { title: 'Carb Heat', detail: 'ON' },
-          { title: 'Magnetos', detail: 'Best/Both' },
-          { title: 'ATC', detail: 'Notify/121.5' },
-          { title: 'XPNDR', detail: '7700' },
-          { title: 'PAX', detail: 'Brief' },
-          { title: 'ELT', detail: 'ON' },
-          { title: 'BPRS', detail: 'CONSIDER' }
-        ]
-      }
+      { title: 'Pre-flight inspection', intro: 'Walk-around and exterior inspection before entering the final cockpit setup flow.', items: [
+        { title: 'Cabin - Ignition', detail: 'OFF' },
+        { title: 'Cabin - Avionics/Instruments', detail: 'Check condition' },
+        { title: 'Cabin - Cockpit', detail: 'Check for loose objects and general condition' },
+        { title: 'Cabin - Loading', detail: 'Check weight and balance, and that loading is secured' },
+        { title: 'Cabin - Master switch', detail: 'ON' },
+        { title: 'Cabin - Avionics switch', detail: 'ON' },
+        { title: 'Cabin - Fuel quantity indication (ref)', detail: 'Check' },
+        { title: 'Cabin - Flap', detail: 'Check operation, select down for inspection' },
+        { title: 'Cabin - Lights', detail: 'Check for VFR night flight, then set dimmers OFF' },
+        { title: 'Cabin - Pitot tube heating', detail: 'Check' },
+        { title: 'Cabin - Avionics switch', detail: 'OFF' },
+        { title: 'Cabin - Master switch', detail: 'OFF' },
+        { title: 'Cabin - Canopy', detail: 'Condition of attachment and cleanness' },
+        { title: 'Engine - Cowling condition', detail: 'Check' },
+        { title: 'Engine - Propeller, blades and spinner', detail: 'Check condition' },
+        { title: 'Engine - Oil quantity', detail: 'Check', note: 'Open the oil access hatch and remove the oil filler cap. Rotate the propeller slowly in the normal direction until a gurgling sound is heard four times; only then will the dipstick indicate correctly.' },
+        { title: 'Engine - Inlet', detail: 'Verify free of obstructions' },
+        { title: 'Engine - Fuel system draining / gascolator', detail: 'Sample' },
+        { title: 'Engine - Nose gear condition', detail: 'Check' },
+        { title: 'Right-hand leading edge - Wing surface', detail: 'Check condition' },
+        { title: 'Right-hand leading edge - Leading edge', detail: 'Check condition' },
+        { title: 'Right-hand leading edge - Stall strips', detail: 'Check condition' },
+        { title: 'Right-hand leading edge - Actual fuel quantity', detail: 'Check against indication by opening filler cap' },
+        { title: 'Right-hand leading edge - Filler cap', detail: 'Check closing' },
+        { title: 'Right-hand leading edge - Fuel vent openings', detail: 'Check' },
+        { title: 'Right-hand trailing edge - Wing tip', detail: 'Check surface condition, attachment and light attachment' },
+        { title: 'Right-hand trailing edge - Aileron', detail: 'Check surface condition, attachment, clearance, movement and trim tab condition' },
+        { title: 'Right-hand trailing edge - Flap', detail: 'Check surface condition, attachment, clearance and hinge bolts', note: 'The left flap has a one degree offset versus the right flap. When retracted, the left flap sits about 7 mm below the stub wing contour, while the right flap is streamlined.' },
+        { title: 'Right-hand trailing edge - Wing locker', detail: 'Check loading, inspect drain hole and lock' },
+        { title: 'Rear fuselage - Landing gear', detail: 'Check damage, wheel attachment, brakes, and tire condition/pressure' },
+        { title: 'Rear fuselage - Static port', detail: 'Check clean and clear of obstructions' },
+        { title: 'Tailplane - Vertical stabilizer', detail: 'Check surface and attachment' },
+        { title: 'Tailplane - Horizontal stabilizer', detail: 'Check surface, attachment, free elevator movement and elevator stops' },
+        { title: 'Tailplane - Elevator tips attachment', detail: 'Check' },
+        { title: 'Tailplane - Trim / anti-servo tab', detail: 'Check' },
+        { title: 'Left side check', detail: 'Repeat right-side wing and fuselage checks on the left side', note: 'On the left wing, also check pitot tube condition and remove the cover.' },
+        { title: 'Before entering cockpit - Chocks', detail: 'Removed' },
+        { title: 'Before entering cockpit - Pitot cover', detail: 'Off' },
+        { title: 'Before entering cockpit - Tow bar', detail: 'Removed if used' },
+        { title: 'Before entering cockpit - Prop area and taxi path', detail: 'Clear, including wingtips and stabilizer if immediate turn is planned' }
+      ]},
+      { title: 'Before Engine Start', intro: 'Final cockpit checks before engine start.', items: [
+        { title: 'Flight log / remarks', detail: 'Checked' },
+        { title: 'Weight and balance', detail: 'Checked' },
+        { title: 'Pre-flight inspection', detail: 'Completed' },
+        { title: 'Rudder pedal position', detail: 'SET' },
+        { title: 'Seatbelts', detail: 'ON' },
+        { title: 'Parking brake', detail: 'SET' },
+        { title: 'Canopy', detail: 'Closed and locked' },
+        { title: 'Flight controls', detail: 'Check free and correct' }
+      ]},
+      { title: 'Engine Start', intro: 'Cockpit setup and engine start preparation.', items: [
+        { title: 'Backup BATT', detail: 'ON' },
+        { title: 'Master switch', detail: 'ON' },
+        { title: 'Choke', detail: 'Use as needed' },
+        { title: 'Dimmer', detail: 'Adjust' },
+        { title: 'Circuit breakers', detail: 'Check' },
+        { title: 'BPRS', detail: 'Arm' },
+        { title: 'Prop lever', detail: 'Max RPM' },
+        { title: 'Throttle', detail: 'Closed (max 5 mm open)' },
+        { title: 'Fuel selector', detail: 'LEFT' },
+        { title: 'PFD / fuel quantity', detail: 'Check fuel quantity' },
+        { title: 'Strobe light', detail: 'ON' },
+        { title: 'Fuel pump', detail: 'ON' },
+        { title: 'Prop area', detail: 'Clear' },
+        { title: 'Starter', detail: 'Engage' }
+      ]},
+      { title: 'After Start', intro: 'Initial engine checks after engine start.', items: [
+        { title: 'Oil pressure', detail: 'Check within 10 seconds' },
+        { title: 'Choke', detail: 'OFF' },
+        { title: 'Throttle', detail: 'Adjust for 2000 RPM' },
+        { title: 'Backup BATT', detail: 'OFF' },
+        { title: 'ALT 1 and 2', detail: 'ON' },
+        { title: 'ALT-1', detail: 'ON' },
+        { title: 'Voltage after ALT-1', detail: 'Check about 13.4 V' },
+        { title: 'ALT-2', detail: 'ON' },
+        { title: 'Voltage after ALT-2', detail: 'Check about 13.8 V' },
+        { title: 'Fuel pump', detail: 'OFF' },
+        { title: 'Avionics', detail: 'ON' },
+        { title: 'MFD', detail: 'Engine page' },
+        { title: 'Voltage', detail: 'Check above 11.0 V' },
+        { title: 'EFIS', detail: 'ON' },
+        { title: 'Altimeter', detail: 'SET QNH' }
+      ]},
+      { title: 'Taxi', intro: 'Taxi checks and techniques.', items: [
+        { title: 'Brakes', detail: 'Check' },
+        { title: 'Flight instruments', detail: 'Check' },
+        { title: 'Taxi technique', detail: 'Apply power as needed and keep RPM below 2500 until oil temperature reaches 50 C' }
+      ]},
+      { title: 'Engine run-up / before departure', intro: 'Run-up and final checks before line-up.', items: [
+        { title: 'Parking brake', detail: 'ON / Set' },
+        { title: 'Oil temperature', detail: 'Above 50 C' },
+        { title: 'Propeller control', detail: 'Max RPM' },
+        { title: 'Throttle', detail: '4000 RPM' },
+        { title: 'Ignition left/right', detail: '300 RPM / 115 RPM' },
+        { title: 'Ignition', detail: 'Both' },
+        { title: 'Carburetor heat', detail: 'Check' },
+        { title: 'Propeller control', detail: 'Cycle 4 times' },
+        { title: 'Oil pressure / temperature', detail: 'Check' },
+        { title: 'Throttle', detail: 'IDLE' },
+        { title: 'Trim', detail: 'SET / Neutral' },
+        { title: 'Flaps', detail: 'Set 1' },
+        { title: 'Canopy', detail: 'Closed / locked' },
+        { title: 'Annunciators', detail: 'Extinguished' },
+        { title: 'Fuel pump', detail: 'ON' },
+        { title: 'Departure briefing', detail: 'Completed' },
+        { title: 'Emergency checklist', detail: 'Repeat' },
+        { title: 'Fuel selector', detail: 'Verify LEFT tank' }
+      ]},
+      { title: 'Before Departure', intro: 'Final checks before entering runway.', items: [
+        { title: 'Approach sector', detail: 'Checked' },
+        { title: 'Transponder', detail: 'GND/ALT' },
+        { title: 'ON RWY - Compasses', detail: 'Checked' },
+        { title: 'Landing lights', detail: 'ON when take-off clearance is received' }
+      ]},
+      { title: 'Take off', intro: 'Take-off roll and initial climb actions.', items: [
+        { title: 'Brakes applied', detail: 'Check' },
+        { title: 'Set full RPM', detail: 'Set' },
+        { title: 'Set Full Throttle', detail: 'Set' },
+        { title: 'Release Brakes', detail: 'Check' },
+        { title: 'Airspeed', detail: 'Verify and call AIRSPEED ALIVE' },
+        { title: 'Engine instruments normal indication', detail: 'Check' }
+      ]},
+      { title: 'After Take off', intro: 'Post take-off configuration and checks.', items: [
+        { title: 'Prop Lever', detail: '5500 RPM' },
+        { title: 'Flaps', detail: '0 (Zero)' },
+        { title: 'Landing Lights', detail: 'OFF' },
+        { title: 'Engine Instruments', detail: 'Monitor' }
+      ]},
+      { title: 'Cruise', intro: 'Cruise configuration and monitoring.', items: [
+        { title: 'Throttle/Prop', detail: 'Set' },
+        { title: 'Fuel Selector', detail: 'Left or Right' },
+        { title: 'Fuel Pump', detail: 'OFF' },
+        { title: 'ENG Instruments', detail: 'Monitor' }
+      ]},
+      { title: 'Approach', intro: 'Preparation for landing.', items: [
+        { title: 'LDG Briefing', detail: 'Completed' },
+        { title: 'Altimeter', detail: 'Set QNH' },
+        { title: 'Landing Light', detail: 'ON' },
+        { title: 'Fuel Pump', detail: 'ON' },
+        { title: 'Carb Heat', detail: 'ON (OAT<10)' }
+      ]},
+      { title: 'After Landing', intro: 'Post-landing actions after runway vacated.', items: [
+        { title: 'Flaps', detail: '0 (Zero)' },
+        { title: 'Transponder', detail: '7000 STBY' },
+        { title: 'Landing Lights', detail: 'OFF' },
+        { title: 'Fuel Pump', detail: 'OFF' },
+        { title: 'Pitch Trim', detail: 'Neutral' }
+      ]},
+      { title: 'Parking', intro: 'Shutdown and securing the aircraft.', items: [
+        { title: 'Parking brake', detail: 'ON' },
+        { title: 'Throttle', detail: 'Idle' },
+        { title: 'Ignition', detail: 'OFF' },
+        { title: 'ALT 1 and 2', detail: 'OFF' },
+        { title: 'Hobbs', detail: 'Note' },
+        { title: 'Avionics', detail: 'OFF' },
+        { title: 'EFIS', detail: 'OFF' },
+        { title: 'Ext Lights', detail: 'OFF' },
+        { title: 'Master Switch', detail: 'OFF' },
+        { title: 'BPRS PIN', detail: 'INSERT' },
+        { title: 'Parking brake', detail: 'As Req.' },
+        { title: 'Flightplan', detail: 'Closed.' }
+      ]},
+      { title: 'Emergency', intro: 'Engine failure / emergency actions.', items: [
+        { title: 'Speed', detail: '67 KTS' },
+        { title: 'Field', detail: 'Select' },
+        { title: 'Fuel Selector', detail: 'Switch' },
+        { title: 'Fuel Pump', detail: 'ON' },
+        { title: 'Carb Heat', detail: 'ON' },
+        { title: 'Magnetos', detail: 'Best/Both' },
+        { title: 'ATC', detail: 'Notify/121.5' },
+        { title: 'Transponder', detail: '7700' },
+        { title: 'PAX', detail: 'Brief' },
+        { title: 'ELT', detail: 'ON' },
+        { title: 'BPRS', detail: 'CONSIDER' }
+      ]}
     ];
 
+    const OPTIONAL_PHASES = new Set(['Emergency', 'Cruise', 'Take off', 'After Take off', 'Approach', 'After Landing']);
     const stepsContainer = document.getElementById('stepsContainer');
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
     const finishBtn = document.getElementById('finishBtn');
-    const resetBtn = document.getElementById('resetBtn');
     const topResetBtn = document.getElementById('topResetBtn');
     const collapseAllBtn = document.getElementById('collapseAllBtn');
-    const expandAllBtn = document.getElementById('expandAllBtn');
     const installBtn = document.getElementById('installBtn');
     const installHelp = document.getElementById('installHelp');
     const headerFuelLeftValue = document.getElementById('headerFuelLeftValue');
@@ -885,7 +870,7 @@
     const exportProfileBtn = document.getElementById('exportProfileBtn');
     const importProfileBtn = document.getElementById('importProfileBtn');
     const importProfileInput = document.getElementById('importProfileInput');
-    const audioToggleBtn = document.getElementById('audioToggleBtn');
+    const audioModeBtn = document.getElementById('audioModeBtn');
     const appTitle = document.getElementById('appTitle');
     const appDescription = document.getElementById('appDescription');
     const editHeaderBtn = document.getElementById('editHeaderBtn');
@@ -893,35 +878,57 @@
     const finishSummaryGrid = document.getElementById('finishSummaryGrid');
     const keepReviewBtn = document.getElementById('keepReviewBtn');
     const summaryResetBtn = document.getElementById('summaryResetBtn');
+    const voiceStatusText = document.getElementById('voiceStatusText');
+    const tabsContainer = document.getElementById('tabsContainer');
+    const tabTools = document.getElementById('tabTools');
 
-    const storageKey = 'b23-ground-check-progress-v10';
-    const customChecklistKey = 'b23-ground-check-custom-v4';
+    const storageKey = 'b23-ground-check-progress-v11';
+    const customChecklistKey = 'b23-ground-check-custom-v5';
     const editModeKey = 'b23-ground-check-edit-mode-v1';
-    const collapsedStorageKey = 'b23-ground-check-collapsed-v7';
+    const collapsedStorageKey = 'b23-ground-check-collapsed-v8';
     const fuelStorageKey = 'b23-ground-check-fuel-v1';
     const hobbsStorageKey = 'b23-ground-check-hobbs-v1';
     const headerContentKey = 'b23-ground-check-header-v1';
     const finishSummaryKey = 'b23-ground-check-last-summary-v1';
     const audioEnabledKey = 'b23-ground-check-audio-enabled-v1';
+    const voiceModeEnabledKey = 'b23-ground-check-voice-mode-enabled-v1';
+    const startTimeKey = 'b23-start-time';
+    const endTimeKey = 'b23-end-time';
+    const airportKey = 'b23-airport';
+    const aircraftKey = 'b23-aircraft';
+    const tabsStorageKey = 'b23-ground-check-tabs-v1';
 
     let phases = [];
+    let tabDefinitions = [];
+    let currentTab = 'normal';
     let flatSteps = [];
-    let pendingFocusStepIndex = null;
     let fuelState = { left: '', right: '' };
     let hobbsValue = '';
     let deferredPrompt = null;
     let isEditMode = localStorage.getItem(editModeKey) === 'true';
+    let isAudioEnabled = localStorage.getItem(audioEnabledKey) === 'true';
+    let isVoiceModeEnabled = localStorage.getItem(voiceModeEnabledKey) === 'true';
     let editorState = null;
     let collapsedPhases = [];
     let lastSummary = null;
-    let focusPhaseIndex = null;
     let activePhaseIndex = null;
-    let isAudioEnabled = localStorage.getItem(audioEnabledKey) === 'true';
+    let focusPhaseIndex = null;
+    let pendingFocusStepIndex = null;
+    let emergencyFlowReturnStepIndex = null;
+    let preferredVoice = null;
+    let recognition = null;
+    let recognitionAvailable = false;
+    let recognitionStarting = false;
+    let recognitionActive = false;
+    let isSpeaking = false;
+    let recognitionRestartTimer = null;
+    let currentVoicePhaseIndex = null;
+    let lastRecognitionError = '';
+    let phaseAnnouncementTimer = null;
+    let lastAnnouncedPhaseIndex = null;
 
-    function cloneDefaultPhases() {
-      return JSON.parse(JSON.stringify(defaultPhases));
-    }
-
+    function cloneDefaultPhases() { return JSON.parse(JSON.stringify(defaultPhases)); }
+    function escapeHtml(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     function specialStepType(phaseTitle, item, itemIndex) {
       if (phaseTitle === 'Before Engine Start' && item.title === 'Pre-flight inspection') return 'derived_preflight';
       if (item.title === 'Taxi technique') return 'tip';
@@ -929,1286 +936,394 @@
       if (item.title === 'Hobbs') return 'hobbs_input';
       return null;
     }
+    function isProtectedStep(phaseTitle, item, itemIndex) { return specialStepType(phaseTitle, item, itemIndex) !== null; }
+    function isRequiredPhase(phaseTitle) { return !OPTIONAL_PHASES.has(phaseTitle); }
+    function isCountedStep(phaseTitle, item, itemIndex) { return specialStepType(phaseTitle, item, itemIndex) !== 'tip'; }
+    function getDisplayStepTitle(phase, item) { if (phase.title === 'Pre-flight inspection' && item.title.includes(' - ')) return item.title.split(' - ').slice(1).join(' - '); return item.title; }
+    function getPreflightSubsection(item) { if (!item.title.includes(' - ')) return null; return item.title.split(' - ')[0]; }
+    function globalIndexFor(phaseIndex, itemIndex) { let count = 0; for (let p = 0; p < phaseIndex; p += 1) count += phases[p].items.length; return count + itemIndex; }
 
-    function isProtectedStep(phaseTitle, item, itemIndex) {
-      return specialStepType(phaseTitle, item, itemIndex) !== null;
+    function loadCustomChecklist() { phases = cloneDefaultPhases(); }
+    function saveCustomChecklist() { localStorage.setItem(customChecklistKey, JSON.stringify(phases)); }
+    function buildDefaultTabs() { return [{ id: 'normal', label: 'Normal Operations', phaseTitles: phases.filter(p => p.title !== 'Emergency').map(p => p.title) }, { id: 'emergency', label: 'Emergency', phaseTitles: phases.filter(p => p.title === 'Emergency').map(p => p.title) }]; }
+    function normalizeTabDefinitions(inputTabs) {
+      if (!Array.isArray(inputTabs) || !inputTabs.length) return buildDefaultTabs();
+      const phaseTitleSet = new Set(phases.map(p => p.title));
+      const normalized = inputTabs.map(function(tab, index) {
+        const safeId = String(tab.id || ('tab-' + index)).trim() || ('tab-' + index);
+        const safeLabel = String(tab.label || ('Tab ' + (index + 1))).trim() || ('Tab ' + (index + 1));
+        const phaseTitles = Array.isArray(tab.phaseTitles) ? tab.phaseTitles.filter(title => phaseTitleSet.has(title)) : [];
+        return { id: safeId, label: safeLabel, phaseTitles };
+      }).filter(tab => tab.label);
+      return normalized.length ? normalized : buildDefaultTabs();
     }
-
-    function isRequiredPhase(phaseTitle) {
-      const optionalPhases = ['Emergency', 'Cruise', 'Take off', 'After Take off', 'Approach', 'After Landing'];
-      return !optionalPhases.includes(phaseTitle);
+    function loadTabDefinitions() { try { tabDefinitions = normalizeTabDefinitions(JSON.parse(localStorage.getItem(tabsStorageKey) || 'null')); } catch { tabDefinitions = buildDefaultTabs(); } if (!tabDefinitions.some(tab => tab.id === currentTab)) currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal'; }
+    function saveTabDefinitions() { localStorage.setItem(tabsStorageKey, JSON.stringify(tabDefinitions)); }
+    function syncTabsWithPhases() {
+      const phaseTitleSet = new Set(phases.map(p => p.title));
+      tabDefinitions = normalizeTabDefinitions(tabDefinitions).map(function(tab, index) {
+        return { id: tab.id || ('tab-' + index), label: tab.label, phaseTitles: tab.phaseTitles.filter(title => phaseTitleSet.has(title)) };
+      });
+      if (!tabDefinitions.some(tab => tab.id === currentTab)) currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal';
+      saveTabDefinitions();
     }
-
-    function isCountedStep(phaseTitle, item, itemIndex) {
-      const type = specialStepType(phaseTitle, item, itemIndex);
-      return type !== 'tip';
+    function getCurrentTabDefinition() { return tabDefinitions.find(tab => tab.id === currentTab) || tabDefinitions[0] || null; }
+    function loadHeaderContent() { try { const saved = JSON.parse(localStorage.getItem(headerContentKey) || 'null'); if (!saved) return; if (typeof saved.title === 'string' && saved.title.trim()) appTitle.textContent = saved.title; if (typeof saved.description === 'string') appDescription.textContent = saved.description; } catch {} }
+    function saveHeaderContent() { localStorage.setItem(headerContentKey, JSON.stringify({ title: appTitle.textContent, description: appDescription.textContent })); }
+    function rebuildFlatSteps() { flatSteps = []; phases.forEach((phase, phaseIndex) => phase.items.forEach((item, itemIndex) => flatSteps.push({ title: item.title, detail: item.detail, note: item.note || '', confirmed: false, phaseTitle: phase.title, phaseIndex, itemIndex }))); }
+    function loadProgress() { try { const saved = JSON.parse(localStorage.getItem(storageKey) || '[]'); if (Array.isArray(saved) && saved.length === flatSteps.length) flatSteps.forEach((step, index) => step.confirmed = Boolean(saved[index])); } catch {} }
+    function saveProgress() { localStorage.setItem(storageKey, JSON.stringify(flatSteps.map(step => step.confirmed))); }
+    function loadCollapsedState() { try { const saved = JSON.parse(localStorage.getItem(collapsedStorageKey) || '[]'); if (Array.isArray(saved) && saved.length === phases.length) { collapsedPhases = saved.map(Boolean); return; } } catch {} collapsedPhases = phases.map(() => false); }
+    function saveCollapsedState() { localStorage.setItem(collapsedStorageKey, JSON.stringify(collapsedPhases)); }
+    function loadFuelState() { try { const saved = JSON.parse(localStorage.getItem(fuelStorageKey) || '{}'); fuelState = { left: typeof saved.left === 'string' ? saved.left : '', right: typeof saved.right === 'string' ? saved.right : '' }; } catch {} }
+    function saveFuelState() { localStorage.setItem(fuelStorageKey, JSON.stringify(fuelState)); }
+    function loadHobbsValue() { hobbsValue = localStorage.getItem(hobbsStorageKey) || ''; }
+    function saveHobbsValue() { localStorage.setItem(hobbsStorageKey, hobbsValue); }
+    function loadLastSummary() { try { lastSummary = JSON.parse(localStorage.getItem(finishSummaryKey) || 'null'); } catch { lastSummary = null; } }
+    function saveLastSummary() { if (lastSummary) localStorage.setItem(finishSummaryKey, JSON.stringify(lastSummary)); }
+    function clearLastSummary() { lastSummary = null; localStorage.removeItem(finishSummaryKey); }
+    function getCurrentZuluParts() { const now = new Date(); return { dateText: new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' }).format(now), timeText: new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }).format(now) }; }
+    function getCurrentZuluTimeValue() { const now = new Date(); return String(now.getUTCHours()).padStart(2, '0') + ':' + String(now.getUTCMinutes()).padStart(2, '0'); }
+    function updateTopMeta() { const parts = getCurrentZuluParts(); document.getElementById('todayDate').textContent = 'Date ' + parts.dateText; document.getElementById('zuluTime').textContent = 'Time ' + parts.timeText + ' Z'; headerFuelLeftValue.textContent = fuelState.left || '--'; headerFuelRightValue.textContent = fuelState.right || '--'; headerHobbsValue.textContent = hobbsValue || '--'; }
+    function isIos() { return /iphone|ipad|ipod/i.test(window.navigator.userAgent); }
+    function isInStandaloneMode() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+    function updateInstallHelp() { if (isInStandaloneMode()) installHelp.textContent = 'Installed on Home Screen.'; else if (isIos()) installHelp.textContent = 'On iPhone: open in Safari, tap Share, then Add to Home Screen.'; else if (deferredPrompt) installHelp.textContent = 'Install this checklist for a full-screen app experience and offline access.'; else installHelp.textContent = 'To install, host this app online, open it in your browser, then use Add to Home Screen or Install.'; }
+    function updateInstallButton() { installBtn.style.display = deferredPrompt && !isIos() && !isInStandaloneMode() ? 'inline-flex' : 'none'; updateInstallHelp(); }
+    function countedStepsInPhase(phaseIndex) { let count = 0; phases[phaseIndex].items.forEach((item, itemIndex) => { if (isCountedStep(phases[phaseIndex].title, item, itemIndex)) count += 1; }); return count; }
+    function completedCountInPhase(phaseIndex) { let count = 0; const phase = phases[phaseIndex]; phase.items.forEach((item, itemIndex) => { if (!isCountedStep(phase.title, item, itemIndex)) return; const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)]; if (step && step.confirmed) count += 1; }); return count; }
+    function isUnlocked(index) { const step = flatSteps[index]; if (!step) return false; if (step.itemIndex === 0) return true; const previousIndex = globalIndexFor(step.phaseIndex, step.itemIndex - 1); return Boolean(flatSteps[previousIndex] && flatSteps[previousIndex].confirmed); }
+    function isPhaseFullyCompleted(phaseIndex) { const phase = phases[phaseIndex]; let hasCountedStep = false; for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) { const item = phase.items[itemIndex]; if (!isCountedStep(phase.title, item, itemIndex)) continue; hasCountedStep = true; const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)]; if (!step || !step.confirmed) return false; } return hasCountedStep; }
+    function syncDerivedSteps() {
+      const preflightPhaseIndex = phases.findIndex(phase => phase.title === 'Pre-flight inspection');
+      const beforeEngineStartPhaseIndex = phases.findIndex(phase => phase.title === 'Before Engine Start');
+      if (preflightPhaseIndex === -1 || beforeEngineStartPhaseIndex === -1) return;
+      const derivedStepIndex = phases[beforeEngineStartPhaseIndex].items.findIndex(item => item.title === 'Pre-flight inspection');
+      if (derivedStepIndex === -1) return;
+      const globalDerivedIndex = globalIndexFor(beforeEngineStartPhaseIndex, derivedStepIndex);
+      if (flatSteps[globalDerivedIndex]) flatSteps[globalDerivedIndex].confirmed = isPhaseFullyCompleted(preflightPhaseIndex);
     }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    let preferredVoice = null;
-
+    function getActivePhaseIndex() { return activePhaseIndex; }
+    function getFirstActionableStepIndexInPhase(phaseIndex) { const phase = phases[phaseIndex]; for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) { const item = phase.items[itemIndex]; if (!isCountedStep(phase.title, item, itemIndex)) continue; const index = globalIndexFor(phaseIndex, itemIndex); const step = flatSteps[index]; if (!step || step.confirmed || !isUnlocked(index)) continue; return index; } return null; }
+    function getCurrentActionableStepIndex(preferredPhaseIndex) { if (typeof preferredPhaseIndex === 'number' && preferredPhaseIndex >= 0 && preferredPhaseIndex < phases.length) { const inPhase = getFirstActionableStepIndexInPhase(preferredPhaseIndex); if (inPhase !== null) return inPhase; } for (let index = 0; index < flatSteps.length; index += 1) { const step = flatSteps[index]; const phase = phases[step.phaseIndex]; const item = phase && phase.items[step.itemIndex]; if (!phase || !item) continue; if (!isCountedStep(phase.title, item, step.itemIndex)) continue; if (step.confirmed || !isUnlocked(index)) continue; return index; } return null; }
+    function updateAudioToggleUi() { if (!audioModeBtn) return; audioModeBtn.classList.toggle('active', isAudioEnabled || isVoiceModeEnabled); if (isVoiceModeEnabled && isAudioEnabled) { audioModeBtn.textContent = '🎙️🔊'; audioModeBtn.title = 'Voice and audio on'; } else if (isVoiceModeEnabled) { audioModeBtn.textContent = '🎙️'; audioModeBtn.title = 'Voice on'; } else if (isAudioEnabled) { audioModeBtn.textContent = '🔊'; audioModeBtn.title = 'Audio on'; } else { audioModeBtn.textContent = '🔈'; audioModeBtn.title = 'Audio and voice off'; } }
+    function updateVoiceModeUi() { if (!voiceStatusText) return; if (!recognitionAvailable) voiceStatusText.textContent = 'Voice: unavailable in this browser'; else if (!isVoiceModeEnabled) voiceStatusText.textContent = 'Voice: off'; else if (isSpeaking) voiceStatusText.textContent = 'Voice: speaking'; else if (recognitionActive) voiceStatusText.textContent = 'Voice: listening'; else if (lastRecognitionError) voiceStatusText.textContent = 'Voice: ' + lastRecognitionError; else voiceStatusText.textContent = 'Voice: starting'; }
     function pickPreferredVoice() {
       if (!('speechSynthesis' in window)) return null;
       const voices = window.speechSynthesis.getVoices() || [];
       if (!voices.length) return null;
-
-      // Prefer common female voices / natural sounding ones
-      const preferredNames = [
-        'Google UK English Female', 'Google US English',
-        'Samantha', 'Victoria', 'Karen',
-        'Microsoft Zira', 'Microsoft Jenny', 'Microsoft Aria'
-      ];
-
-      // Try exact preferred list first
-      for (const name of preferredNames) {
-        const v = voices.find(v => (v.name || '').toLowerCase().includes(name.toLowerCase()));
-        if (v) return v;
+      const preferredNames = ['Samantha', 'Google UK English Female', 'Google US English', 'Victoria', 'Karen', 'Microsoft Jenny', 'Microsoft Aria', 'Microsoft Zira'];
+      for (let i = 0; i < preferredNames.length; i += 1) {
+        const found = voices.find(function(voice) {
+          return (voice.name || '').toLowerCase().includes(preferredNames[i].toLowerCase());
+        });
+        if (found) return found;
       }
-
-      // Fallback: any English female-like voice
-      const femaleHint = voices.find(v => {
-        const n = (v.name || '').toLowerCase();
-        return (v.lang || '').toLowerCase().startsWith('en') && (n.includes('female') || n.includes('woman'));
+      const anyEnglish = voices.find(function(voice) {
+        return (voice.lang || '').toLowerCase().startsWith('en');
       });
-      if (femaleHint) return femaleHint;
-
-      // Fallback: any English voice
-      const anyEn = voices.find(v => (v.lang || '').toLowerCase().startsWith('en'));
-      if (anyEn) return anyEn;
-
-      // Last resort: first voice
-      return voices[0] || null;
+      return anyEnglish || voices[0] || null;
     }
-
     function ensureVoiceReady() {
-      if (!('speechSynthesis' in window)) return;
-      if (!preferredVoice) {
+      if ('speechSynthesis' in window && !preferredVoice) {
         preferredVoice = pickPreferredVoice();
       }
     }
-
     if ('speechSynthesis' in window) {
-      // Some browsers load voices asynchronously
       window.speechSynthesis.onvoiceschanged = function() {
         preferredVoice = pickPreferredVoice();
       };
     }
-
     function speakText(text) {
       if (!isAudioEnabled) return;
       if (!('speechSynthesis' in window)) return;
-
       ensureVoiceReady();
-
+      clearPhaseAnnouncementTimer();
+      if (recognitionRestartTimer) {
+        clearTimeout(recognitionRestartTimer);
+        recognitionRestartTimer = null;
+      }
+      if (isVoiceModeEnabled) {
+        stopVoiceRecognition();
+      }
+      isSpeaking = true;
+      updateVoiceModeUi();
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-
       if (preferredVoice) {
         utterance.voice = preferredVoice;
         utterance.lang = preferredVoice.lang || 'en-US';
       } else {
         utterance.lang = 'en-US';
       }
-
-      // Tune for less robotic feel
-      utterance.rate = 1.15;   // slightly faster
-      utterance.pitch = 1.05;  // slightly more natural
+      utterance.rate = 1.0;
+      utterance.pitch = 0.92;
       utterance.volume = 1;
-
+      utterance.onend = function() {
+        isSpeaking = false;
+        updateVoiceModeUi();
+        if (isVoiceModeEnabled) {
+          recognitionRestartTimer = setTimeout(function() {
+            recognitionRestartTimer = null;
+            startVoiceRecognition();
+          }, 250);
+        }
+      };
+      utterance.onerror = function() {
+        isSpeaking = false;
+        lastRecognitionError = 'speech error';
+        updateVoiceModeUi();
+        if (isVoiceModeEnabled) {
+          recognitionRestartTimer = setTimeout(function() {
+            recognitionRestartTimer = null;
+            startVoiceRecognition();
+          }, 250);
+        }
+      };
       window.speechSynthesis.speak(utterance);
     }
-
-    function updateAudioToggleUi() {
-      if (!audioToggleBtn) return;
-      audioToggleBtn.classList.toggle('active', isAudioEnabled);
-      audioToggleBtn.textContent = isAudioEnabled ? '🔊' : '🔈';
-      audioToggleBtn.title = isAudioEnabled ? 'Audio on' : 'Audio off';
+    function speakStepWithPhase(index, forcePhaseHeader) {
+      if (index === null || index === undefined) return;
+      const step = flatSteps[index];
+      if (!step) return;
+      const phase = phases[step.phaseIndex];
+      const item = phase && phase.items[step.itemIndex];
+      if (!phase || !item) return;
+      const title = getDisplayStepTitle(phase, item);
+      if (forcePhaseHeader) {
+        lastAnnouncedPhaseIndex = step.phaseIndex;
+        speakText(phase.title + '. ' + title + '. ' + step.detail);
+      } else {
+        speakText(title + '. ' + step.detail);
+      }
     }
-
+    function speakCurrentActionableStep(forcePhaseHeader, preferredPhaseIndex) {
+      const phaseIndex = typeof preferredPhaseIndex === 'number' ? preferredPhaseIndex : currentVoicePhaseIndex;
+      const index = getCurrentActionableStepIndex(phaseIndex);
+      if (index === null) return;
+      currentVoicePhaseIndex = flatSteps[index] ? flatSteps[index].phaseIndex : currentVoicePhaseIndex;
+      speakStepWithPhase(index, forcePhaseHeader);
+    }
+    function schedulePhaseActivationAnnouncement(phaseIndex) {
+      if (!isVoiceModeEnabled || !isAudioEnabled) return;
+      const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex);
+      if (actionableIndex === null) return;
+      clearPhaseAnnouncementTimer();
+      phaseAnnouncementTimer = setTimeout(function() {
+        phaseAnnouncementTimer = null;
+        speakStepWithPhase(actionableIndex, true);
+      }, 180);
+    }
+    function clearPhaseAnnouncementTimer() { if (phaseAnnouncementTimer) { clearTimeout(phaseAnnouncementTimer); phaseAnnouncementTimer = null; } }
+    function startVoiceRecognition() { if (!recognition || !recognitionAvailable || recognitionStarting || recognitionActive || isSpeaking) return; recognitionStarting = true; lastRecognitionError = ''; updateVoiceModeUi(); try { recognition.start(); } catch { recognitionStarting = false; lastRecognitionError = 'mic start failed'; updateVoiceModeUi(); } setTimeout(function() { recognitionStarting = false; updateVoiceModeUi(); }, 500); }
+    function stopVoiceRecognition() { if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; } recognitionActive = false; recognitionStarting = false; updateVoiceModeUi(); if (!recognition || !recognitionAvailable) return; try { recognition.stop(); } catch {} }
+    function maybeAutoRecordTime(step) { if (!step) return; if (step.phaseTitle === 'Engine Start' && step.title === 'Master switch' && headerStartTime.textContent === '--') { const value = getCurrentZuluTimeValue(); headerStartTime.textContent = value; localStorage.setItem(startTimeKey, value); } if (step.phaseTitle === 'Parking' && step.title === 'Master Switch') { const value = getCurrentZuluTimeValue(); headerEndTime.textContent = value; localStorage.setItem(endTimeKey, value); } }
+    function buildCompletionSummary() { const parts = getCurrentZuluParts(); return { aircraft: headerAircraft.value, airport: headerAirport.value, date: parts.dateText, startTime: headerStartTime.textContent, endTime: headerEndTime.textContent, hobbs: hobbsValue || '--', fuelLeft: fuelState.left || '--', fuelRight: fuelState.right || '--', completedAt: parts.timeText }; }
+    function renderSummaryCard() { if (!lastSummary) { finishSummaryCard.classList.remove('visible'); finishSummaryGrid.innerHTML = ''; return; } const fields = [['Aircraft', lastSummary.aircraft], ['Airport', lastSummary.airport], ['Date (UTC)', lastSummary.date], ['Start time (Z)', lastSummary.startTime], ['End time (Z)', lastSummary.endTime], ['Hobbs', lastSummary.hobbs], ['Fuel left', lastSummary.fuelLeft], ['Fuel right', lastSummary.fuelRight], ['Completed at (Z)', lastSummary.completedAt]]; finishSummaryGrid.innerHTML = fields.map(entry => '<div class="summary-item"><span class="summary-label">' + escapeHtml(entry[0]) + '</span><div class="summary-value">' + escapeHtml(entry[1] || '--') + '</div></div>').join(''); finishSummaryCard.classList.add('visible'); }
+    function showFinishSummary() { lastSummary = buildCompletionSummary(); saveLastSummary(); renderSummaryCard(); finishSummaryCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    function resetProgressForStructureChange() { rebuildFlatSteps(); flatSteps.forEach(step => step.confirmed = false); syncDerivedSteps(); saveProgress(); }
+    function openInsertEditor(phaseIndex, insertAt, existingStep) { editorState = { mode: existingStep ? 'edit' : 'insert', phaseIndex, insertAt, title: existingStep ? existingStep.title : '', detail: existingStep ? existingStep.detail : '', note: existingStep ? (existingStep.note || '') : '' }; render(); }
+    function closeEditor() { editorState = null; render(); }
+    function saveEditorStep() { if (!editorState) return; if (editorState.mode === 'edit-header') { const title = editorState.title.trim(); const detail = editorState.detail.trim(); if (!title) return alert('Header title is required.'); appTitle.textContent = title; appDescription.textContent = detail; saveHeaderContent(); closeEditor(); return; } const phase = phases[editorState.phaseIndex]; if (!phase) return; const title = editorState.title.trim(); const detail = editorState.detail.trim(); const note = editorState.note.trim(); if (!title || !detail) return alert('Step title and detail are required.'); const newStep = { title, detail, note }; if (editorState.mode === 'edit') phase.items[editorState.insertAt] = newStep; else phase.items.splice(editorState.insertAt, 0, newStep); saveCustomChecklist(); resetProgressForStructureChange(); closeEditor(); }
+    function deleteStep(phaseIndex, itemIndex) { const phase = phases[phaseIndex]; if (!phase) return; const item = phase.items[itemIndex]; if (!item || isProtectedStep(phase.title, item, itemIndex)) return; phase.items.splice(itemIndex, 1); saveCustomChecklist(); resetProgressForStructureChange(); render(); }
+    function buildInlineEditorHtml() { if (!editorState) return ''; const isHeaderEditor = editorState.mode === 'edit-header'; return `<div class="edit-panel" data-inline-editor="true">${isHeaderEditor ? `<div><label class="small-label">Header title</label><input id="editorTitle" type="text" value="${escapeHtml(editorState.title)}" autofocus></div><div><label class="small-label">Header description</label><textarea id="editorDetail">${escapeHtml(editorState.detail)}</textarea></div>` : `<div class="edit-grid"><div><label class="small-label">Step title</label><input id="editorTitle" type="text" value="${escapeHtml(editorState.title)}" autofocus></div><div><label class="small-label">Step detail</label><input id="editorDetail" type="text" value="${escapeHtml(editorState.detail)}"></div></div><div><label class="small-label">Optional note</label><textarea id="editorNote">${escapeHtml(editorState.note)}</textarea></div>`}<div class="step-tools"><button class="mini-btn" id="saveEditorBtn" type="button">${isHeaderEditor ? 'Save header' : 'Save step'}</button><button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button></div></div>`; }
+    function setActiveTab(tabName) { currentTab = tabName; }
+    function openTabEditor(tabId) { const existing = tabDefinitions.find(tab => tab.id === tabId); editorState = { mode: existing ? 'edit-tab' : 'add-tab', tabId: existing ? existing.id : null, title: existing ? existing.label : '', phaseTitles: existing ? existing.phaseTitles.slice() : [] }; render(); }
+    function saveTabEditor() { if (!editorState || (editorState.mode !== 'edit-tab' && editorState.mode !== 'add-tab')) return; const label = String(editorState.title || '').trim(); if (!label) return alert('Tab name is required.'); const phaseTitles = Array.isArray(editorState.phaseTitles) ? editorState.phaseTitles.slice() : []; if (editorState.mode === 'edit-tab') tabDefinitions = tabDefinitions.map(tab => tab.id !== editorState.tabId ? tab : { id: tab.id, label, phaseTitles }); else { const newId = 'tab-' + Date.now(); tabDefinitions.push({ id: newId, label, phaseTitles }); currentTab = newId; } syncTabsWithPhases(); editorState = null; render(); }
+    function deleteCurrentTab() { if (tabDefinitions.length <= 1) return alert('At least one tab is required.'); tabDefinitions = tabDefinitions.filter(tab => tab.id !== currentTab); currentTab = tabDefinitions[0].id; syncTabsWithPhases(); editorState = null; render(); }
+    function buildTabEditorHtml() { if (!editorState || (editorState.mode !== 'edit-tab' && editorState.mode !== 'add-tab')) return ''; const selected = new Set(editorState.phaseTitles || []); return '<div class="edit-panel" data-tab-editor="true">' + '<div><label class="small-label">Tab name</label><input id="tabEditorTitle" type="text" value="' + escapeHtml(editorState.title || '') + '" /></div>' + '<div style="margin-top:12px;"><label class="small-label">Include phases</label>' + phases.map((phase, index) => '<label style="display:flex;align-items:center;gap:8px;margin-top:6px;"><input type="checkbox" data-tab-phase-index="' + index + '"' + (selected.has(phase.title) ? ' checked' : '') + '> <span>' + escapeHtml(phase.title) + '</span></label>').join('') + '</div><div class="step-tools" style="margin-top:12px;"><button class="mini-btn" id="saveTabEditorBtn" type="button">Save tab</button><button class="mini-btn" id="cancelTabEditorBtn" type="button">Cancel</button></div></div>'; }
+    function getNextPhaseIndexInOrder(currentPhaseIndex) { for (let phaseIndex = currentPhaseIndex + 1; phaseIndex < phases.length; phaseIndex += 1) if (!isPhaseFullyCompleted(phaseIndex)) return phaseIndex; return null; }
+    function activatePhase(phaseIndex) { const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex); collapsedPhases[phaseIndex] = false; activePhaseIndex = phaseIndex; currentVoicePhaseIndex = phaseIndex; pendingFocusStepIndex = actionableIndex; saveCollapsedState(); render(); schedulePhaseActivationAnnouncement(phaseIndex); }
+    function deactivatePhase(phaseIndex) { collapsedPhases[phaseIndex] = true; if (activePhaseIndex === phaseIndex) activePhaseIndex = null; if (currentVoicePhaseIndex === phaseIndex) currentVoicePhaseIndex = null; pendingFocusStepIndex = null; clearPhaseAnnouncementTimer(); saveCollapsedState(); render(); }
     function confirmStep(index) {
       if (!flatSteps[index] || flatSteps[index].confirmed || !isUnlocked(index)) return;
-      flatSteps[index].confirmed = true;
       const currentStep = flatSteps[index];
+      currentVoicePhaseIndex = currentStep.phaseIndex;
+      currentStep.confirmed = true;
       maybeAutoRecordTime(currentStep);
-
-      const phase = phases[currentStep.phaseIndex];
-      const item = phase && phase.items[currentStep.itemIndex] ? phase.items[currentStep.itemIndex] : null;
-      if (item) {
-        const title = getDisplayStepTitle(phase, item);
-        speakText(title + '. ' + currentStep.detail);
-      }
-
       const nextItemIndex = currentStep.itemIndex + 1;
-      pendingFocusStepIndex = nextItemIndex < phases[currentStep.phaseIndex].items.length
-        ? globalIndexFor(currentStep.phaseIndex, nextItemIndex)
-        : null;
+      pendingFocusStepIndex = nextItemIndex < phases[currentStep.phaseIndex].items.length ? globalIndexFor(currentStep.phaseIndex, nextItemIndex) : null;
       syncDerivedSteps();
-      if (isPhaseFullyCompleted(currentStep.phaseIndex)) {
-        const phaseIndex = currentStep.phaseIndex;
-        collapsedPhases[phaseIndex] = true;
+      const phaseCompleted = isPhaseFullyCompleted(currentStep.phaseIndex);
+      if (phaseCompleted) {
+        const completedPhaseIndex = currentStep.phaseIndex;
+        saveProgress();
+        const nextPhaseIndex = getNextPhaseIndexInOrder(completedPhaseIndex);
+        collapsedPhases = phases.map(() => true);
+        activePhaseIndex = null;
+        focusPhaseIndex = completedPhaseIndex;
         pendingFocusStepIndex = null;
+        currentVoicePhaseIndex = nextPhaseIndex;
         saveCollapsedState();
-        focusPhaseIndex = phaseIndex;
+        render();
+        if (isAudioEnabled) {
+          speakText(phases[completedPhaseIndex].title + '. Checks completed.');
+        }
+        return;
       }
       saveProgress();
       render();
-    }
-
-    function getActivePhaseIndex() {
-      for (let phaseIndex = 0; phaseIndex < phases.length; phaseIndex += 1) {
-        if (!isRequiredPhase(phases[phaseIndex].title)) continue;
-        if (!isPhaseFullyCompleted(phaseIndex)) return phaseIndex;
-      }
-      for (let phaseIndex = 0; phaseIndex < phases.length; phaseIndex += 1) {
-        if (!isPhaseFullyCompleted(phaseIndex)) return phaseIndex;
-      }
-      return null;
-    }
-
-    function loadCustomChecklist() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(customChecklistKey) || 'null');
-        if (Array.isArray(saved) && saved.length) {
-          defaultPhases = saved.map(function(phase) {
-            return {
-              title: String(phase.title || ''),
-              intro: String(phase.intro || ''),
-              items: Array.isArray(phase.items)
-                ? phase.items.map(function(item) {
-                    return {
-                      title: String(item.title || ''),
-                      detail: String(item.detail || ''),
-                      note: String(item.note || '')
-                    };
-                  })
-                : []
-            };
-          });
-          localStorage.removeItem(customChecklistKey);
-        }
-      } catch (error) {
-        console.warn('Could not load custom checklist.', error);
-      }
-      phases = cloneDefaultPhases();
-    }
-
-    function saveCustomChecklist() {
-      localStorage.setItem(customChecklistKey, JSON.stringify(phases));
-    }
-
-    function saveHeaderContent() {
-      if (!appTitle || !appDescription) return;
-      localStorage.setItem(headerContentKey, JSON.stringify({
-        title: appTitle.textContent,
-        description: appDescription.textContent
-      }));
-    }
-
-    function loadHeaderContent() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(headerContentKey) || 'null');
-        if (saved && appTitle && appDescription) {
-          if (typeof saved.title === 'string' && saved.title.trim()) {
-            appTitle.textContent = saved.title;
-          }
-          if (typeof saved.description === 'string') {
-            appDescription.textContent = saved.description;
-          }
-        }
-      } catch (error) {
-        console.warn('Could not load header content.', error);
+      if (isVoiceModeEnabled) {
+        speakCurrentActionableStep(false, currentVoicePhaseIndex);
       }
     }
-
-    function buildProfileExport() {
-      return {
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        airport: headerAirport ? headerAirport.value : 'ESGA',
-        aircraft: headerAircraft ? headerAircraft.value : 'SE-MOY',
-        appTitle: appTitle ? appTitle.textContent : 'Bristell B23 Check List',
-        appDescription: appDescription ? appDescription.textContent : '',
-        phases: phases
-      };
-    }
-
-    function exportChecklistProfile() {
-      const profile = buildProfileExport();
-      const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_');
-      link.href = url;
-      link.download = 'b23-checklist-profile-' + aircraft + '.json';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
-
-    function rebuildFlatSteps() {
-      flatSteps = [];
-      phases.forEach(function(phase, phaseIndex) {
-        phase.items.forEach(function(item, itemIndex) {
-          flatSteps.push({
-            title: item.title,
-            detail: item.detail,
-            note: item.note || '',
-            confirmed: false,
-            phaseTitle: phase.title,
-            phaseIndex: phaseIndex,
-            itemIndex: itemIndex
-          });
-        });
-      });
-    }
-
-    function globalIndexFor(phaseIndex, itemIndex) {
-      let count = 0;
-      for (let p = 0; p < phaseIndex; p += 1) {
-        count += phases[p].items.length;
-      }
-      return count + itemIndex;
-    }
-
-    function loadProgress() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        if (Array.isArray(saved) && saved.length === flatSteps.length) {
-          flatSteps.forEach(function(step, index) {
-            step.confirmed = Boolean(saved[index]);
-          });
-        }
-      } catch (error) {
-        console.warn('Could not load saved checklist progress.', error);
-      }
-    }
-
-    function saveProgress() {
-      localStorage.setItem(storageKey, JSON.stringify(flatSteps.map(function(step) {
-        return step.confirmed;
-      })));
-    }
-
-    function loadCollapsedState() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(collapsedStorageKey) || '[]');
-        if (Array.isArray(saved) && saved.length === phases.length) {
-          collapsedPhases = saved.map(Boolean);
-          return;
-        }
-      } catch (error) {
-        console.warn('Could not load phase state.', error);
-      }
-      collapsedPhases = phases.map(function() { return false; });
-    }
-
-    function saveCollapsedState() {
-      localStorage.setItem(collapsedStorageKey, JSON.stringify(collapsedPhases));
-    }
-
-    function loadFuelState() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(fuelStorageKey) || '{}');
-        fuelState = {
-          left: typeof saved.left === 'string' ? saved.left : '',
-          right: typeof saved.right === 'string' ? saved.right : ''
-        };
-      } catch (error) {
-        console.warn('Could not load fuel values.', error);
-      }
-    }
-
-    function saveFuelState() {
-      localStorage.setItem(fuelStorageKey, JSON.stringify(fuelState));
-    }
-
-    function loadHobbsValue() {
-      try {
-        hobbsValue = localStorage.getItem(hobbsStorageKey) || '';
-      } catch (error) {
-        console.warn('Could not load hobbs value.', error);
-      }
-    }
-
-    function saveHobbsValue() {
-      localStorage.setItem(hobbsStorageKey, hobbsValue);
-    }
-
-    function saveLastSummary() {
-      if (!lastSummary) return;
-      localStorage.setItem(finishSummaryKey, JSON.stringify(lastSummary));
-    }
-
-    function loadLastSummary() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(finishSummaryKey) || 'null');
-        if (saved) {
-          lastSummary = saved;
-        }
-      } catch (error) {
-        console.warn('Could not load last summary.', error);
-      }
-    }
-
-    function clearLastSummary() {
-      lastSummary = null;
-      localStorage.removeItem(finishSummaryKey);
-    }
-
-    function getCurrentZuluParts() {
-      const now = new Date();
-      const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-        timeZone: 'UTC'
-      });
-      const timeFormatter = new Intl.DateTimeFormat('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-        timeZone: 'UTC'
-      });
-      return {
-        dateText: dateFormatter.format(now),
-        timeText: timeFormatter.format(now)
-      };
-    }
-
-    function getCurrentZuluTimeValue() {
-      const now = new Date();
-      const hours = String(now.getUTCHours()).padStart(2, '0');
-      const minutes = String(now.getUTCMinutes()).padStart(2, '0');
-      return hours + ':' + minutes;
-    }
-
-    function updateTopMeta() {
-      const todayDateEl = document.getElementById('todayDate');
-      const zuluTimeEl = document.getElementById('zuluTime');
-      const parts = getCurrentZuluParts();
-      if (todayDateEl) todayDateEl.textContent = 'Date ' + parts.dateText;
-      if (zuluTimeEl) zuluTimeEl.textContent = 'Time ' + parts.timeText + ' Z';
-      if (headerFuelLeftValue) headerFuelLeftValue.textContent = fuelState.left || '--';
-      if (headerFuelRightValue) headerFuelRightValue.textContent = fuelState.right || '--';
-      if (headerHobbsValue) headerHobbsValue.textContent = hobbsValue || '--';
-    }
-
-    function isIos() {
-      return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-    }
-
-    function isInStandaloneMode() {
-      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    }
-
-    function updateInstallHelp() {
-      if (!installHelp) return;
-      if (isInStandaloneMode()) {
-        installHelp.textContent = 'Installed on Home Screen.';
-      } else if (isIos()) {
-        installHelp.textContent = 'On iPhone: open in Safari, tap Share, then Add to Home Screen.';
-      } else if (deferredPrompt) {
-        installHelp.textContent = 'Install this checklist for a full-screen app experience and offline access.';
-      } else {
-        installHelp.textContent = 'To install, host this app online, open it in your browser, then use Add to Home Screen or Install.';
-      }
-    }
-
-    function updateInstallButton() {
-      if (!installBtn) return;
-      installBtn.style.display = deferredPrompt && !isIos() && !isInStandaloneMode() ? 'inline-flex' : 'none';
-      updateInstallHelp();
-    }
-
-    function isUnlocked(index) {
-      const step = flatSteps[index];
-      if (!step) return false;
-      if (step.itemIndex === 0) return true;
-      const previousIndex = globalIndexFor(step.phaseIndex, step.itemIndex - 1);
-      return Boolean(flatSteps[previousIndex] && flatSteps[previousIndex].confirmed);
-    }
-
-    function completedCount() {
-      let count = 0;
-      phases.forEach(function(phase, phaseIndex) {
-        phase.items.forEach(function(item, itemIndex) {
-          if (!isCountedStep(phase.title, item, itemIndex)) return;
-          const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
-          if (step && step.confirmed) count += 1;
-        });
-      });
-      return count;
-    }
-
-    function totalCountedSteps() {
-      let count = 0;
-      phases.forEach(function(phase) {
-        phase.items.forEach(function(item, itemIndex) {
-          if (isCountedStep(phase.title, item, itemIndex)) count += 1;
-        });
-      });
-      return count;
-    }
-
-    function countedStepsInPhase(phaseIndex) {
-      const phase = phases[phaseIndex];
-      if (!phase) return 0;
-      let count = 0;
-      phase.items.forEach(function(item, itemIndex) {
-        if (isCountedStep(phase.title, item, itemIndex)) count += 1;
-      });
-      return count;
-    }
-
-    function completedCountInPhase(phaseIndex) {
-      const phase = phases[phaseIndex];
-      if (!phase) return 0;
-      let count = 0;
-      phase.items.forEach(function(item, itemIndex) {
-        if (!isCountedStep(phase.title, item, itemIndex)) return;
-        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
-        if (step && step.confirmed) count += 1;
-      });
-      return count;
-    }
-
-    function isPhaseFullyCompleted(phaseIndex) {
-      const phase = phases[phaseIndex];
-      if (!phase) return false;
-
-      let hasCountedStep = false;
-      for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) {
-        const item = phase.items[itemIndex];
-        if (!isCountedStep(phase.title, item, itemIndex)) continue;
-        hasCountedStep = true;
-        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
-        if (!step || !step.confirmed) return false;
-      }
-      return hasCountedStep;
-    }
-
-    function syncDerivedSteps() {
-      const preflightPhaseIndex = phases.findIndex(function(phase) {
-        return phase.title === 'Pre-flight inspection';
-      });
-      const beforeEngineStartPhaseIndex = phases.findIndex(function(phase) {
-        return phase.title === 'Before Engine Start';
-      });
-      if (preflightPhaseIndex === -1 || beforeEngineStartPhaseIndex === -1) return;
-      const derivedStepIndex = phases[beforeEngineStartPhaseIndex].items.findIndex(function(item) {
-        return item.title === 'Pre-flight inspection';
-      });
-      if (derivedStepIndex === -1) return;
-      const globalDerivedIndex = globalIndexFor(beforeEngineStartPhaseIndex, derivedStepIndex);
-      if (flatSteps[globalDerivedIndex]) {
-        flatSteps[globalDerivedIndex].confirmed = isPhaseFullyCompleted(preflightPhaseIndex);
-      }
-    }
-
-    function getPhaseBorderClass(title) {
-      const bluePhases = ['Taxi', 'Before Departure', 'Take off', 'After Take off', 'Cruise', 'Approach', 'After Landing'];
-      if (title === 'Emergency') return 'emergency';
-      if (bluePhases.includes(title)) return 'highlight-blue';
-      return 'highlight-green';
-    }
-
-    function resetProgressForStructureChange() {
-      rebuildFlatSteps();
-      flatSteps.forEach(function(step) { step.confirmed = false; });
-      syncDerivedSteps();
-      saveProgress();
-    }
-
-    function openInsertEditor(phaseIndex, insertAt, existingStep) {
-      editorState = {
-        mode: existingStep ? 'edit' : 'insert',
-        phaseIndex: phaseIndex,
-        insertAt: insertAt,
-        existingStep: existingStep || null,
-        title: existingStep ? existingStep.title : '',
-        detail: existingStep ? existingStep.detail : '',
-        note: existingStep ? (existingStep.note || '') : ''
-      };
-      render();
-    }
-
-    function closeEditor() {
-      editorState = null;
-      render();
-    }
-
-    function saveEditorStep() {
-      if (!editorState) return;
-
-      if (editorState.mode === 'edit-header') {
-        if (!appTitle || !appDescription) return;
-        const title = editorState.title.trim();
-        const detail = editorState.detail.trim();
-        if (!title) {
-          alert('Header title is required.');
-          return;
-        }
-        appTitle.textContent = title;
-        appDescription.textContent = detail;
-        saveHeaderContent();
-        closeEditor();
-        return;
-      }
-
-      const phase = phases[editorState.phaseIndex];
-      if (!phase) return;
-      const title = editorState.title.trim();
-      const detail = editorState.detail.trim();
-      const note = editorState.note.trim();
-      if (!title || !detail) {
-        alert('Step title and detail are required.');
-        return;
-      }
-      const newStep = { title: title, detail: detail, note: note };
-      if (editorState.mode === 'edit') {
-        phase.items[editorState.insertAt] = newStep;
-      } else {
-        phase.items.splice(editorState.insertAt, 0, newStep);
-      }
-      saveCustomChecklist();
-      resetProgressForStructureChange();
-      closeEditor();
-    }
-
-    function deleteStep(phaseIndex, itemIndex) {
-      const phase = phases[phaseIndex];
-      if (!phase) return;
-      const item = phase.items[itemIndex];
-      if (!item || isProtectedStep(phase.title, item, itemIndex)) return;
-      phase.items.splice(itemIndex, 1);
-      saveCustomChecklist();
-      resetProgressForStructureChange();
-      render();
-    }
-
-    function buildInlineEditorHtml() {
-      if (!editorState) return '';
-      const isHeaderEditor = editorState.mode === 'edit-header';
-      return `
-        <div class="edit-panel" data-inline-editor="true">
-          ${isHeaderEditor ? `
-          <div>
-            <label class="small-label">Header title</label>
-            <input id="editorTitle" type="text" value="${escapeHtml(editorState.title)}" autofocus>
-          </div>
-          <div>
-            <label class="small-label">Header description</label>
-            <textarea id="editorDetail">${escapeHtml(editorState.detail)}</textarea>
-          </div>
-          ` : `
-          <div class="edit-grid">
-            <div>
-              <label class="small-label">Step title</label>
-              <input id="editorTitle" type="text" value="${escapeHtml(editorState.title)}" autofocus>
-            </div>
-            <div>
-              <label class="small-label">Step detail</label>
-              <input id="editorDetail" type="text" value="${escapeHtml(editorState.detail)}">
-            </div>
-          </div>
-          <div>
-            <label class="small-label">Optional note</label>
-            <textarea id="editorNote">${escapeHtml(editorState.note)}</textarea>
-          </div>
-          `}
-          <div class="step-tools">
-            <button class="mini-btn" id="saveEditorBtn" type="button">${isHeaderEditor ? 'Save header' : 'Save step'}</button>
-            <button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button>
-          </div>
-        </div>
-      `;
-    }
-
-    function getDisplayStepTitle(phase, item) {
-      if (phase.title === 'Pre-flight inspection' && item.title.includes(' - ')) {
-        return item.title.split(' - ').slice(1).join(' - ');
-      }
-      return item.title;
-    }
-
-    function getPreflightSubsection(item) {
-      if (!item.title.includes(' - ')) return null;
-      return item.title.split(' - ')[0];
-    }
-
+    function renderHeaderEditor() { const existing = document.getElementById('headerInlineEditorWrap'); if (existing) existing.remove(); if (!(editorState && editorState.mode === 'edit-header')) return; const headerCard = document.querySelector('.container > .card'); if (!headerCard) return; const wrap = document.createElement('div'); wrap.id = 'headerInlineEditorWrap'; wrap.innerHTML = buildInlineEditorHtml(); const progressWrap = headerCard.querySelector('.progress-wrap'); if (progressWrap) progressWrap.parentNode.insertBefore(wrap, progressWrap); else headerCard.appendChild(wrap); }
     function buildStepHtml(phase, phaseIndex, item, itemIndex) {
       const stepIndex = globalIndexFor(phaseIndex, itemIndex);
       const step = flatSteps[stepIndex];
       const unlocked = isUnlocked(stepIndex);
       const type = specialStepType(phase.title, item, itemIndex);
-      const isDerivedPreflightStep = type === 'derived_preflight';
-      const isTaxiTip = type === 'tip';
-      const showFuelInputs = type === 'fuel_input';
-      const showHobbsInput = type === 'hobbs_input';
+      const isDerived = type === 'derived_preflight';
+      const isTip = type === 'tip';
+      const isFuelInput = type === 'fuel_input';
+      const isHobbsInput = type === 'hobbs_input';
       const stateClass = step && step.confirmed ? 'done' : (unlocked ? 'ready' : 'locked');
-      const stateLabel = isDerivedPreflightStep && step && step.confirmed ? 'Auto completed' : ((step && step.confirmed) ? 'Confirmed' : (unlocked ? 'Ready' : 'Locked'));
+      const stateLabel = isDerived && step && step.confirmed ? 'Auto completed' : (step && step.confirmed ? 'Confirmed' : (unlocked ? 'Ready' : 'Locked'));
       const focusClass = pendingFocusStepIndex === stepIndex ? 'next-focus' : '';
-      const canConfirm = !isTaxiTip && !isDerivedPreflightStep && unlocked && step && !step.confirmed;
-      const isProtected = isProtectedStep(phase.title, item, itemIndex);
       const isEditingThisStep = editorState && editorState.mode === 'edit' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex;
-
-      if (isEditingThisStep) {
-        return buildInlineEditorHtml();
-      }
-
-      return `
-        <div class="step ${step && step.confirmed ? 'completed' : ''} ${focusClass}" data-step-card="${stepIndex}" data-step-index="${stepIndex}">
-          <div class="step-header">
-            <div>
-              ${isTaxiTip ? '' : `<div class="step-number">Step ${itemIndex + 1}</div>`}
-              <h3 class="step-title">${isTaxiTip ? '💡 TIP — Taxi technique' : escapeHtml(getDisplayStepTitle(phase, item))}</h3>
-              <p class="step-detail">${escapeHtml(item.detail)}</p>
-            </div>
-            ${isTaxiTip ? '' : `<span class="status ${stateClass}">${escapeHtml(stateLabel)}</span>`}
-          </div>
-          ${showFuelInputs ? `
-            <div class="fuel-input-grid">
-              <div class="fuel-input-card">
-                <label for="fuel-left-${stepIndex}">Left tank</label>
-                <input id="fuel-left-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.left)}" data-fuel-side="left">
-              </div>
-              <div class="fuel-input-card">
-                <label for="fuel-right-${stepIndex}">Right tank</label>
-                <input id="fuel-right-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.right)}" data-fuel-side="right">
-              </div>
-            </div>
-            <div class="fuel-helper">Enter measured fuel quantity for both tanks. These values remain visible in the collapsed phase header.</div>
-          ` : ''}
-          ${showHobbsInput ? `
-            <div class="fuel-input-grid">
-              <div class="fuel-input-card">
-                <label for="hobbs-${stepIndex}">Hobbs</label>
-                <input id="hobbs-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(hobbsValue)}" data-hobbs-input="true">
-              </div>
-            </div>
-            <div class="fuel-helper">Enter the Hobbs value. This value remains visible in the collapsed phase header.</div>
-          ` : ''}
-          ${step && step.note ? `<div class="step-note">${escapeHtml(step.note)}</div>` : ''}
-          ${isDerivedPreflightStep && (!step || !step.confirmed) ? `<div class="fuel-helper">This step is completed automatically when the Pre-flight inspection phase is fully completed.</div>` : ''}
-          ${isEditMode ? `
-            <div class="step-tools">
-              <button class="mini-btn" data-insert-before="${phaseIndex}:${itemIndex}" type="button">Insert before</button>
-              <button class="mini-btn" data-insert-after="${phaseIndex}:${itemIndex + 1}" type="button">Insert after</button>
-              ${!isProtected ? `<button class="mini-btn" data-edit-step="${phaseIndex}:${itemIndex}" type="button">Edit</button>` : ''}
-              ${!isProtected ? `<button class="mini-btn danger-btn" data-delete-step="${phaseIndex}:${itemIndex}" type="button">Delete</button>` : ''}
-            </div>
-          ` : ''}
-          
-        </div>
-      `;
+      const isProtected = isProtectedStep(phase.title, item, itemIndex);
+      if (isEditingThisStep) return buildInlineEditorHtml();
+      return `<div class="step ${step && step.confirmed ? 'completed' : ''} ${focusClass}" data-step-card="${stepIndex}" data-step-index="${stepIndex}"><div class="step-header"><div>${isTip ? '' : `<div class="step-number">Step ${itemIndex + 1}</div>`}<h3 class="step-title">${isTip ? '💡 TIP — Taxi technique' : escapeHtml(getDisplayStepTitle(phase, item))}</h3><p class="step-detail">${escapeHtml(item.detail)}</p></div>${isTip ? '' : `<span class="status ${stateClass}">${escapeHtml(stateLabel)}</span>`}</div>${isFuelInput ? `<div class="fuel-input-grid"><div class="fuel-input-card"><label for="fuel-left-${stepIndex}">Left tank</label><input id="fuel-left-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.left)}" data-fuel-side="left"></div><div class="fuel-input-card"><label for="fuel-right-${stepIndex}">Right tank</label><input id="fuel-right-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.right)}" data-fuel-side="right"></div></div><div class="fuel-helper">Enter measured fuel quantity for both tanks. These values remain visible in the collapsed phase header.</div>` : ''}${isHobbsInput ? `<div class="fuel-input-grid"><div class="fuel-input-card"><label for="hobbs-${stepIndex}">Hobbs</label><input id="hobbs-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(hobbsValue)}" data-hobbs-input="true"></div></div><div class="fuel-helper">Enter the Hobbs value. This value remains visible in the collapsed phase header.</div>` : ''}${step && step.note ? `<div class="step-note">${escapeHtml(step.note)}</div>` : ''}${isDerived && (!step || !step.confirmed) ? `<div class="fuel-helper">This step is completed automatically when the Pre-flight inspection phase is fully completed.</div>` : ''}${isEditMode ? `<div class="step-tools"><button class="mini-btn" data-insert-before="${phaseIndex}:${itemIndex}" type="button">Insert before</button><button class="mini-btn" data-insert-after="${phaseIndex}:${itemIndex + 1}" type="button">Insert after</button>${!isProtected ? `<button class="mini-btn" data-edit-step="${phaseIndex}:${itemIndex}" type="button">Edit</button>` : ''}${!isProtected ? `<button class="mini-btn danger-btn" data-delete-step="${phaseIndex}:${itemIndex}" type="button">Delete</button>` : ''}</div>` : ''}</div>`;
     }
-
     function attachRenderEvents() {
       document.querySelectorAll('.phase-toggle[data-phase-index]').forEach(function(btn) {
         btn.addEventListener('click', function() {
           const index = Number(btn.dataset.phaseIndex);
-          collapsedPhases[index] = !collapsedPhases[index];
-          saveCollapsedState();
-          render();
+          const isCollapsed = Boolean(collapsedPhases[index]);
+          const isAlreadyActive = activePhaseIndex === index;
+          if (isCollapsed || !isAlreadyActive) { activatePhase(index); return; }
+          deactivatePhase(index);
         });
       });
-
-      document.querySelectorAll('[data-insert-before]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const parts = btn.dataset.insertBefore.split(':').map(Number);
-          openInsertEditor(parts[0], parts[1], null);
-        });
-      });
-
-      document.querySelectorAll('[data-insert-after]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const parts = btn.dataset.insertAfter.split(':').map(Number);
-          openInsertEditor(parts[0], parts[1], null);
-        });
-      });
-
-      document.querySelectorAll('[data-add-end]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const parts = btn.dataset.addEnd.split(':').map(Number);
-          openInsertEditor(parts[0], parts[1], null);
-        });
-      });
-
-      document.querySelectorAll('[data-edit-step]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const parts = btn.dataset.editStep.split(':').map(Number);
-          const phase = phases[parts[0]];
-          if (!phase || !phase.items[parts[1]]) return;
-          openInsertEditor(parts[0], parts[1], phase.items[parts[1]]);
-        });
-      });
-
-      document.querySelectorAll('[data-delete-step]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          const parts = btn.dataset.deleteStep.split(':').map(Number);
-          deleteStep(parts[0], parts[1]);
-        });
-      });
-
-      const saveEditorBtn = document.getElementById('saveEditorBtn');
-      if (saveEditorBtn) {
-        saveEditorBtn.addEventListener('click', function() {
-          const titleEl = document.getElementById('editorTitle');
-          const detailEl = document.getElementById('editorDetail');
-          const noteEl = document.getElementById('editorNote');
-          if (!editorState || !titleEl || !detailEl) return;
-          editorState.title = titleEl.value;
-          editorState.detail = detailEl.value;
-          editorState.note = noteEl ? noteEl.value : '';
-          saveEditorStep();
-        });
-      }
-
-      const cancelEditorBtn = document.getElementById('cancelEditorBtn');
-      if (cancelEditorBtn) {
-        cancelEditorBtn.addEventListener('click', function() {
-          closeEditor();
-        });
-      }
-
-      document.querySelectorAll('input[data-fuel-side]').forEach(function(input) {
-        input.addEventListener('input', function() {
-          fuelState[input.dataset.fuelSide] = input.value;
-          saveFuelState();
-          updateTopMeta();
-        });
-      });
-
-      document.querySelectorAll('input[data-hobbs-input="true"]').forEach(function(input) {
-        input.addEventListener('input', function() {
-          hobbsValue = input.value;
-          saveHobbsValue();
-          updateTopMeta();
-        });
-      });
-
       document.querySelectorAll('[data-step-card][data-step-index]').forEach(function(card) {
         card.addEventListener('click', function(event) {
           if (event.target.closest('button, input, textarea, select, label')) return;
-          const index = Number(card.dataset.stepIndex);
-          confirmStep(index);
+          const stepIndex = Number(card.dataset.stepIndex);
+          if (flatSteps[stepIndex]) currentVoicePhaseIndex = flatSteps[stepIndex].phaseIndex;
+          confirmStep(stepIndex);
         });
       });
+      document.querySelectorAll('[data-insert-before]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.insertBefore.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }));
+      document.querySelectorAll('[data-insert-after]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.insertAfter.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }));
+      document.querySelectorAll('[data-add-end]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.addEnd.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }));
+      document.querySelectorAll('[data-edit-step]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.editStep.split(':').map(Number); const phase = phases[parts[0]]; if (!phase || !phase.items[parts[1]]) return; openInsertEditor(parts[0], parts[1], phase.items[parts[1]]); }));
+      document.querySelectorAll('[data-delete-step]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.deleteStep.split(':').map(Number); deleteStep(parts[0], parts[1]); }));
+      const saveEditorBtn = document.getElementById('saveEditorBtn');
+      if (saveEditorBtn) saveEditorBtn.addEventListener('click', function() { const titleEl = document.getElementById('editorTitle'); const detailEl = document.getElementById('editorDetail'); const noteEl = document.getElementById('editorNote'); if (!editorState || !titleEl || !detailEl) return; editorState.title = titleEl.value; editorState.detail = detailEl.value; editorState.note = noteEl ? noteEl.value : ''; saveEditorStep(); });
+      const cancelEditorBtn = document.getElementById('cancelEditorBtn');
+      if (cancelEditorBtn) cancelEditorBtn.addEventListener('click', closeEditor);
+      document.querySelectorAll('input[data-fuel-side]').forEach(input => input.addEventListener('input', function() { fuelState[input.dataset.fuelSide] = input.value; saveFuelState(); updateTopMeta(); }));
+      document.querySelectorAll('input[data-hobbs-input="true"]').forEach(input => input.addEventListener('input', function() { hobbsValue = input.value; saveHobbsValue(); updateTopMeta(); }));
     }
-
-    function renderHeaderEditor() {
-      const existing = document.getElementById('headerInlineEditorWrap');
-      if (existing) existing.remove();
-      if (!(editorState && editorState.mode === 'edit-header')) return;
-      const headerCard = document.querySelector('.container > .card');
-      if (!headerCard) return;
-      const wrap = document.createElement('div');
-      wrap.id = 'headerInlineEditorWrap';
-      wrap.innerHTML = buildInlineEditorHtml();
-      const progressWrap = headerCard.querySelector('.progress-wrap');
-      if (progressWrap) {
-        progressWrap.parentNode.insertBefore(wrap, progressWrap);
-      } else {
-        headerCard.appendChild(wrap);
-      }
-      const inlineEditor = wrap.querySelector('[data-inline-editor="true"]');
-      const editorTitle = document.getElementById('editorTitle');
-      if (inlineEditor) {
-        inlineEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      if (editorTitle) {
-        setTimeout(function() {
-          editorTitle.focus({ preventScroll: true });
-          editorTitle.select();
-        }, 50);
-      }
-    }
-
     function render() {
       syncDerivedSteps();
-      activePhaseIndex = getActivePhaseIndex();
+      syncTabsWithPhases();
       stepsContainer.innerHTML = '';
-
-      phases.forEach(function(phase, phaseIndex) {
+      tabsContainer.innerHTML = tabDefinitions.map(tab => '<button class="tab ' + (tab.id === currentTab ? 'active' : '') + '" data-tab-id="' + escapeHtml(tab.id) + '" type="button">' + escapeHtml(tab.label) + '</button>').join('');
+      const currentTabDef = getCurrentTabDefinition();
+      const visiblePhases = phases.filter(p => currentTabDef ? currentTabDef.phaseTitles.includes(p.title) : true);
+      if (isEditMode) {
+        tabTools.classList.add('visible');
+        tabTools.innerHTML = '<button class="mini-btn" id="addTabBtn" type="button">Add tab</button>' + (currentTabDef ? '<button class="mini-btn" id="editTabBtn" type="button">Edit tab</button>' : '') + (currentTabDef && tabDefinitions.length > 1 ? '<button class="mini-btn danger-btn" id="deleteTabBtn" type="button">Delete tab</button>' : '') + buildTabEditorHtml();
+      } else { tabTools.classList.remove('visible'); tabTools.innerHTML = ''; }
+      visiblePhases.forEach(function(phase) {
+        const phaseIndex = phases.indexOf(phase);
         const phaseDone = completedCountInPhase(phaseIndex);
         const phaseTotal = countedStepsInPhase(phaseIndex);
         const isPhaseComplete = phaseTotal > 0 && phaseDone === phaseTotal;
         const isRequired = isRequiredPhase(phase.title);
-        const fuelSummaryText = phase.title === 'Pre-flight inspection' && (fuelState.left || fuelState.right)
-          ? 'Fuel Tank Volume  L: ' + (fuelState.left || '-') + '  R: ' + (fuelState.right || '-')
-          : '';
+        const fuelSummaryText = phase.title === 'Pre-flight inspection' && (fuelState.left || fuelState.right) ? 'Fuel Tank Volume  L: ' + (fuelState.left || '-') + '  R: ' + (fuelState.right || '-') : '';
         const hobbsSummaryText = phase.title === 'Parking' && hobbsValue ? 'Hobbs ' + hobbsValue : '';
-
         const phaseCard = document.createElement('div');
-        phaseCard.className = 'card phase-card ' + getPhaseBorderClass(phase.title);
+        const bluePhases = ['Taxi','Before Departure','Take off','After Take off','Cruise','Approach','After Landing'];
+        const baseClass = phase.title === 'Emergency'
+          ? ' emergency-phase'
+          : (bluePhases.includes(phase.title) ? ' highlight-blue' : ' highlight-green');
+        phaseCard.className = 'card phase-card' + baseClass;
         if (isPhaseComplete) phaseCard.classList.add('completed');
         if (activePhaseIndex === phaseIndex) phaseCard.classList.add('active-phase');
         phaseCard.classList.toggle('collapsed', !!collapsedPhases[phaseIndex]);
-
         let stepsHtml = '';
         let lastSubsection = null;
         phase.items.forEach(function(item, itemIndex) {
           if (phase.title === 'Pre-flight inspection') {
             const subsection = getPreflightSubsection(item);
-            if (subsection && subsection !== lastSubsection) {
-              stepsHtml += `<div class="subsection-heading">${escapeHtml(subsection)}</div>`;
-              lastSubsection = subsection;
-            }
+            if (subsection && subsection !== lastSubsection) { stepsHtml += '<div class="subsection-heading">' + escapeHtml(subsection) + '</div>'; lastSubsection = subsection; }
           }
-          if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex) {
-            stepsHtml += buildInlineEditorHtml();
-          }
+          if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex) stepsHtml += buildInlineEditorHtml();
           stepsHtml += buildStepHtml(phase, phaseIndex, item, itemIndex);
         });
-        if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === phase.items.length) {
-          stepsHtml += buildInlineEditorHtml();
-        }
-
-        phaseCard.innerHTML = `
-          <button class="phase-toggle" data-phase-index="${phaseIndex}" type="button">
-            <div class="phase-header">
-              <div class="phase-title-wrap">
-                <h2>${escapeHtml(phase.title)}</h2>
-              </div>
-              <div class="phase-summary">
-                <div class="phase-meta">
-                  ${fuelSummaryText ? `<div class="fuel-summary">${escapeHtml(fuelSummaryText)}</div>` : ''}
-                  ${hobbsSummaryText ? `<div class="value-summary">${escapeHtml(hobbsSummaryText)}</div>` : ''}
-                  <span class="status ${isPhaseComplete ? 'done' : (isRequired ? 'ready' : 'locked')}">${phaseDone} / ${phaseTotal}${isRequired ? '' : ' optional'}</span>
-                </div>
-                <span class="phase-chevron">▾</span>
-              </div>
-            </div>
-          </button>
-          <div class="phase-content">
-            <p class="phase-intro">${escapeHtml(phase.intro)}</p>
-            ${isEditMode ? `<div class="phase-tools"><button class="mini-btn" data-add-end="${phaseIndex}:${phase.items.length}" type="button">Add step at end</button></div>` : ''}
-            ${stepsHtml}
-          </div>
-        `;
-
+        if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === phase.items.length) stepsHtml += buildInlineEditorHtml();
+        phaseCard.innerHTML = `<button class="phase-toggle" data-phase-index="${phaseIndex}" type="button"><div class="phase-header"><div class="phase-title-wrap"><h2>${escapeHtml(phase.title)}</h2></div><div class="phase-summary"><div class="phase-meta">${fuelSummaryText ? `<div class="fuel-summary">${escapeHtml(fuelSummaryText)}</div>` : ''}${hobbsSummaryText ? `<div class="value-summary">${escapeHtml(hobbsSummaryText)}</div>` : ''}<span class="status ${isPhaseComplete ? 'done' : (isRequired ? 'ready' : 'locked')}">${phaseDone} / ${phaseTotal}${isRequired ? '' : ' optional'}</span></div><span class="phase-chevron">▾</span></div></div></button><div class="phase-content"><p class="phase-intro">${escapeHtml(phase.intro)}</p>${isEditMode ? `<div class="phase-tools"><button class="mini-btn" data-add-end="${phaseIndex}:${phase.items.length}" type="button">Add step at end</button></div>` : ''}${stepsHtml}</div>`;
         stepsContainer.appendChild(phaseCard);
       });
-
       renderHeaderEditor();
       attachRenderEvents();
       renderSummaryCard();
-
-      // focus collapsed phase after render
-      if (focusPhaseIndex !== null) {
-        const phaseCards = document.querySelectorAll('.phase-card');
-        const target = phaseCards[focusPhaseIndex];
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          const header = target.querySelector('.phase-toggle');
-          if (header) {
-            header.style.boxShadow = '0 0 0 3px rgba(96,165,250,0.6)';
-            setTimeout(function() {
-              header.style.boxShadow = '';
-            }, 1200);
-          }
-        }
-        focusPhaseIndex = null;
-      }
-
-      if (editorState && editorState.mode !== 'edit-header') {
-        const inlineEditor = document.querySelector('[data-inline-editor="true"]');
-        const editorTitle = document.getElementById('editorTitle');
-        if (inlineEditor) {
-          inlineEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        if (editorTitle) {
-          setTimeout(function() {
-            editorTitle.focus({ preventScroll: true });
-            editorTitle.select();
-          }, 50);
-        }
-      }
-
-      if (pendingFocusStepIndex !== null) {
-        const nextStepCard = document.querySelector('[data-step-card="' + pendingFocusStepIndex + '"]');
-        const nextStepButton = document.querySelector('.confirm-btn[data-step-index="' + pendingFocusStepIndex + '"]');
-        if (nextStepCard) nextStepCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        if (nextStepButton) {
-          setTimeout(function() {
-            nextStepButton.focus({ preventScroll: true });
-          }, 150);
-        }
-      }
-
-      // Required-phase progress
-      let completedPhases = 0;
-      let totalPhases = 0;
-      phases.forEach(function(phase, phaseIndex) {
-        if (!isRequiredPhase(phase.title)) return;
-        totalPhases += 1;
-        if (isPhaseFullyCompleted(phaseIndex)) completedPhases += 1;
-      });
-
-      progressFill.style.width = (totalPhases ? (completedPhases / totalPhases) * 100 : 0) + '%';
-      progressText.textContent = completedPhases + ' of ' + totalPhases + ' required phases completed';
-
-      finishBtn.disabled = completedPhases !== totalPhases;
+      const addTabBtn = document.getElementById('addTabBtn'); if (addTabBtn) addTabBtn.addEventListener('click', function() { editorState = null; openTabEditor(null); });
+      const editTabBtn = document.getElementById('editTabBtn'); if (editTabBtn && currentTabDef) editTabBtn.addEventListener('click', function() { editorState = null; openTabEditor(currentTabDef.id); });
+      const deleteTabBtn = document.getElementById('deleteTabBtn'); if (deleteTabBtn) deleteTabBtn.addEventListener('click', deleteCurrentTab);
+      const saveTabEditorBtn = document.getElementById('saveTabEditorBtn'); if (saveTabEditorBtn) saveTabEditorBtn.addEventListener('click', function() { const titleEl = document.getElementById('tabEditorTitle'); const selectedTitles = Array.from(document.querySelectorAll('[data-tab-phase-index]:checked')).map(input => phases[Number(input.dataset.tabPhaseIndex)].title); if (titleEl) editorState.title = titleEl.value; editorState.phaseTitles = selectedTitles; saveTabEditor(); });
+      const cancelTabEditorBtn = document.getElementById('cancelTabEditorBtn'); if (cancelTabEditorBtn) cancelTabEditorBtn.addEventListener('click', function() { editorState = null; render(); });
+      let completedRequiredPhases = 0, totalRequiredPhases = 0;
+      phases.forEach(function(phase, phaseIndex) { if (!isRequiredPhase(phase.title)) return; totalRequiredPhases += 1; if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1; });
+      progressFill.style.width = (totalRequiredPhases ? (completedRequiredPhases / totalRequiredPhases) * 100 : 0) + '%';
+      progressText.textContent = completedRequiredPhases + ' of ' + totalRequiredPhases + ' required phases completed';
+      finishBtn.disabled = completedRequiredPhases !== totalRequiredPhases;
       updateInstallButton();
       updateAudioToggleUi();
+      updateVoiceModeUi();
     }
-
-    function resetChecklist() {
-      flatSteps.forEach(function(step) { step.confirmed = false; });
-      fuelState = { left: '', right: '' };
-      hobbsValue = '';
-      pendingFocusStepIndex = null;
-      collapsedPhases = phases.map(function() { return true; });
-      if (headerStartTime) {
-        headerStartTime.textContent = '';
-        localStorage.setItem('b23-start-time', '');
-      }
-      if (headerEndTime) {
-        headerEndTime.textContent = '';
-        localStorage.setItem('b23-end-time', '');
-      }
-      clearLastSummary();
-      syncDerivedSteps();
-      saveProgress();
-      saveCollapsedState();
-      saveFuelState();
-      saveHobbsValue();
-      updateTopMeta();
-      render();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function renderSummaryCard() {
-      if (!finishSummaryCard || !finishSummaryGrid) return;
-      if (!lastSummary) {
-        finishSummaryCard.classList.remove('visible');
-        finishSummaryGrid.innerHTML = '';
-        return;
-      }
-      const fields = [
-        ['Aircraft', lastSummary.aircraft],
-        ['Airport', lastSummary.airport],
-        ['Date (UTC)', lastSummary.date],
-        ['Start time (Z)', lastSummary.startTime],
-        ['End time (Z)', lastSummary.endTime],
-        ['Hobbs', lastSummary.hobbs],
-        ['Fuel left', lastSummary.fuelLeft],
-        ['Fuel right', lastSummary.fuelRight],
-        ['Completed at (Z)', lastSummary.completedAt]
-      ];
-      finishSummaryGrid.innerHTML = fields.map(function(entry) {
-        return `<div class="summary-item"><span class="summary-label">${escapeHtml(entry[0])}</span><div class="summary-value">${escapeHtml(entry[1] || '--')}</div></div>`;
-      }).join('');
-      finishSummaryCard.classList.add('visible');
-    }
-
-    function buildCompletionSummary() {
-      const parts = getCurrentZuluParts();
-      return {
-        aircraft: headerAircraft ? headerAircraft.value : '',
-        airport: headerAirport ? headerAirport.value : '',
-        date: parts.dateText,
-        startTime: headerStartTime ? headerStartTime.textContent : '',
-        endTime: headerEndTime ? headerEndTime.textContent : '',
-        hobbs: hobbsValue || '',
-        fuelLeft: fuelState.left || '',
-        fuelRight: fuelState.right || '',
-        completedAt: parts.timeText
-      };
-    }
-
-    function maybeAutoRecordTime(step) {
-      if (!step) return;
-      if (step.phaseTitle === 'Engine Start' && step.title === 'Master switch' && headerStartTime && !headerStartTime.textContent) {
-        headerStartTime.textContent = getCurrentZuluTimeValue();
-        localStorage.setItem('b23-start-time', headerStartTime.textContent);
-      }
-      if (step.phaseTitle === 'Parking' && step.title === 'Master Switch' && headerEndTime) {
-        headerEndTime.textContent = getCurrentZuluTimeValue();
-        localStorage.setItem('b23-end-time', headerEndTime.textContent);
-      }
-    }
-
-    function showFinishSummary() {
-      lastSummary = buildCompletionSummary();
-      saveLastSummary();
-      renderSummaryCard();
-      if (finishSummaryCard) {
-        finishSummaryCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-
+    function parseVoiceCommand(transcript) { const normalized = String(transcript || '').toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim(); if (!normalized) return null; const words = normalized.split(' '); if (normalized === 'repeat' || words.includes('repeat')) return 'repeat'; if (normalized === 'stop' || normalized === 'stop listening') return 'stop'; if (normalized === 'checked' || normalized === 'check' || normalized === 'done') return 'confirm'; if (words.length === 1 && (words[0] === 'checked' || words[0] === 'check' || words[0] === 'done')) return 'confirm'; return null; }
+    function handleVoiceCommand(transcript) { if (isSpeaking) return; const command = parseVoiceCommand(transcript); if (!command) return; if (command === 'repeat') { speakCurrentActionableStep(false, currentVoicePhaseIndex); return; } if (command === 'stop') { isVoiceModeEnabled = false; localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled)); updateVoiceModeUi(); stopVoiceRecognition(); return; } if (command === 'confirm') { const currentIndex = getCurrentActionableStepIndex(currentVoicePhaseIndex); if (currentIndex !== null) confirmStep(currentIndex); } }
+    function initVoiceRecognition() { const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SpeechRecognitionCtor) { recognitionAvailable = false; updateVoiceModeUi(); return; } recognitionAvailable = true; recognition = new SpeechRecognitionCtor(); recognition.continuous = false; recognition.interimResults = true; recognition.maxAlternatives = 3; recognition.lang = 'en-US'; recognition.onstart = function() { recognitionStarting = false; recognitionActive = true; lastRecognitionError = ''; updateVoiceModeUi(); }; recognition.onresult = function(event) { if (isSpeaking) return; const result = event.results[event.results.length - 1]; if (!result) return; let transcript = ''; for (let i = 0; i < result.length; i += 1) transcript += ' ' + (result[i].transcript || ''); transcript = transcript.trim(); if (!transcript) return; if (result.isFinal) handleVoiceCommand(transcript); }; recognition.onend = function() { recognitionActive = false; updateVoiceModeUi(); if (isVoiceModeEnabled && !isSpeaking) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 300); } }; recognition.onerror = function(event) { recognitionActive = false; recognitionStarting = false; lastRecognitionError = event && event.error ? String(event.error) : 'mic error'; updateVoiceModeUi(); if (isVoiceModeEnabled && !isSpeaking) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 700); } }; updateVoiceModeUi(); }
+    function resetChecklist() { flatSteps.forEach(step => step.confirmed = false); fuelState = { left: '', right: '' }; hobbsValue = ''; pendingFocusStepIndex = null; focusPhaseIndex = null; emergencyFlowReturnStepIndex = null; collapsedPhases = phases.map(() => true); activePhaseIndex = null; currentVoicePhaseIndex = null; clearPhaseAnnouncementTimer(); headerStartTime.textContent = '--'; headerEndTime.textContent = '--'; localStorage.setItem(startTimeKey, ''); localStorage.setItem(endTimeKey, ''); clearLastSummary(); syncDerivedSteps(); saveProgress(); saveCollapsedState(); saveFuelState(); saveHobbsValue(); updateTopMeta(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     function importChecklistProfileObject(profile) {
-      if (!profile || !Array.isArray(profile.phases) || !profile.phases.length) {
-        throw new Error('Invalid checklist profile file.');
-      }
-      phases = profile.phases.map(function(phase) {
-        return {
-          title: String(phase.title || ''),
-          intro: String(phase.intro || ''),
-          items: Array.isArray(phase.items)
-            ? phase.items.map(function(item) {
-                return {
-                  title: String(item.title || ''),
-                  detail: String(item.detail || ''),
-                  note: String(item.note || '')
-                };
-              })
-            : []
-        };
-      });
+      if (!profile || !Array.isArray(profile.phases) || !profile.phases.length) throw new Error('Invalid checklist profile file.');
+      phases = profile.phases.map(phase => ({ title: String(phase.title || ''), intro: String(phase.intro || ''), items: Array.isArray(phase.items) ? phase.items.map(item => ({ title: String(item.title || ''), detail: String(item.detail || ''), note: String(item.note || '') })) : [] }));
       defaultPhases = JSON.parse(JSON.stringify(phases));
-      if (appTitle && typeof profile.appTitle === 'string' && profile.appTitle.trim()) {
-        appTitle.textContent = profile.appTitle;
-      }
-      if (appDescription && typeof profile.appDescription === 'string') {
-        appDescription.textContent = profile.appDescription;
-      }
+      tabDefinitions = normalizeTabDefinitions(profile.tabs);
+      if (typeof profile.appTitle === 'string' && profile.appTitle.trim()) appTitle.textContent = profile.appTitle;
+      if (typeof profile.appDescription === 'string') appDescription.textContent = profile.appDescription;
       saveHeaderContent();
-      if (headerAirport && typeof profile.airport === 'string') {
-        headerAirport.value = profile.airport;
-        localStorage.setItem('b23-airport', headerAirport.value);
-      }
-      if (headerAircraft && typeof profile.aircraft === 'string') {
-        headerAircraft.value = profile.aircraft;
-        localStorage.setItem('b23-aircraft', headerAircraft.value);
-      }
-      editorState = null;
-      pendingFocusStepIndex = null;
-      saveCustomChecklist();
-      rebuildFlatSteps();
-      flatSteps.forEach(function(step) { step.confirmed = false; });
-      loadCollapsedState();
-      syncDerivedSteps();
-      saveProgress();
-      saveCollapsedState();
-      updateTopMeta();
-      render();
+      if (typeof profile.airport === 'string') { headerAirport.value = profile.airport; localStorage.setItem(airportKey, headerAirport.value); }
+      if (typeof profile.aircraft === 'string') { headerAircraft.value = profile.aircraft; localStorage.setItem(aircraftKey, headerAircraft.value); }
+      editorState = null; pendingFocusStepIndex = null; saveCustomChecklist(); saveTabDefinitions(); rebuildFlatSteps(); flatSteps.forEach(step => step.confirmed = false); loadCollapsedState(); syncDerivedSteps(); saveProgress(); saveCollapsedState(); updateTopMeta(); render();
     }
-
     function attachStaticEvents() {
-      const emergencyBtn = document.getElementById('emergencyJumpBtn');
-      if (emergencyBtn) {
-        emergencyBtn.addEventListener('click', function() {
-          const emergencyIndex = phases.findIndex(function(phase) {
-            return phase.title === 'Emergency';
-          });
-          if (emergencyIndex === -1) return;
-          collapsedPhases[emergencyIndex] = false;
-          saveCollapsedState();
-          render();
-          setTimeout(function() {
-            const phaseCards = document.querySelectorAll('.phase-card');
-            const target = phaseCards[emergencyIndex];
-            if (!target) return;
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            const header = target.querySelector('.phase-toggle');
-            if (header) {
-              header.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.6)';
-              setTimeout(function() { header.style.boxShadow = ''; }, 1500);
-            }
-          }, 50);
-        });
-      }
-
-      if (resetBtn) resetBtn.addEventListener('click', resetChecklist);
-      if (topResetBtn) topResetBtn.addEventListener('click', resetChecklist);
-
-      if (collapseAllBtn) {
-        collapseAllBtn.addEventListener('click', function() {
-          collapsedPhases = phases.map(function() { return true; });
-          saveCollapsedState();
-          render();
-        });
-      }
-
-      if (expandAllBtn) {
-        expandAllBtn.addEventListener('click', function() {
-          collapsedPhases = phases.map(function() { return false; });
-          saveCollapsedState();
-          render();
-        });
-      }
-
-      if (finishBtn) {
-        finishBtn.addEventListener('click', function() {
-          let completedRequiredPhases = 0;
-          let totalRequiredPhases = 0;
-          phases.forEach(function(phase, phaseIndex) {
-            if (!isRequiredPhase(phase.title)) return;
-            totalRequiredPhases += 1;
-            if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1;
-          });
-          if (completedRequiredPhases === totalRequiredPhases) {
-            showFinishSummary();
-          }
-        });
-      }
-
-      if (keepReviewBtn) {
-        keepReviewBtn.addEventListener('click', function() {
-          if (finishSummaryCard) {
-            finishSummaryCard.classList.remove('visible');
-          }
-        });
-      }
-
-      if (summaryResetBtn) {
-        summaryResetBtn.addEventListener('click', function() {
-          resetChecklist();
-        });
-      }
-
-      if (installBtn) {
-        installBtn.addEventListener('click', async function() {
-          if (!deferredPrompt) return;
-          deferredPrompt.prompt();
-          try {
-            await deferredPrompt.userChoice;
-          } catch (error) {
-          }
-          deferredPrompt = null;
-          updateInstallButton();
-        });
-      }
-
-      if (headerAirport) {
-        headerAirport.value = localStorage.getItem('b23-airport') || 'ESGA';
-        headerAirport.addEventListener('input', function() {
-          localStorage.setItem('b23-airport', headerAirport.value);
-        });
-      }
-
-      if (headerAircraft) {
-        headerAircraft.value = localStorage.getItem('b23-aircraft') || 'SE-MOY';
-        headerAircraft.addEventListener('change', function() {
-          localStorage.setItem('b23-aircraft', headerAircraft.value);
-        });
-      }
-
-      if (headerStartTime) {
-        headerStartTime.textContent = localStorage.getItem('b23-start-time') || '';
-      }
-
-      if (headerEndTime) {
-        headerEndTime.textContent = localStorage.getItem('b23-end-time') || '';
-      }
-
-      if (editModeBtn) {
-        editModeBtn.textContent = isEditMode ? '✓' : '✏️';
-        editModeBtn.addEventListener('click', function() {
-          isEditMode = !isEditMode;
-          if (editHeaderBtn) {
-            editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
-          }
-          localStorage.setItem(editModeKey, String(isEditMode));
-          if (editorState && editorState.mode !== 'edit-header') {
-            editorState = null;
-          }
-          editModeBtn.textContent = isEditMode ? '✓' : '✏️';
-          render();
-        });
-      }
-
-      if (editHeaderBtn) {
-        editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
-        editHeaderBtn.addEventListener('click', function() {
-          editorState = {
-            mode: 'edit-header',
-            title: appTitle ? appTitle.textContent : '',
-            detail: appDescription ? appDescription.textContent : '',
-            note: ''
-          };
-          render();
-        });
-      }
-
-      if (audioToggleBtn) {
-        updateAudioToggleUi();
-        audioToggleBtn.addEventListener('click', function() {
-          isAudioEnabled = !isAudioEnabled;
-          localStorage.setItem(audioEnabledKey, String(isAudioEnabled));
-          updateAudioToggleUi();
-          if (!isAudioEnabled && 'speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-          }
-        });
-      }
-
-      if (exportProfileBtn) {
-        exportProfileBtn.addEventListener('click', function() {
-          exportChecklistProfile();
-        });
-      }
-
-      if (importProfileBtn && importProfileInput) {
-        importProfileBtn.addEventListener('click', function() {
-          importProfileInput.click();
-        });
-        importProfileInput.addEventListener('change', function(event) {
-          const file = event.target.files && event.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = function(loadEvent) {
-            try {
-              const parsed = JSON.parse(String(loadEvent.target.result || ''));
-              importChecklistProfileObject(parsed);
-            } catch (error) {
-              alert(error && error.message ? error.message : 'Could not import checklist profile.');
-            } finally {
-              importProfileInput.value = '';
-            }
-          };
-          reader.readAsText(file);
-        });
-      }
-    }
-
-    function initialize() {
-      loadCustomChecklist();
-      loadHeaderContent();
-      rebuildFlatSteps();
-      loadCollapsedState();
-      loadProgress();
-      loadFuelState();
-      loadHobbsValue();
-      loadLastSummary();
-      syncDerivedSteps();
-      updateTopMeta();
-      updateInstallButton();
-      attachStaticEvents();
-      setInterval(updateTopMeta, 30000);
-      render();
-    }
-
-    window.addEventListener('beforeinstallprompt', function(event) {
-      event.preventDefault();
-      deferredPrompt = event;
-      updateInstallButton();
-    });
-
-    window.addEventListener('appinstalled', function() {
-      deferredPrompt = null;
-      updateInstallButton();
-    });
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js').catch(function(error) {
-          console.warn('Service worker registration failed.', error);
-        });
+      document.addEventListener('click', function(event) {
+        const tabBtn = event.target.closest('.tab[data-tab-id]');
+        if (!tabBtn) return;
+        setActiveTab(tabBtn.dataset.tabId);
+        activePhaseIndex = null;
+        pendingFocusStepIndex = null;
+        render();
       });
+      initVoiceRecognition();
+      topResetBtn.addEventListener('click', resetChecklist);
+      collapseAllBtn.addEventListener('click', function() { collapsedPhases = phases.map(() => true); activePhaseIndex = null; saveCollapsedState(); render(); });
+      finishBtn.addEventListener('click', function() { let completedRequiredPhases = 0; let totalRequiredPhases = 0; phases.forEach(function(phase, phaseIndex) { if (!isRequiredPhase(phase.title)) return; totalRequiredPhases += 1; if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1; }); if (completedRequiredPhases === totalRequiredPhases) showFinishSummary(); });
+      keepReviewBtn.addEventListener('click', function() { finishSummaryCard.classList.remove('visible'); });
+      summaryResetBtn.addEventListener('click', resetChecklist);
+      installBtn.addEventListener('click', async function() { if (!deferredPrompt) return; deferredPrompt.prompt(); try { await deferredPrompt.userChoice; } catch {} deferredPrompt = null; updateInstallButton(); });
+      headerAirport.value = localStorage.getItem(airportKey) || 'ESGA';
+      headerAirport.addEventListener('input', function() { localStorage.setItem(airportKey, headerAirport.value); });
+      headerAircraft.value = localStorage.getItem(aircraftKey) || 'SE-MOY';
+      headerAircraft.addEventListener('change', function() { localStorage.setItem(aircraftKey, headerAircraft.value); });
+      headerStartTime.textContent = localStorage.getItem(startTimeKey) || '--';
+      headerEndTime.textContent = localStorage.getItem(endTimeKey) || '--';
+      editModeBtn.textContent = isEditMode ? '✓' : '✏️';
+      editModeBtn.addEventListener('click', function() { isEditMode = !isEditMode; localStorage.setItem(editModeKey, String(isEditMode)); if (editorState && editorState.mode !== 'edit-header') editorState = null; editModeBtn.textContent = isEditMode ? '✓' : '✏️'; editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none'; render(); });
+      editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+      editHeaderBtn.addEventListener('click', function() { editorState = { mode: 'edit-header', title: appTitle.textContent, detail: appDescription.textContent, note: '' }; render(); });
+      audioModeBtn.addEventListener('click', function() { const nextEnabled = !(isAudioEnabled || isVoiceModeEnabled); isAudioEnabled = nextEnabled; isVoiceModeEnabled = nextEnabled && recognitionAvailable; localStorage.setItem(audioEnabledKey, String(isAudioEnabled)); localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled)); lastRecognitionError = ''; updateAudioToggleUi(); updateVoiceModeUi(); if (!nextEnabled) { stopVoiceRecognition(); if ('speechSynthesis' in window) window.speechSynthesis.cancel(); return; } currentVoicePhaseIndex = currentVoicePhaseIndex !== null ? currentVoicePhaseIndex : getActivePhaseIndex(); if (isAudioEnabled && currentVoicePhaseIndex !== null) { speakCurrentActionableStep(true, currentVoicePhaseIndex); } else if (isVoiceModeEnabled) { startVoiceRecognition(); } });
+      
+      exportProfileBtn.addEventListener('click', function() { const profile = { version: 1, exportedAt: new Date().toISOString(), airport: headerAirport.value, aircraft: headerAircraft.value, appTitle: appTitle.textContent, appDescription: appDescription.textContent, tabs: tabDefinitions, phases: phases }; const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_'); link.href = url; link.download = 'b23-checklist-profile-' + aircraft + '.json'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); });
+      importProfileBtn.addEventListener('click', function() { importProfileInput.click(); });
+      importProfileInput.addEventListener('change', function(event) { const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(loadEvent) { try { const parsed = JSON.parse(String(loadEvent.target.result || '')); importChecklistProfileObject(parsed); } catch (error) { alert(error && error.message ? error.message : 'Could not import checklist profile.'); } finally { importProfileInput.value = ''; } }; reader.readAsText(file); });
     }
-
+    function initialize() { loadCustomChecklist(); loadHeaderContent(); rebuildFlatSteps(); loadTabDefinitions(); loadCollapsedState(); loadProgress(); loadFuelState(); loadHobbsValue(); loadLastSummary(); syncDerivedSteps(); updateTopMeta(); updateInstallButton(); attachStaticEvents(); setInterval(updateTopMeta, 30000); render(); if (isVoiceModeEnabled) { currentVoicePhaseIndex = getActivePhaseIndex(); startVoiceRecognition(); } }
+    window.addEventListener('beforeinstallprompt', function(event) { event.preventDefault(); deferredPrompt = event; updateInstallButton(); });
+    window.addEventListener('appinstalled', function() { deferredPrompt = null; updateInstallButton(); });
     initialize();
   </script>
 </body>
