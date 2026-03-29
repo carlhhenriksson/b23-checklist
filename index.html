@@ -410,6 +410,59 @@
       font-size: 13px;
     }
 
+    .info-box-card {
+      border: 1px solid var(--border);
+      background: #18212d;
+    }
+
+    .info-box-title {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .info-box-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .info-box-section {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #111827;
+    }
+
+    .info-box-section h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .info-box-list {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .info-box-list div {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .info-box-list strong {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
     .phase-card.active-phase {
       border: 4px solid #22c55e;
       background: rgba(34, 197, 94, 0.08);
@@ -675,6 +728,70 @@
         <button class="primary-btn" id="summaryResetBtn" type="button">Reset</button>
       </div>
     </div>
+    <div class="card info-box-card">
+      <h2 class="info-box-title">Quick reference</h2>
+      <p class="muted">AFM-based throttle, RPM and speed references for rapid scan. Always verify against the approved AFM before flight.</p>
+      <div class="info-box-grid">
+        <div class="info-box-section">
+          <h3>Speed limits</h3>
+          <div class="info-box-list">
+            <div><span>VNE</span><strong>157 KIAS</strong></div>
+            <div><span>VNO</span><strong>136 KIAS</strong></div>
+            <div><span>VA</span><strong>99 KIAS</strong></div>
+            <div><span>VFE</span><strong>82 KIAS</strong></div>
+            <div><span>Vs1 clean</span><strong>51 KIAS</strong></div>
+            <div><span>Vs0 landing</span><strong>44 KIAS</strong></div>
+            <div><span>Best glide</span><strong>67 KIAS</strong></div>
+          </div>
+        </div>
+        <div class="info-box-section">
+          <h3>Take-off / climb</h3>
+          <div class="info-box-list">
+            <div><span>Nose wheel unstick</span><strong>40 KIAS</strong></div>
+            <div><span>Lift-off</span><strong>50 KIAS</strong></div>
+            <div><span>Initial climb</span><strong>64 KIAS</strong></div>
+            <div><span>Vx</span><strong>62 KIAS</strong></div>
+            <div><span>Vy</span><strong>74 KIAS</strong></div>
+            <div><span>Flap 10 best angle</span><strong>64 KIAS</strong></div>
+            <div><span>Flap 10 best rate</span><strong>75 KIAS</strong></div>
+          </div>
+        </div>
+        <div class="info-box-section">
+          <h3>Approach / landing</h3>
+          <div class="info-box-list">
+            <div><span>Final, flap 25</span><strong>60 KIAS</strong></div>
+            <div><span>Landing reference</span><strong>58 KIAS</strong></div>
+            <div><span>Go-around accelerate</span><strong>65 KIAS</strong></div>
+            <div><span>Retract flaps</span><strong>Vy / 74 KIAS</strong></div>
+            <div><span>Min retract altitude</span><strong>150 ft AGL</strong></div>
+          </div>
+        </div>
+        <div class="info-box-section">
+          <h3>Power settings</h3>
+          <div class="info-box-list">
+            <div><span>Take-off</span><strong>WOT / 5800 RPM</strong></div>
+            <div><span>Climb</span><strong>WOT / 5500 RPM</strong></div>
+            <div><span>En-route climb</span><strong>WOT / 5400 RPM</strong></div>
+            <div><span>Low cruise</span><strong>26 inHg / 4800</strong></div>
+            <div><span>High cruise</span><strong>26 inHg / 5000</strong></div>
+            <div><span>Max continuous</span><strong>27 inHg / 5500</strong></div>
+            <div><span>Descent</span><strong>15-17 inHg / 4500</strong></div>
+          </div>
+        </div>
+        <div class="info-box-section">
+          <h3>Ground / run-up</h3>
+          <div class="info-box-list">
+            <div><span>Taxi max before 50 C oil temp</span><strong>2500 RPM</strong></div>
+            <div><span>Best ground cooling</span><strong>2300-2500 RPM</strong></div>
+            <div><span>Run-up</span><strong>4000 RPM</strong></div>
+            <div><span>Ignition max drop</span><strong>300 RPM</strong></div>
+            <div><span>Ignition max difference</span><strong>115 RPM</strong></div>
+            <div><span>Carb heat drop</span><strong>150-200 RPM</strong></div>
+            <div><span>Prop cycle drop min</span><strong>200 RPM</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="card install-area">
       <h2>Install app</h2>
       <p class="muted">Add this checklist to your Home Screen for a cleaner app-like experience and offline access after the first load.</p>
@@ -759,7 +876,6 @@
         { title: 'Choke', detail: 'OFF' },
         { title: 'Throttle', detail: 'Adjust for 2000 RPM' },
         { title: 'Backup BATT', detail: 'OFF' },
-        { title: 'ALT 1 and 2', detail: 'ON' },
         { title: 'ALT-1', detail: 'ON' },
         { title: 'Voltage after ALT-1', detail: 'Check about 13.4 V' },
         { title: 'ALT-2', detail: 'ON' },
@@ -771,20 +887,21 @@
         { title: 'EFIS', detail: 'ON' },
         { title: 'Altimeter', detail: 'SET QNH' }
       ]},
-      { title: 'Taxi', intro: 'Taxi checks and techniques.', items: [
-        { title: 'Brakes', detail: 'Check' },
+      { title: 'Taxiing', intro: 'Taxi checks and techniques.', items: [
+        { title: 'Ground control', detail: 'Check nose gear steering' },
+        { title: 'Brakes', detail: 'Check function' },
         { title: 'Flight instruments', detail: 'Check' },
         { title: 'Taxi technique', detail: 'Apply power as needed and keep RPM below 2500 until oil temperature reaches 50 C' }
       ]},
-      { title: 'Engine run-up / before departure', intro: 'Run-up and final checks before line-up.', items: [
+      { title: 'Before take-off / Engine run up', intro: 'Run-up and final checks before line-up.', items: [
         { title: 'Parking brake', detail: 'ON / Set' },
         { title: 'Oil temperature', detail: 'Above 50 C' },
         { title: 'Propeller control', detail: 'Max RPM' },
         { title: 'Throttle', detail: '4000 RPM' },
         { title: 'Ignition left/right', detail: '300 RPM / 115 RPM' },
         { title: 'Ignition', detail: 'Both' },
-        { title: 'Carburetor heat', detail: 'Check' },
-        { title: 'Propeller control', detail: 'Cycle 4 times' },
+        { title: 'Carburetor heat', detail: 'ON (pull), check speed drop min 150 RPM; stabilize OFF (push); check speed regain to 4000 RPM' },
+        { title: 'Propeller control', detail: 'Cycle 4 times Check speed drop minimum 200 RPM.' },
         { title: 'Oil pressure / temperature', detail: 'Check' },
         { title: 'Throttle', detail: 'IDLE' },
         { title: 'Trim', detail: 'SET / Neutral' },
@@ -803,10 +920,11 @@
         { title: 'Landing lights', detail: 'ON when take-off clearance is received' }
       ]},
       { title: 'Take off', intro: 'Take-off roll and initial climb actions.', items: [
-        { title: 'Brakes applied', detail: 'Check' },
+        { title: 'Brakes', detail: 'Hold' },
+        { title: 'Carburettor heat', detail: 'Closed' },
         { title: 'Set full RPM', detail: 'Set' },
         { title: 'Set Full Throttle', detail: 'Set' },
-        { title: 'Release Brakes', detail: 'Check' },
+        { title: 'Brakes', detail: 'Release' },
         { title: 'Airspeed', detail: 'Verify and call AIRSPEED ALIVE' },
         { title: 'Engine instruments normal indication', detail: 'Check' }
       ]},
@@ -865,7 +983,7 @@
       ]}
     ];
 
-    const OPTIONAL_PHASES = new Set(['Emergency', 'Cruise', 'Take off', 'After Take off', 'Approach', 'After Landing']);
+    const OPTIONAL_PHASES = new Set(['Emergency', 'Cruise', 'Take off', 'After Take off', 'Approach', 'After Landing', 'Taxiing']);
     const stepsContainer = document.getElementById('stepsContainer');
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
@@ -976,10 +1094,31 @@
     function saveTabDefinitions() { localStorage.setItem(tabsStorageKey, JSON.stringify(tabDefinitions)); }
     function syncTabsWithPhases() {
       const phaseTitleSet = new Set(phases.map(p => p.title));
+
       tabDefinitions = normalizeTabDefinitions(tabDefinitions).map(function(tab, index) {
-        return { id: tab.id || ('tab-' + index), label: tab.label, phaseTitles: tab.phaseTitles.filter(title => phaseTitleSet.has(title)) };
+        let filtered = tab.phaseTitles.filter(title => phaseTitleSet.has(title));
+
+        // Ensure normal tab always contains ALL non-emergency phases
+        if (tab.id !== 'emergency') {
+          filtered = phases.filter(p => p.title !== 'Emergency').map(p => p.title);
+        }
+
+        // Emergency tab only contains emergency phase
+        if (tab.id === 'emergency') {
+          filtered = phases.filter(p => p.title === 'Emergency').map(p => p.title);
+        }
+
+        return {
+          id: tab.id || ('tab-' + index),
+          label: tab.label,
+          phaseTitles: filtered
+        };
       });
-      if (!tabDefinitions.some(tab => tab.id === currentTab)) currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal';
+
+      if (!tabDefinitions.some(tab => tab.id === currentTab)) {
+        currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal';
+      }
+
       saveTabDefinitions();
     }
     function getCurrentTabDefinition() { return tabDefinitions.find(tab => tab.id === currentTab) || tabDefinitions[0] || null; }
@@ -1351,7 +1490,14 @@
     function initialize() { loadCustomChecklist(); loadHeaderContent(); rebuildFlatSteps(); loadTabDefinitions(); loadCollapsedState(); loadProgress(); loadFuelState(); loadHobbsValue(); loadLastSummary(); syncDerivedSteps(); updateTopMeta(); updateInstallButton(); attachStaticEvents(); setInterval(updateTopMeta, 30000); render(); if (isVoiceModeEnabled) { currentVoicePhaseIndex = getActivePhaseIndex(); startVoiceRecognition(); } }
     window.addEventListener('beforeinstallprompt', function(event) { event.preventDefault(); deferredPrompt = event; updateInstallButton(); });
     window.addEventListener('appinstalled', function() { deferredPrompt = null; updateInstallButton(); });
+    function runBasicSelfTests() {
+      console.assert(Array.isArray(defaultPhases), 'defaultPhases should be an array');
+      console.assert(typeof syncTabsWithPhases === 'function', 'syncTabsWithPhases should exist');
+      console.assert(typeof render === 'function', 'render should exist');
+      console.assert(phases.every(function(phase) { return Array.isArray(phase.items); }), 'Every phase should have an items array');
+    }
     initialize();
+    runBasicSelfTests();
   </script>
 </body>
 </html>
