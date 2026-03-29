@@ -1026,7 +1026,17 @@
       if (!('speechSynthesis' in window)) return null;
       const voices = window.speechSynthesis.getVoices() || [];
       if (!voices.length) return null;
-      const preferredNames = ['Samantha', 'Google UK English Female', 'Google US English', 'Victoria', 'Karen', 'Microsoft Jenny', 'Microsoft Aria', 'Microsoft Zira'];
+      const preferredNames = [
+        // Prefer UK English male voices first (more "ATC/pilot" tone)
+        'Google UK English Male',
+        'Microsoft Ryan',
+        'Microsoft Guy',
+        'Microsoft David',
+        'Microsoft Mark',
+        // Fallback well-known male voices
+        'Alex',
+        'Daniel'
+      ];
       for (let i = 0; i < preferredNames.length; i += 1) {
         const found = voices.find(function(voice) {
           return (voice.name || '').toLowerCase().includes(preferredNames[i].toLowerCase());
@@ -1051,9 +1061,18 @@
       updateVoiceModeUi();
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      if (preferredVoice) { utterance.voice = preferredVoice; utterance.lang = preferredVoice.lang || 'en-US'; } else { utterance.lang = 'en-US'; }
-      utterance.rate = 1.2;
-      utterance.pitch = 0.92;
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        // Prefer UK cadence if available
+        utterance.lang = (preferredVoice.lang && preferredVoice.lang.toLowerCase().startsWith('en-gb'))
+          ? preferredVoice.lang
+          : (preferredVoice.lang || 'en-US');
+      } else {
+        utterance.lang = 'en-GB';
+      }
+      // Slightly slower and deeper for clearer, more distinct delivery
+      utterance.rate = 1.1;
+      utterance.pitch = 0.8;
       utterance.volume = 1;
       utterance.onend = function() { isSpeaking = false; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() {
             recognitionRestartTimer = null;
