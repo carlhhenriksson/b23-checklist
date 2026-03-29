@@ -151,10 +151,10 @@
 
     button {
       border: none;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-size: 15px;
-      font-weight: bold;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
     }
 
@@ -171,6 +171,9 @@
       background: #2b3642;
       color: var(--text);
       border: 1px solid var(--border);
+      padding: 4px 6px;
+      font-size: 10px;
+      border-radius: 7px;
     }
 
     .secondary-btn,
@@ -258,7 +261,6 @@
       line-height: 1.3;
     }
 
-    /* Make install section text ~50% smaller */
     .install-area h2 {
       font-size: 10px;
     }
@@ -315,6 +317,7 @@
       gap: 8px;
       flex-wrap: wrap;
       min-height: 38px;
+      flex: 1;
     }
 
     .tabs-actions {
@@ -325,29 +328,28 @@
       padding-bottom: 6px;
     }
 
-    /* Make action buttons match tab height */
     .tabs-actions .secondary-btn,
     .tabs-actions .mini-btn {
-      height: 36px;
-      padding: 0 12px;
-      font-size: 13px;
-      border-radius: 10px;
+      height: 24px;
+      padding: 0 6px;
+      font-size: 10px;
+      border-radius: 7px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
 
     .tab {
-      padding: 8px 12px;
-      border-radius: 10px 10px 0 0;
+      padding: 4px 8px;
+      border-radius: 7px 7px 0 0;
       background: #1b2531;
       color: var(--muted);
       border: 1px solid var(--border);
       border-bottom: none;
-      font-size: 13px;
-      font-weight: bold;
+      font-size: 10px;
+      font-weight: 600;
       cursor: pointer;
-      opacity: 0.85;
+      opacity: 0.95;
     }
 
     .tab:hover {
@@ -378,6 +380,12 @@
       border-bottom: 1px solid #7f1d1d;
     }
 
+    .tab.icon-tab,
+    .tab.action-tab {
+      font-size: 10px;
+      padding: 4px 6px;
+    }
+
     .tab-tools {
       display: none;
       gap: 8px;
@@ -402,7 +410,6 @@
       border-color: var(--accent);
     }
 
-    /* Default phase outlines */
     .phase-card.highlight-green {
       border: 2px solid var(--success);
     }
@@ -411,12 +418,6 @@
       border: 2px solid var(--accent);
     }
 
-    /* Emergency phase always red outline */
-    .phase-card.emergency-phase {
-      border: 2px solid #ef4444;
-    }
-
-    /* Emergency phase always red outline */
     .phase-card.emergency-phase {
       border: 2px solid #ef4444;
     }
@@ -590,6 +591,7 @@
       padding: 14px;
       margin: 12px 0;
       background: #162133;
+      width: 100%;
     }
 
     @media (display-mode: standalone) {
@@ -628,7 +630,7 @@
       <div class="voice-status" id="voiceStatusText">Voice: off</div>
       <div class="header-disclaimer">
         ⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.
-            </div>
+      </div>
       <div class="progress-wrap">
         <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
         <p id="progressText" class="muted">0 required phases completed</p>
@@ -928,7 +930,7 @@
     let lastAnnouncedPhaseIndex = null;
 
     function cloneDefaultPhases() { return JSON.parse(JSON.stringify(defaultPhases)); }
-    function escapeHtml(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+    function escapeHtml(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }
     function specialStepType(phaseTitle, item, itemIndex) {
       if (phaseTitle === 'Before Engine Start' && item.title === 'Pre-flight inspection') return 'derived_preflight';
       if (item.title === 'Taxi technique') return 'tip';
@@ -1023,62 +1025,25 @@
       });
       return anyEnglish || voices[0] || null;
     }
-    function ensureVoiceReady() {
-      if ('speechSynthesis' in window && !preferredVoice) {
-        preferredVoice = pickPreferredVoice();
-      }
-    }
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = function() {
-        preferredVoice = pickPreferredVoice();
-      };
-    }
+    function ensureVoiceReady() { if ('speechSynthesis' in window && !preferredVoice) { preferredVoice = pickPreferredVoice(); } }
+    if ('speechSynthesis' in window) { window.speechSynthesis.onvoiceschanged = function() { preferredVoice = pickPreferredVoice(); }; }
     function speakText(text) {
       if (!isAudioEnabled) return;
       if (!('speechSynthesis' in window)) return;
       ensureVoiceReady();
       clearPhaseAnnouncementTimer();
-      if (recognitionRestartTimer) {
-        clearTimeout(recognitionRestartTimer);
-        recognitionRestartTimer = null;
-      }
-      if (isVoiceModeEnabled) {
-        stopVoiceRecognition();
-      }
+      if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; }
+      if (isVoiceModeEnabled) { stopVoiceRecognition(); }
       isSpeaking = true;
       updateVoiceModeUi();
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
-        utterance.lang = preferredVoice.lang || 'en-US';
-      } else {
-        utterance.lang = 'en-US';
-      }
+      if (preferredVoice) { utterance.voice = preferredVoice; utterance.lang = preferredVoice.lang || 'en-US'; } else { utterance.lang = 'en-US'; }
       utterance.rate = 1.0;
       utterance.pitch = 0.92;
       utterance.volume = 1;
-      utterance.onend = function() {
-        isSpeaking = false;
-        updateVoiceModeUi();
-        if (isVoiceModeEnabled) {
-          recognitionRestartTimer = setTimeout(function() {
-            recognitionRestartTimer = null;
-            startVoiceRecognition();
-          }, 250);
-        }
-      };
-      utterance.onerror = function() {
-        isSpeaking = false;
-        lastRecognitionError = 'speech error';
-        updateVoiceModeUi();
-        if (isVoiceModeEnabled) {
-          recognitionRestartTimer = setTimeout(function() {
-            recognitionRestartTimer = null;
-            startVoiceRecognition();
-          }, 250);
-        }
-      };
+      utterance.onend = function() { isSpeaking = false; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 250); } };
+      utterance.onerror = function() { isSpeaking = false; lastRecognitionError = 'speech error'; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 250); } };
       window.speechSynthesis.speak(utterance);
     }
     function speakStepWithPhase(index, forcePhaseHeader) {
@@ -1089,12 +1054,8 @@
       const item = phase && phase.items[step.itemIndex];
       if (!phase || !item) return;
       const title = getDisplayStepTitle(phase, item);
-      if (forcePhaseHeader) {
-        lastAnnouncedPhaseIndex = step.phaseIndex;
-        speakText(phase.title + '. ' + title + '. ' + step.detail);
-      } else {
-        speakText(title + '. ' + step.detail);
-      }
+      if (forcePhaseHeader) { lastAnnouncedPhaseIndex = step.phaseIndex; speakText(phase.title + '. ' + title + '. ' + step.detail); }
+      else { speakText(title + '. ' + step.detail); }
     }
     function speakCurrentActionableStep(forcePhaseHeader, preferredPhaseIndex) {
       const phaseIndex = typeof preferredPhaseIndex === 'number' ? preferredPhaseIndex : currentVoicePhaseIndex;
@@ -1103,16 +1064,7 @@
       currentVoicePhaseIndex = flatSteps[index] ? flatSteps[index].phaseIndex : currentVoicePhaseIndex;
       speakStepWithPhase(index, forcePhaseHeader);
     }
-    function schedulePhaseActivationAnnouncement(phaseIndex) {
-      if (!isVoiceModeEnabled || !isAudioEnabled) return;
-      const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex);
-      if (actionableIndex === null) return;
-      clearPhaseAnnouncementTimer();
-      phaseAnnouncementTimer = setTimeout(function() {
-        phaseAnnouncementTimer = null;
-        speakStepWithPhase(actionableIndex, true);
-      }, 180);
-    }
+    function schedulePhaseActivationAnnouncement(phaseIndex) { if (!isVoiceModeEnabled || !isAudioEnabled) return; const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex); if (actionableIndex === null) return; clearPhaseAnnouncementTimer(); phaseAnnouncementTimer = setTimeout(function() { phaseAnnouncementTimer = null; speakStepWithPhase(actionableIndex, true); }, 180); }
     function clearPhaseAnnouncementTimer() { if (phaseAnnouncementTimer) { clearTimeout(phaseAnnouncementTimer); phaseAnnouncementTimer = null; } }
     function startVoiceRecognition() { if (!recognition || !recognitionAvailable || recognitionStarting || recognitionActive || isSpeaking) return; recognitionStarting = true; lastRecognitionError = ''; updateVoiceModeUi(); try { recognition.start(); } catch { recognitionStarting = false; lastRecognitionError = 'mic start failed'; updateVoiceModeUi(); } setTimeout(function() { recognitionStarting = false; updateVoiceModeUi(); }, 500); }
     function stopVoiceRecognition() { if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; } recognitionActive = false; recognitionStarting = false; updateVoiceModeUi(); if (!recognition || !recognitionAvailable) return; try { recognition.stop(); } catch {} }
@@ -1155,16 +1107,12 @@
         currentVoicePhaseIndex = nextPhaseIndex;
         saveCollapsedState();
         render();
-        if (isAudioEnabled) {
-          speakText(phases[completedPhaseIndex].title + '. Checks completed.');
-        }
+        if (isAudioEnabled) { speakText(phases[completedPhaseIndex].title + '. Checks completed.'); }
         return;
       }
       saveProgress();
       render();
-      if (isVoiceModeEnabled) {
-        speakCurrentActionableStep(false, currentVoicePhaseIndex);
-      }
+      if (isVoiceModeEnabled) { speakCurrentActionableStep(false, currentVoicePhaseIndex); }
     }
     function renderHeaderEditor() { const existing = document.getElementById('headerInlineEditorWrap'); if (existing) existing.remove(); if (!(editorState && editorState.mode === 'edit-header')) return; const headerCard = document.querySelector('.container > .card'); if (!headerCard) return; const wrap = document.createElement('div'); wrap.id = 'headerInlineEditorWrap'; wrap.innerHTML = buildInlineEditorHtml(); const progressWrap = headerCard.querySelector('.progress-wrap'); if (progressWrap) progressWrap.parentNode.insertBefore(wrap, progressWrap); else headerCard.appendChild(wrap); }
     function buildStepHtml(phase, phaseIndex, item, itemIndex) {
@@ -1218,13 +1166,33 @@
       syncDerivedSteps();
       syncTabsWithPhases();
       stepsContainer.innerHTML = '';
-      tabsContainer.innerHTML = tabDefinitions.map(tab => '<button class="tab ' + (tab.id === currentTab ? 'active' : '') + '" data-tab-id="' + escapeHtml(tab.id) + '" type="button">' + escapeHtml(tab.label) + '</button>').join('');
+
       const currentTabDef = getCurrentTabDefinition();
+      tabsContainer.innerHTML =
+        tabDefinitions.map(tab =>
+          '<button class="tab ' + (tab.id === currentTab ? 'active' : '') +
+          '" data-tab-id="' + escapeHtml(tab.id) + '" type="button">' +
+          escapeHtml(tab.label) +
+          '</button>'
+        ).join('') +
+        (
+          isEditMode
+            ? '<button class="tab action-tab" id="addTabBtn" type="button">+ Tab</button>' +
+              (currentTabDef ? '<button class="tab icon-tab" id="editTabBtn" type="button">✏️</button>' : '') +
+              (currentTabDef && tabDefinitions.length > 1 ? '<button class="tab icon-tab" id="deleteTabBtn" type="button">🗑️</button>' : '')
+            : ''
+        );
+
       const visiblePhases = phases.filter(p => currentTabDef ? currentTabDef.phaseTitles.includes(p.title) : true);
-      if (isEditMode) {
+
+      if (isEditMode && (editorState && (editorState.mode === 'edit-tab' || editorState.mode === 'add-tab'))) {
         tabTools.classList.add('visible');
-        tabTools.innerHTML = '<button class="mini-btn" id="addTabBtn" type="button">Add tab</button>' + (currentTabDef ? '<button class="mini-btn" id="editTabBtn" type="button">Edit tab</button>' : '') + (currentTabDef && tabDefinitions.length > 1 ? '<button class="mini-btn danger-btn" id="deleteTabBtn" type="button">Delete tab</button>' : '') + buildTabEditorHtml();
-      } else { tabTools.classList.remove('visible'); tabTools.innerHTML = ''; }
+        tabTools.innerHTML = buildTabEditorHtml();
+      } else {
+        tabTools.classList.remove('visible');
+        tabTools.innerHTML = '';
+      }
+
       visiblePhases.forEach(function(phase) {
         const phaseIndex = phases.indexOf(phase);
         const phaseDone = completedCountInPhase(phaseIndex);
@@ -1316,7 +1284,6 @@
       editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
       editHeaderBtn.addEventListener('click', function() { editorState = { mode: 'edit-header', title: appTitle.textContent, detail: appDescription.textContent, note: '' }; render(); });
       audioModeBtn.addEventListener('click', function() { const nextEnabled = !(isAudioEnabled || isVoiceModeEnabled); isAudioEnabled = nextEnabled; isVoiceModeEnabled = nextEnabled && recognitionAvailable; localStorage.setItem(audioEnabledKey, String(isAudioEnabled)); localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled)); lastRecognitionError = ''; updateAudioToggleUi(); updateVoiceModeUi(); if (!nextEnabled) { stopVoiceRecognition(); if ('speechSynthesis' in window) window.speechSynthesis.cancel(); return; } currentVoicePhaseIndex = currentVoicePhaseIndex !== null ? currentVoicePhaseIndex : getActivePhaseIndex(); if (isAudioEnabled && currentVoicePhaseIndex !== null) { speakCurrentActionableStep(true, currentVoicePhaseIndex); } else if (isVoiceModeEnabled) { startVoiceRecognition(); } });
-      
       exportProfileBtn.addEventListener('click', function() { const profile = { version: 1, exportedAt: new Date().toISOString(), airport: headerAirport.value, aircraft: headerAircraft.value, appTitle: appTitle.textContent, appDescription: appDescription.textContent, tabs: tabDefinitions, phases: phases }; const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_'); link.href = url; link.download = 'b23-checklist-profile-' + aircraft + '.json'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); });
       importProfileBtn.addEventListener('click', function() { importProfileInput.click(); });
       importProfileInput.addEventListener('change', function(event) { const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(loadEvent) { try { const parsed = JSON.parse(String(loadEvent.target.result || '')); importChecklistProfileObject(parsed); } catch (error) { alert(error && error.message ? error.message : 'Could not import checklist profile.'); } finally { importProfileInput.value = ''; } }; reader.readAsText(file); });
