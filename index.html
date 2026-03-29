@@ -673,12 +673,22 @@
       <h1 id="appTitle">Bristell B23 Check List</h1>
       <p class="muted" id="appDescription">Ground checklist grouped by phase using your SE-MOA checklist and the Bristell B23 SOP / training manual details. Each item must be confirmed before the next step unlocks.</p>
       <div class="top-meta">
-        <div class="header-input-pill">Airport <input id="headerAirport" type="text" value="ESGA"></div>
+        <div class="header-input-pill">Airport
+          <select id="headerAirport">
+            <option value="ESGA" selected>ESGA</option>
+          </select>
+        </div>
         <div class="header-input-pill">Aircraft
           <select id="headerAircraft">
             <option value="SE-MOY" selected>SE-MOY</option>
             <option value="SE-MOA">SE-MOA</option>
           </select>
+        </div>
+        <div class="header-input-pill">Altitude
+          <input id="headerAirportAlt" type="number" placeholder="ft" />
+        </div>
+        <div class="header-input-pill">Radio
+          <input id="headerRadioFreq" type="text" placeholder="MHz" />
         </div>
         <div class="top-meta-pill" id="todayDate">Date --</div>
         <div class="top-meta-pill" id="zuluTime">Time -- Z</div>
@@ -883,7 +893,6 @@
         { title: 'Fuel pump', detail: 'OFF' },
         { title: 'Avionics', detail: 'ON' },
         { title: 'MFD', detail: 'Engine page' },
-        { title: 'Voltage', detail: 'Check above 11.0 V' },
         { title: 'EFIS', detail: 'ON' },
         { title: 'Altimeter', detail: 'SET QNH' }
       ]},
@@ -909,7 +918,7 @@
         { title: 'Canopy', detail: 'Closed / locked' },
         { title: 'Annunciators', detail: 'Extinguished' },
         { title: 'Fuel pump', detail: 'ON' },
-        { title: 'Departure briefing', detail: 'Completed' },
+        { title: 'Departure briefing', detail: 'Completed', note: 'Includes runway in use, takeoff type (normal/short-field), weather, abort procedures, emergency landing options, and departure trajectory.' },
         { title: 'Emergency checklist', detail: 'Repeat' },
         { title: 'Fuel selector', detail: 'Verify LEFT tank' }
       ]},
@@ -983,7 +992,7 @@
       ]}
     ];
 
-    const OPTIONAL_PHASES = new Set(['Emergency', 'Cruise', 'Take off', 'After Take off', 'Approach', 'After Landing', 'Taxiing']);
+    const OPTIONAL_PHASES = new Set(['Emergency', 'Cruise', 'Take off', 'After Take off', 'Approach', 'After Landing']);
     const stepsContainer = document.getElementById('stepsContainer');
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
@@ -999,6 +1008,8 @@
     const headerAircraft = document.getElementById('headerAircraft');
     const headerStartTime = document.getElementById('headerStartTime');
     const headerEndTime = document.getElementById('headerEndTime');
+    const headerAirportAlt = document.getElementById('headerAirportAlt');
+    const headerRadioFreq = document.getElementById('headerRadioFreq');
     const editModeBtn = document.getElementById('editModeBtn');
     const exportProfileBtn = document.getElementById('exportProfileBtn');
     const importProfileBtn = document.getElementById('importProfileBtn');
@@ -1029,6 +1040,8 @@
     const endTimeKey = 'b23-end-time';
     const airportKey = 'b23-airport';
     const aircraftKey = 'b23-aircraft';
+    const airportAltKey = 'b23-airport-alt';
+    const radioFreqKey = 'b23-radio-freq';
     const tabsStorageKey = 'b23-ground-check-tabs-v1';
 
     let phases = [];
@@ -1249,8 +1262,8 @@
     function startVoiceRecognition() { if (!recognition || !recognitionAvailable || recognitionStarting || recognitionActive || isSpeaking) return; recognitionStarting = true; lastRecognitionError = ''; updateVoiceModeUi(); try { recognition.start(); } catch { recognitionStarting = false; lastRecognitionError = 'mic start failed'; updateVoiceModeUi(); } setTimeout(function() { recognitionStarting = false; updateVoiceModeUi(); }, 500); }
     function stopVoiceRecognition() { if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; } recognitionActive = false; recognitionStarting = false; updateVoiceModeUi(); if (!recognition || !recognitionAvailable) return; try { recognition.stop(); } catch {} }
     function maybeAutoRecordTime(step) { if (!step) return; if (step.phaseTitle === 'Engine Start' && step.title === 'Master switch' && headerStartTime.textContent === '--') { const value = getCurrentZuluTimeValue(); headerStartTime.textContent = value; localStorage.setItem(startTimeKey, value); } if (step.phaseTitle === 'Parking' && step.title === 'Master Switch') { const value = getCurrentZuluTimeValue(); headerEndTime.textContent = value; localStorage.setItem(endTimeKey, value); } }
-    function buildCompletionSummary() { const parts = getCurrentZuluParts(); return { aircraft: headerAircraft.value, airport: headerAirport.value, date: parts.dateText, startTime: headerStartTime.textContent, endTime: headerEndTime.textContent, hobbs: hobbsValue || '--', fuelLeft: fuelState.left || '--', fuelRight: fuelState.right || '--', completedAt: parts.timeText }; }
-    function renderSummaryCard() { if (!lastSummary) { finishSummaryCard.classList.remove('visible'); finishSummaryGrid.innerHTML = ''; return; } const fields = [['Aircraft', lastSummary.aircraft], ['Airport', lastSummary.airport], ['Date (UTC)', lastSummary.date], ['Start time (Z)', lastSummary.startTime], ['End time (Z)', lastSummary.endTime], ['Hobbs', lastSummary.hobbs], ['Fuel left', lastSummary.fuelLeft], ['Fuel right', lastSummary.fuelRight], ['Completed at (Z)', lastSummary.completedAt]]; finishSummaryGrid.innerHTML = fields.map(entry => '<div class="summary-item"><span class="summary-label">' + escapeHtml(entry[0]) + '</span><div class="summary-value">' + escapeHtml(entry[1] || '--') + '</div></div>').join(''); finishSummaryCard.classList.add('visible'); }
+    function buildCompletionSummary() { const parts = getCurrentZuluParts(); return { aircraft: headerAircraft.value, airport: headerAirport.value, altitude: headerAirportAlt.value || '--', radioFreq: headerRadioFreq.value || '--', date: parts.dateText, startTime: headerStartTime.textContent, endTime: headerEndTime.textContent, hobbs: hobbsValue || '--', fuelLeft: fuelState.left || '--', fuelRight: fuelState.right || '--', completedAt: parts.timeText }; }
+    function renderSummaryCard() { if (!lastSummary) { finishSummaryCard.classList.remove('visible'); finishSummaryGrid.innerHTML = ''; return; } const fields = [['Aircraft', lastSummary.aircraft], ['Airport', lastSummary.airport], ['Altitude (ft)', lastSummary.altitude], ['Radio (MHz)', lastSummary.radioFreq], ['Date (UTC)', lastSummary.date], ['Start time (Z)', lastSummary.startTime], ['End time (Z)', lastSummary.endTime], ['Hobbs', lastSummary.hobbs], ['Fuel left', lastSummary.fuelLeft], ['Fuel right', lastSummary.fuelRight], ['Completed at (Z)', lastSummary.completedAt]]; finishSummaryGrid.innerHTML = fields.map(entry => '<div class="summary-item"><span class="summary-label">' + escapeHtml(entry[0]) + '</span><div class="summary-value">' + escapeHtml(entry[1] || '--') + '</div></div>').join(''); finishSummaryCard.classList.add('visible'); }
     function showFinishSummary() { lastSummary = buildCompletionSummary(); saveLastSummary(); renderSummaryCard(); finishSummaryCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     function resetProgressForStructureChange() { rebuildFlatSteps(); flatSteps.forEach(step => step.confirmed = false); syncDerivedSteps(); saveProgress(); }
     function openInsertEditor(phaseIndex, insertAt, existingStep) { editorState = { mode: existingStep ? 'edit' : 'insert', phaseIndex, insertAt, title: existingStep ? existingStep.title : '', detail: existingStep ? existingStep.detail : '', note: existingStep ? (existingStep.note || '') : '' }; render(); }
@@ -1454,6 +1467,8 @@
       saveHeaderContent();
       if (typeof profile.airport === 'string') { headerAirport.value = profile.airport; localStorage.setItem(airportKey, headerAirport.value); }
       if (typeof profile.aircraft === 'string') { headerAircraft.value = profile.aircraft; localStorage.setItem(aircraftKey, headerAircraft.value); }
+      if (typeof profile.altitude === 'string' || typeof profile.altitude === 'number') { headerAirportAlt.value = String(profile.altitude || ''); localStorage.setItem(airportAltKey, headerAirportAlt.value); }
+      if (typeof profile.radioFreq === 'string' || typeof profile.radioFreq === 'number') { headerRadioFreq.value = String(profile.radioFreq || ''); localStorage.setItem(radioFreqKey, headerRadioFreq.value); }
       editorState = null; pendingFocusStepIndex = null; saveCustomChecklist(); saveTabDefinitions(); rebuildFlatSteps(); flatSteps.forEach(step => step.confirmed = false); loadCollapsedState(); syncDerivedSteps(); saveProgress(); saveCollapsedState(); updateTopMeta(); render();
     }
     function attachStaticEvents() {
@@ -1473,9 +1488,25 @@
       summaryResetBtn.addEventListener('click', resetChecklist);
       installBtn.addEventListener('click', async function() { if (!deferredPrompt) return; deferredPrompt.prompt(); try { await deferredPrompt.userChoice; } catch {} deferredPrompt = null; updateInstallButton(); });
       headerAirport.value = localStorage.getItem(airportKey) || 'ESGA';
-      headerAirport.addEventListener('input', function() { localStorage.setItem(airportKey, headerAirport.value); });
+      function applyAirportDefaults(code) {
+        if (code === 'ESGA') {
+          headerAirportAlt.value = '424';
+          headerRadioFreq.value = '123.550';
+          localStorage.setItem(airportAltKey, headerAirportAlt.value);
+          localStorage.setItem(radioFreqKey, headerRadioFreq.value);
+        }
+      }
+      applyAirportDefaults(headerAirport.value);
+      headerAirport.addEventListener('change', function() {
+        localStorage.setItem(airportKey, headerAirport.value);
+        applyAirportDefaults(headerAirport.value);
+      });
       headerAircraft.value = localStorage.getItem(aircraftKey) || 'SE-MOY';
       headerAircraft.addEventListener('change', function() { localStorage.setItem(aircraftKey, headerAircraft.value); });
+      headerAirportAlt.value = localStorage.getItem(airportAltKey) || '';
+      headerAirportAlt.addEventListener('input', function() { localStorage.setItem(airportAltKey, headerAirportAlt.value); });
+      headerRadioFreq.value = localStorage.getItem(radioFreqKey) || '';
+      headerRadioFreq.addEventListener('input', function() { localStorage.setItem(radioFreqKey, headerRadioFreq.value); });
       headerStartTime.textContent = localStorage.getItem(startTimeKey) || '--';
       headerEndTime.textContent = localStorage.getItem(endTimeKey) || '--';
       editModeBtn.textContent = isEditMode ? '✓' : '✏️';
@@ -1483,7 +1514,7 @@
       editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
       editHeaderBtn.addEventListener('click', function() { editorState = { mode: 'edit-header', title: appTitle.textContent, detail: appDescription.textContent, note: '' }; render(); });
       audioModeBtn.addEventListener('click', function() { const nextEnabled = !(isAudioEnabled || isVoiceModeEnabled); isAudioEnabled = nextEnabled; isVoiceModeEnabled = nextEnabled && recognitionAvailable; localStorage.setItem(audioEnabledKey, String(isAudioEnabled)); localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled)); lastRecognitionError = ''; updateAudioToggleUi(); updateVoiceModeUi(); if (!nextEnabled) { stopVoiceRecognition(); if ('speechSynthesis' in window) window.speechSynthesis.cancel(); return; } currentVoicePhaseIndex = currentVoicePhaseIndex !== null ? currentVoicePhaseIndex : getActivePhaseIndex(); if (isAudioEnabled && currentVoicePhaseIndex !== null) { speakCurrentActionableStep(true, currentVoicePhaseIndex); } else if (isVoiceModeEnabled) { startVoiceRecognition(); } });
-      exportProfileBtn.addEventListener('click', function() { const profile = { version: 1, exportedAt: new Date().toISOString(), airport: headerAirport.value, aircraft: headerAircraft.value, appTitle: appTitle.textContent, appDescription: appDescription.textContent, tabs: tabDefinitions, phases: phases }; const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_'); link.href = url; link.download = 'b23-checklist-profile-' + aircraft + '.json'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); });
+      exportProfileBtn.addEventListener('click', function() { const profile = { version: 1, exportedAt: new Date().toISOString(), airport: headerAirport.value, aircraft: headerAircraft.value, altitude: headerAirportAlt.value, radioFreq: headerRadioFreq.value, appTitle: appTitle.textContent, appDescription: appDescription.textContent, tabs: tabDefinitions, phases: phases }; const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_'); link.href = url; link.download = 'b23-checklist-profile-' + aircraft + '.json'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); });
       importProfileBtn.addEventListener('click', function() { importProfileInput.click(); });
       importProfileInput.addEventListener('change', function(event) { const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(loadEvent) { try { const parsed = JSON.parse(String(loadEvent.target.result || '')); importChecklistProfileObject(parsed); } catch (error) { alert(error && error.message ? error.message : 'Could not import checklist profile.'); } finally { importProfileInput.value = ''; } }; reader.readAsText(file); });
     }
