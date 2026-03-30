@@ -136,9 +136,20 @@
     .top-meta {
       margin-top: 12px;
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 8px;
       align-items: stretch;
+    }
+
+    /* Default: 3 per row (each spans 2 of 6 columns) */
+    .top-meta > * {
+      grid-column: span 2;
+    }
+
+    /* Airport + Aircraft share full first row (2 items) */
+    .top-meta > :nth-child(1),
+    .top-meta > :nth-child(2) {
+      grid-column: span 3;
     }
 
     /* Tablet */
@@ -579,26 +590,30 @@
     .tabs-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: nowrap;
       margin-bottom: 6px;
+      min-width: 0;
     }
 
     #collapseAllBtn {
       margin-left: auto;
+      min-width: 0;
+      max-width: 42%;
     }
 
     .tabs-actions .secondary-btn,
     .tabs-actions .mini-btn {
-      height: 36px;
-      padding: 0 12px;
-      font-size: 13px;
+      height: clamp(32px, 5vw, 36px);
+      padding: 0 clamp(8px, 1.8vw, 12px);
+      font-size: clamp(10px, 2.5vw, 13px);
       border-radius: 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       white-space: nowrap;
-      flex: 0 0 auto;
+      flex: 0 1 auto;
+      min-width: 0;
     }
 
     .tab {
