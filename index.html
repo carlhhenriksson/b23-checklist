@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#111827" />
+  <meta name="app-version" content="v2" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="B23 Checklist" />
@@ -79,126 +80,9 @@
       align-items: center;
     }
 
-    body.light-mode .top-meta-pill,
-    body.light-mode .header-input-pill,
-    body.light-mode .voice-status {
-      background: #f8fafc;
+    .top-toolbar .spacer {
+      margin-left: auto;
     }
-
-    body.light-mode .header-input-pill input,
-    body.light-mode .header-input-pill select,
-    body.light-mode .fuel-input-card input,
-    body.light-mode .edit-panel input,
-    body.light-mode .edit-panel textarea {
-      background: #ffffff;
-      color: var(--text);
-    }
-
-    body.light-mode .tab,
-    body.light-mode .header-disclaimer,
-    body.light-mode .info-box-section,
-    body.light-mode .step,
-    body.light-mode .summary-item {
-      background: #f8fafc;
-      color: var(--text);
-    }
-
-    /* Fix Quick Ref card in light mode */
-    body.light-mode .info-box-card {
-      background: #ffffff;
-    }
-
-    body.light-mode .info-box-section {
-      background: #ffffff;
-    }
-
-    body.light-mode .muted,
-    body.light-mode .step-detail,
-    body.light-mode .step-note,
-    body.light-mode .fuel-helper,
-    body.light-mode .summary-label,
-    body.light-mode .footer-note,
-    body.light-mode .install-help,
-    body.light-mode .phase-intro {
-      color: #334155;
-    }
-
-    body.light-mode .header-input-value {
-      color: var(--text);
-    }
-
-    body.light-mode .top-meta-pill,
-    body.light-mode .header-input-pill {
-      color: var(--text);
-    }
-
-    body.light-mode .tab:hover {
-      background: #e2e8f0;
-    }
-
-    body.light-mode .secondary-btn,
-    body.light-mode .mini-btn {
-      background: #f8fafc;
-      color: var(--text);
-    }
-
-    body.light-mode .phase-card.active-phase {
-      background: rgba(34, 197, 94, 0.08);
-    }
-
-    /* Fix emergency phase color in light mode */
-    body.light-mode .phase-card.emergency-phase {
-      background: rgba(239, 68, 68, 0.08);
-      border-color: #ef4444 !important;
-    }
-
-    body.light-mode .phase-card.emergency-phase.active-phase {
-      background: rgba(239, 68, 68, 0.12);
-      border-color: #ef4444 !important;
-    }
-
-    body.light-mode .phase-card.completed {
-      background: rgba(34, 197, 94, 0.12);
-    }
-
-    body.light-mode .step.completed {
-      border-color: #16a34a;
-      background: #dcfce7;
-      color: #14532d;
-    }
-
-    body.light-mode .step.completed .step-detail,
-    body.light-mode .step.completed .step-note,
-    body.light-mode .step.completed .fuel-helper,
-    body.light-mode .step.completed .step-number,
-    body.light-mode .step.completed .step-title {
-      color: #14532d;
-    }
-
-    body.light-mode .status.done {
-      background: #dcfce7;
-      color: #14532d;
-      border-color: #16a34a;
-    }
-
-    body.light-mode .edit-panel {
-      background: #eff6ff;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
-      margin-bottom: 16px;
-    }
-
-    h1 { margin: 0 0 8px; font-size: 28px; }
-    h2 { margin: 0; font-size: 20px; }
-    h3 { margin: 0; }
-    p { margin: 0; line-height: 1.5; }
-    .muted { color: var(--muted); }
 
     .top-meta,
     .top-actions,
@@ -217,6 +101,34 @@
     .phase-tools { margin-top: 10px; margin-bottom: 12px; }
     .step-tools { gap: 8px; }
     .install-row { margin-top: 14px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    h3 { margin: 0; }
+
+    p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .muted { color: var(--muted); }
 
     .top-meta-pill,
     .header-input-pill {
@@ -256,29 +168,23 @@
       font-weight: bold;
     }
 
-    .header-input-pill input:focus,
-    .header-input-pill select:focus,
-    .fuel-input-card input:focus,
-    .edit-panel input:focus,
-    .edit-panel textarea:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: 1px;
-    }
-
     .header-input-value { color: #ffffff; }
 
     .voice-status {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11px;
+      padding: 0 10px;
+      border-radius: 10px;
+      font-size: 10px;
       font-weight: 700;
       border: 1px solid var(--border);
       background: #243140;
       color: var(--muted);
-      min-height: 24px;
+      height: 32px;
+      min-height: 32px;
+      line-height: 1;
     }
 
     .voice-status::before {
@@ -314,6 +220,92 @@
       border-color: #ef4444;
     }
 
+    body.light-mode .top-meta-pill,
+    body.light-mode .header-input-pill {
+      background: #f8fafc;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    body.light-mode .voice-status {
+      border-color: var(--border);
+    }
+
+    body.light-mode .voice-status.off {
+      background: #f8fafc;
+      color: #64748b;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .voice-status.listening {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #22c55e;
+    }
+
+    body.light-mode .voice-status.speaking {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+    }
+
+    body.light-mode .voice-status.error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #ef4444;
+    }
+
+    body.light-mode .header-input-pill input,
+    body.light-mode .header-input-pill select,
+    body.light-mode .fuel-input-card input,
+    body.light-mode .edit-panel input,
+    body.light-mode .edit-panel textarea {
+      background: #ffffff;
+      color: var(--text);
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .header-input-value {
+      color: var(--text);
+    }
+
+    body.light-mode .muted,
+    body.light-mode .step-detail,
+    body.light-mode .step-note,
+    body.light-mode .fuel-helper,
+    body.light-mode .summary-label,
+    body.light-mode .footer-note,
+    body.light-mode .install-help,
+    body.light-mode .phase-intro {
+      color: #334155;
+    }
+
+    body.light-mode .card,
+    body.light-mode .summary-item,
+    body.light-mode .step,
+    body.light-mode .edit-panel,
+    body.light-mode .header-disclaimer,
+    body.light-mode .info-box-card,
+    body.light-mode .info-box-section,
+    body.light-mode .summary-item,
+    body.light-mode .step {
+      background: #ffffff;
+    }
+
+    body.light-mode .edit-panel {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #111827;
+    }
+
+    body.light-mode .info-box-list {
+      color: #475569;
+    }
+
+    body.light-mode .info-box-list strong {
+      color: #111827;
+    }
+
     button {
       border: none;
       border-radius: 8px;
@@ -338,6 +330,22 @@
       line-height: 1;
     }
 
+    /* OFF state red cross */
+    #audioModeBtn.off::after,
+    #voiceModeBtn.off::after {
+      content: '';
+      position: absolute;
+      width: 60%;
+      height: 60%;
+      top: 20%;
+      left: 20%;
+      pointer-events: none;
+      background: linear-gradient(45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%),
+                  linear-gradient(-45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%);
+      opacity: 0.9;
+      border-radius: 4px;
+    }
+
     #audioModeBtn {
       position: relative;
       font-size: 14px;
@@ -345,29 +353,46 @@
       filter: saturate(1.1);
     }
 
-    body.light-mode #audioModeBtn {
+    body.light-mode .secondary-btn,
+    body.light-mode .mini-btn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode #editModeBtn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode #editModeBtn.active,
+    body.light-mode #editModeBtn[title="Edit"]:focus,
+    body.light-mode #editHeaderBtn,
+    body.light-mode #editAirportsBtn {
+      color: #111827;
+    }
+
+    body.light-mode .secondary-btn:hover,
+    body.light-mode .mini-btn:hover,
+    body.light-mode .tab:hover {
+      background: #f1f5f9;
+    }
+
+    body.light-mode #audioModeBtn,
+    body.light-mode #voiceModeBtn {
       background: #ffffff;
       color: #111827;
       border-color: #cbd5e1;
       filter: saturate(1.4) contrast(1.05);
     }
 
-    /* Off state: add red cross */
-    #audioModeBtn.off::after,
-    #voiceModeBtn.off::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%),
-                  linear-gradient(-45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%);
-      opacity: 0.9;
-      border-radius: 8px;
-    }
-
-    /* On states: make icon vivid */
-    #audioModeBtn.active {
-      box-shadow: 0 0 0 1px rgba(96,165,250,0.5) inset;
+    body.light-mode #audioModeBtn.active,
+    body.light-mode #voiceModeBtn.active {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 1px rgba(96,165,250,0.35) inset;
       filter: saturate(1.5) contrast(1.1);
     }
 
@@ -423,6 +448,11 @@
       margin-bottom: 8px;
     }
 
+    body.light-mode .progress-bar {
+      background: #e5e7eb;
+      border: 1px solid #cbd5e1;
+    }
+
     .progress-fill {
       height: 100%;
       width: 0%;
@@ -473,10 +503,10 @@
 
     .tabs-actions .secondary-btn,
     .tabs-actions .mini-btn {
-      height: 24px;
-      padding: 0 6px;
-      font-size: 10px;
-      border-radius: 7px;
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12px;
+      border-radius: 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -496,6 +526,32 @@
     }
 
     .tab:hover { opacity: 1; background: #243140; }
+
+    body.light-mode .tab {
+      background: #f8fafc;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .tab.active {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+      outline: 2px solid #22c55e;
+    }
+
+    body.light-mode .tab[data-tab-id="emergency"] {
+      color: #dc2626;
+      border-color: rgba(239, 68, 68, 0.45);
+      background: #fef2f2;
+    }
+
+    body.light-mode .tab[data-tab-id="emergency"].active {
+      background: #ffffff;
+      color: #b91c1c;
+      border-color: #cbd5e1;
+      outline: 2px solid #ef4444;
+    }
 
     .tab.active {
       background: #1b2531;
@@ -595,6 +651,57 @@
       border: 4px solid #ef4444 !important;
       background: rgba(239, 68, 68, 0.12);
       box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.6), 0 0 12px rgba(239, 68, 68, 0.4);
+    }
+
+    body.light-mode .phase-card.active-phase {
+      background: rgba(34, 197, 94, 0.08);
+      border-color: #22c55e;
+    }
+
+    body.light-mode .phase-card.completed {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: #16a34a;
+    }
+
+    body.light-mode .phase-card.emergency-phase {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: #ef4444 !important;
+    }
+
+    body.light-mode .phase-card.emergency-phase.active-phase {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: #ef4444 !important;
+    }
+
+    body.light-mode .step.completed {
+      border-color: #16a34a;
+      background: #dcfce7;
+    }
+
+    body.light-mode .step.completed .step-title,
+    body.light-mode .step.completed .step-detail,
+    body.light-mode .step.completed .step-note,
+    body.light-mode .step.completed .fuel-helper,
+    body.light-mode .step.completed .step-number {
+      color: #14532d;
+    }
+
+    body.light-mode .status.done {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #16a34a;
+    }
+
+    body.light-mode .status.ready {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+    }
+
+    body.light-mode .status.locked {
+      background: #e5e7eb;
+      color: #475569;
+      border-color: #cbd5e1;
     }
 
     .phase-card.collapsed .phase-content { display: none; }
@@ -715,17 +822,21 @@
       <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
       <button class="mini-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
       <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
+      <div class="spacer"></div>
+      <button class="mini-btn" id="voiceModeBtn" type="button" title="Voice input">🎙️</button>
+      <div class="voice-status" id="voiceStatusText" style="margin:0; display:flex; align-items:center;">Voice: off</div>
     </div>
 
     <div class="card" style="position: relative;">
       <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
       
-      <h1 id="appTitle">Bristell B23 Check List</h1>
+      <h1><span id="appTitle">Bristell B23 - Checklists</span></h1>
       
       <div class="top-meta">
         <div class="header-input-pill">Airport
           <select id="headerAirport">
             <option value="ESGA" selected>ESGA</option>
+            <option value="ESGT">ESGT</option>
           </select>
         </div>
         <div class="header-input-pill">Aircraft
@@ -746,6 +857,7 @@
       </div>
       <div class="top-actions">
         <button class="mini-btn" id="editHeaderBtn" type="button">Edit header</button>
+        <button class="mini-btn" id="editAirportsBtn" type="button">Edit airports</button>
       </div>
       
       <div class="header-disclaimer" id="headerDisclaimer">⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.</div>
@@ -757,8 +869,6 @@
 
     <div class="tabs-actions" style="margin-bottom:6px;">
       <button class="mini-btn" id="audioModeBtn" type="button" title="Audio output">🔊</button>
-      <button class="mini-btn" id="voiceModeBtn" type="button" title="Voice input">🎙️</button>
-      <div class="voice-status" id="voiceStatusText" style="margin:0; display:flex; align-items:center;">Voice: off</div>
       <button class="secondary-btn" id="topResetBtn" type="button">Reset all</button>
       <button class="mini-btn" id="resetPhaseBtn" type="button" title="Reset active phase">↺ Phase</button>
       <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
@@ -864,6 +974,11 @@
   </div>
 
   <script>
+    let defaultAirports = [
+      { code: 'ESGA', altitude: '424 ft', radio: '123.550 Backamo' },
+      { code: 'ESGT', altitude: '137 ft', radio: '122.730 Trollhättan TWR' }
+    ];
+
     let defaultPhases = [
       { title: 'Pre-flight inspection', intro: 'Walk-around and exterior inspection before entering the final cockpit setup flow.', items: [
         { title: 'Cabin - Ignition', detail: 'OFF' },
@@ -1088,6 +1203,7 @@
     const fuelStorageKey = 'b23-ground-check-fuel-v1';
     const hobbsStorageKey = 'b23-ground-check-hobbs-v1';
     const headerContentKey = 'b23-ground-check-header-v1';
+    const airportsStorageKey = 'b23-airports-v1';
     const disclaimerContentKey = 'b23-ground-check-disclaimer-v1';
     const finishSummaryKey = 'b23-ground-check-last-summary-v1';
     const audioEnabledKey = 'b23-ground-check-audio-enabled-v1';
@@ -1100,7 +1216,10 @@
     const radioFreqKey = 'b23-radio-freq';
     const tabsStorageKey = 'b23-ground-check-tabs-v1';
     const themeStorageKey = 'b23-theme-v1';
+    const appVersionKey = 'b23-app-version';
+    const currentAppVersion = 'v2';
 
+    let airports = [];
     let phases = [];
     let tabDefinitions = [];
     let currentTab = 'normal';
@@ -1130,6 +1249,7 @@
     let phaseAnnouncementTimer = null;
     let lastAnnouncedPhaseIndex = null;
 
+    function cloneDefaultAirports() { return JSON.parse(JSON.stringify(defaultAirports)); }
     function cloneDefaultPhases() { return JSON.parse(JSON.stringify(defaultPhases)); }
     function escapeHtml(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }
     function specialStepType(phaseTitle, item, itemIndex) {
@@ -1146,6 +1266,39 @@
     function getPreflightSubsection(item) { if (!item.title.includes(' - ')) return null; return item.title.split(' - ')[0]; }
     function globalIndexFor(phaseIndex, itemIndex) { let count = 0; for (let p = 0; p < phaseIndex; p += 1) count += phases[p].items.length; return count + itemIndex; }
 
+    function loadAirports() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(airportsStorageKey) || 'null');
+        if (Array.isArray(saved) && saved.length) {
+          airports = saved.map(function(item) {
+            return {
+              code: String(item.code || '').trim().toUpperCase(),
+              altitude: String(item.altitude || '').trim(),
+              radio: String(item.radio || '').trim()
+            };
+          }).filter(function(item) { return item.code; });
+        }
+      } catch (_) {}
+      if (!Array.isArray(airports) || !airports.length) airports = cloneDefaultAirports();
+    }
+    function saveAirports() { localStorage.setItem(airportsStorageKey, JSON.stringify(airports)); }
+    function getAirportConfig(code) {
+      return airports.find(function(item) { return item.code === code; }) || null;
+    }
+    function renderAirportOptions() {
+      if (!headerAirport) return;
+      headerAirport.innerHTML = airports.map(function(item) {
+        return '<option value="' + escapeHtml(item.code) + '">' + escapeHtml(item.code) + '</option>';
+      }).join('');
+    }
+    function applyAirportDefaults(code) {
+      const config = getAirportConfig(code);
+      if (!config) return;
+      headerAirportAlt.textContent = config.altitude || '--';
+      headerRadioFreq.textContent = config.radio || '--';
+      localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
+      localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
+    }
     function loadCustomChecklist() { phases = cloneDefaultPhases(); }
     function saveCustomChecklist() { localStorage.setItem(customChecklistKey, JSON.stringify(phases)); }
     function buildDefaultTabs() { 
@@ -1542,6 +1695,31 @@
         closeEditor();
         return;
       }
+      if (editorState.mode === 'edit-airports') {
+        const nextAirports = (editorState.airports || []).map(function(item) {
+          return {
+            code: String(item.code || '').trim().toUpperCase(),
+            altitude: String(item.altitude || '').trim(),
+            radio: String(item.radio || '').trim()
+          };
+        }).filter(function(item) { return item.code; });
+        const codes = new Set();
+        for (let i = 0; i < nextAirports.length; i += 1) {
+          if (codes.has(nextAirports[i].code)) return alert('Airport codes must be unique.');
+          codes.add(nextAirports[i].code);
+        }
+        if (!nextAirports.length) return alert('At least one airport is required.');
+        airports = nextAirports;
+        saveAirports();
+        renderAirportOptions();
+        if (!getAirportConfig(headerAirport.value)) {
+          headerAirport.value = airports[0].code;
+          localStorage.setItem(airportKey, headerAirport.value);
+        }
+        applyAirportDefaults(headerAirport.value);
+        closeEditor();
+        return;
+      }
       const phase = phases[editorState.phaseIndex];
       if (!phase) return;
       const title = editorState.title.trim();
@@ -1568,6 +1746,19 @@
     function buildInlineEditorHtml() {
       if (!editorState) return '';
       const isHeaderEditor = editorState.mode === 'edit-header';
+      if (editorState.mode === 'edit-airports') {
+        const rows = (editorState.airports || []).map(function(item, index) {
+          return '<div class="edit-grid" data-airport-row="' + index + '" style="margin-top:8px;align-items:end;">' +
+            '<div><label class="small-label">ICAO</label><input data-airport-code="' + index + '" type="text" value="' + escapeHtml(item.code || '') + '" placeholder="ESGA"></div>' +
+            '<div><label class="small-label">Altitude</label><input data-airport-altitude="' + index + '" type="text" value="' + escapeHtml(item.altitude || '') + '" placeholder="424 ft"></div>' +
+            '<div><label class="small-label">Radio</label><input data-airport-radio="' + index + '" type="text" value="' + escapeHtml(item.radio || '') + '" placeholder="123.550 Backamo"></div>' +
+            '<div><button class="mini-btn danger-btn" data-remove-airport-row="' + index + '" type="button">Remove</button></div>' +
+          '</div>';
+        }).join('');
+        return '<div class="edit-panel" data-inline-editor="true">' +
+          '<div><label class="small-label">Airports</label>' + rows + '</div>' +
+          '<div class="step-tools" style="margin-top:12px;"><button class="mini-btn" id="addAirportRowBtn" type="button">Add airport</button><button class="mini-btn" id="saveEditorBtn" type="button">Save airports</button><button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button></div></div>';
+      }
       return '<div class="edit-panel" data-inline-editor="true">' +
         (isHeaderEditor
           ? '<div><label class="small-label">Header title</label><input id="editorTitle" type="text" value="' + escapeHtml(editorState.title) + '" autofocus></div>' +
@@ -1673,7 +1864,7 @@
     function renderHeaderEditor() {
       const existing = document.getElementById('headerInlineEditorWrap');
       if (existing) existing.remove();
-      if (!(editorState && editorState.mode === 'edit-header')) return;
+      if (!(editorState && (editorState.mode === 'edit-header' || editorState.mode === 'edit-airports'))) return;
       const headerCard = document.querySelector('.container > .card');
       if (!headerCard) return;
       const wrap = document.createElement('div');
@@ -1730,10 +1921,26 @@
       document.querySelectorAll('[data-delete-step]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.deleteStep.split(':').map(Number); deleteStep(parts[0], parts[1]); }); });
       const saveEditorBtn = document.getElementById('saveEditorBtn');
       if (saveEditorBtn) saveEditorBtn.addEventListener('click', function() {
+        if (!editorState) return;
+        if (editorState.mode === 'edit-airports') {
+          const rows = Array.from(document.querySelectorAll('[data-airport-row]'));
+          editorState.airports = rows.map(function(row, index) {
+            const codeEl = row.querySelector('[data-airport-code="' + index + '"]');
+            const altitudeEl = row.querySelector('[data-airport-altitude="' + index + '"]');
+            const radioEl = row.querySelector('[data-airport-radio="' + index + '"]');
+            return {
+              code: codeEl ? codeEl.value : '',
+              altitude: altitudeEl ? altitudeEl.value : '',
+              radio: radioEl ? radioEl.value : ''
+            };
+          });
+          saveEditorStep();
+          return;
+        }
         const titleEl = document.getElementById('editorTitle');
         const detailEl = document.getElementById('editorDetail');
         const noteEl = document.getElementById('editorNote');
-        if (!editorState || !titleEl) return;
+        if (!titleEl) return;
         editorState.title = titleEl.value;
         if (editorState.mode === 'edit-header') {
           const disclaimerEl = document.getElementById('editorDisclaimer');
@@ -1744,6 +1951,20 @@
           editorState.note = noteEl ? noteEl.value : '';
         }
         saveEditorStep();
+      });
+      document.querySelectorAll('[data-remove-airport-row]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (!editorState || editorState.mode !== 'edit-airports') return;
+          const index = Number(btn.dataset.removeAirportRow);
+          editorState.airports.splice(index, 1);
+          render();
+        });
+      });
+      const addAirportRowBtn = document.getElementById('addAirportRowBtn');
+      if (addAirportRowBtn) addAirportRowBtn.addEventListener('click', function() {
+        if (!editorState || editorState.mode !== 'edit-airports') return;
+        editorState.airports.push({ code: '', altitude: '', radio: '' });
+        render();
       });
       const cancelEditorBtn = document.getElementById('cancelEditorBtn');
       if (cancelEditorBtn) cancelEditorBtn.addEventListener('click', closeEditor);
@@ -1989,8 +2210,13 @@
         headerAirport.value = localStorage.getItem(airportKey) || 'ESGA';
         function applyAirportDefaults(code) {
           if (code === 'ESGA') {
-            headerAirportAlt.textContent = '424';
-            headerRadioFreq.textContent = '123.550';
+            headerAirportAlt.textContent = '424 ft';
+            headerRadioFreq.textContent = '123.550 Backamo';
+            localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
+            localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
+          } else if (code === 'ESGT') {
+            headerAirportAlt.textContent = '137 ft';
+            headerRadioFreq.textContent = '122.730 Trollhättan TWR';
             localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
             localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
           }
@@ -2009,8 +2235,8 @@
         });
       }
 
-      if (headerAirportAlt) headerAirportAlt.textContent = localStorage.getItem(airportAltKey) || '';
-      if (headerRadioFreq) headerRadioFreq.textContent = localStorage.getItem(radioFreqKey) || '';
+      if (headerAirportAlt) headerAirportAlt.textContent = localStorage.getItem(airportAltKey) || headerAirportAlt.textContent || '';
+      if (headerRadioFreq) headerRadioFreq.textContent = localStorage.getItem(radioFreqKey) || headerRadioFreq.textContent || '';
       if (headerStartTime) headerStartTime.textContent = localStorage.getItem(startTimeKey) || '--';
       if (headerEndTime) headerEndTime.textContent = localStorage.getItem(endTimeKey) || '--';
 
@@ -2026,11 +2252,20 @@
       if (editModeBtn) {
         editModeBtn.textContent = isEditMode ? '✓' : '✏️';
         editModeBtn.addEventListener('click', function() {
-          isEditMode = !isEditMode;
+          const nextEditMode = !isEditMode;
+          isEditMode = nextEditMode;
           localStorage.setItem(editModeKey, String(isEditMode));
-          if (editorState && editorState.mode !== 'edit-header') editorState = null;
+
+          if (!isEditMode) {
+            editorState = null;
+          } else if (editorState && editorState.mode !== 'edit-header' && editorState.mode !== 'edit-airports') {
+            editorState = null;
+          }
+
           editModeBtn.textContent = isEditMode ? '✓' : '✏️';
           if (editHeaderBtn) editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+          const editAirportsBtn = document.getElementById('editAirportsBtn');
+          if (editAirportsBtn) editAirportsBtn.style.display = isEditMode ? 'inline-flex' : 'none';
           render();
         });
       }
@@ -2044,6 +2279,18 @@
             disclaimer: (headerDisclaimer ? headerDisclaimer.textContent : ''),
             detail: '',
             note: ''
+          };
+          render();
+        });
+      }
+
+      const editAirportsBtn = document.getElementById('editAirportsBtn');
+      if (editAirportsBtn) {
+        editAirportsBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+        editAirportsBtn.addEventListener('click', function() {
+          editorState = {
+            mode: 'edit-airports',
+            airports: JSON.parse(JSON.stringify(airports))
           };
           render();
         });
@@ -2121,8 +2368,19 @@
       });
     }
     function initialize() {
+      try {
+        const savedVersion = localStorage.getItem(appVersionKey);
+        if (savedVersion !== currentAppVersion) {
+          const themeValue = localStorage.getItem(themeStorageKey);
+          localStorage.clear();
+          if (themeValue !== null) localStorage.setItem(themeStorageKey, themeValue);
+          localStorage.setItem(appVersionKey, currentAppVersion);
+        }
+      } catch (_) {}
+      loadAirports();
       loadCustomChecklist();
       loadHeaderContent();
+      renderAirportOptions();
       rebuildFlatSteps();
       loadTabDefinitions();
       loadCollapsedState();
@@ -2151,6 +2409,7 @@
       console.assert(Boolean(document.getElementById('importProfileBtn')), 'importProfileBtn should exist');
       console.assert(Boolean(document.getElementById('exportProfileBtn')), 'exportProfileBtn should exist');
       console.assert(Boolean(document.getElementById('themeToggleBtn')), 'themeToggleBtn should exist');
+      console.assert(Array.isArray(defaultAirports), 'defaultAirports should be an array');
       console.assert(Array.isArray(defaultPhases), 'defaultPhases should be an array');
       console.assert(typeof syncTabsWithPhases === 'function', 'syncTabsWithPhases should exist');
       console.assert(typeof render === 'function', 'render should exist');
