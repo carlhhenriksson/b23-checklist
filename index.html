@@ -74,10 +74,34 @@
 
     .top-toolbar {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       margin-bottom: 8px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap; /* force single row */
       align-items: center;
+      overflow-x: hidden; /* no scrolling */
+    }
+
+    .top-toolbar .mini-btn {
+      flex: 0 1 auto; /* allow shrink to fit */
+      min-width: 28px;
+      padding: 6px;
+      font-size: 11px;
+    }
+
+    .top-toolbar .spacer {
+      margin-left: auto;
+      flex: 0 0 auto;
+    }
+
+    .top-toolbar .mini-btn {
+      flex: 0 0 auto; /* prevent shrinking weirdly */
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+
+    .top-toolbar .spacer {
+      margin-left: auto;
+      flex: 0 0 auto;
     }
 
     .top-toolbar .spacer {
