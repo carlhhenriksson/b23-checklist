@@ -144,6 +144,7 @@
     /* Default: 3 per row (each spans 2 of 6 columns) */
     .top-meta > * {
       grid-column: span 2;
+      min-width: 0;
     }
 
     /* Airport + Aircraft share full first row (2 items) */
@@ -152,18 +153,38 @@
       grid-column: span 3;
     }
 
-    /* Tablet */
+    /* Keep the same 6-column logic on small screens so items do not stack */
     @media (max-width: 760px) {
       .top-meta {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
       }
     }
 
-    /* Mobile: keep 3 per row */
     @media (max-width: 480px) {
       .top-meta {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 6px;
+      }
+
+      .top-meta-pill,
+      .header-input-pill,
+      .header-input-value,
+      .header-input-pill input,
+      .header-input-pill select {
+        font-size: 10px;
+      }
+
+      .top-meta-pill,
+      .header-input-pill {
+        min-height: 34px;
+        padding: 5px 7px;
+      }
+
+      .header-input-pill input,
+      .header-input-pill select {
+        max-width: 58%;
+        padding: 3px 7px;
       }
     }
 
@@ -603,10 +624,13 @@
     }
 
     .tabs-actions .secondary-btn,
-    .tabs-actions .mini-btn {
-      height: clamp(32px, 5vw, 36px);
-      padding: 0 clamp(8px, 1.8vw, 12px);
-      font-size: clamp(10px, 2.5vw, 13px);
+    .tabs-actions .mini-btn,
+    .tabs-actions .voice-status {
+      height: 36px; /* fixed uniform height */
+      min-height: 36px;
+      max-height: 36px;
+      padding: 0 10px;
+      font-size: 12px;
       border-radius: 10px;
       display: inline-flex;
       align-items: center;
@@ -614,6 +638,12 @@
       white-space: nowrap;
       flex: 0 1 auto;
       min-width: 0;
+    }
+
+    /* ensure text doesn't stretch height */
+    #collapseAllBtn {
+      height: 36px;
+      line-height: 1;
     }
 
     .tab {
