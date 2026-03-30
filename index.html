@@ -73,24 +73,38 @@
     }
 
     .top-toolbar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-      flex-wrap: nowrap; /* force single row */
-      align-items: center;
-      overflow-x: hidden; /* no scrolling */
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: stretch;
     }
 
-    .top-toolbar .mini-btn {
-      flex: 0 1 auto; /* allow shrink to fit */
-      min-width: 28px;
-      padding: 6px;
-      font-size: 11px;
+    .top-toolbar .mini-btn,
+    .top-toolbar .voice-status {
+      min-width: 0;
+      width: 100%;
     }
 
     .top-toolbar .spacer {
-      margin-left: auto;
-      flex: 0 0 auto;
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .top-toolbar {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .top-toolbar .mini-btn {
+        min-height: 38px;
+        padding: 0 8px;
+        font-size: 12px;
+      }
+
+      #voiceModeBtn,
+      .top-toolbar .voice-status {
+        grid-column: span 2;
+      }
     }
 
     .top-toolbar .mini-btn {
@@ -119,8 +133,47 @@
       gap: 10px;
     }
 
-    .top-meta,
-    .top-actions { margin-top: 12px; }
+    .top-meta {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    /* Tablet */
+    @media (max-width: 760px) {
+      .top-meta {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    /* Mobile: keep 3 per row */
+    @media (max-width: 480px) {
+      .top-meta {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+      }
+    }
+
+    .top-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 760px) {
+      .top-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 420px) {
+      .top-meta {
+        grid-template-columns: 1fr;
+      }
+    }
     .btn-row { margin-top: 18px; }
     .phase-tools { margin-top: 10px; margin-bottom: 12px; }
     .step-tools { gap: 8px; }
@@ -156,16 +209,20 @@
 
     .top-meta-pill,
     .header-input-pill {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 8px;
+      border-radius: 12px;
       background: #243140;
       border: 1px solid var(--border);
       color: var(--text);
-      font-size: 13px;
-      font-weight: bold;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.1;
     }
 
     .header-input-pill input,
@@ -188,13 +245,25 @@
     .header-input-pill input,
     .header-input-pill select {
       width: auto;
+      max-width: 60%;
+      min-width: 0;
       border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 13px;
-      font-weight: bold;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
     }
 
-    .header-input-value { color: #ffffff; }
+    .header-input-value {
+      color: #ffffff;
+      font-weight: 700;
+      text-align: right;
+      margin-left: auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
+    }
 
     .voice-status {
       display: inline-flex;
@@ -519,23 +588,27 @@
 
     .tabs-actions {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
       align-items: center;
-      padding-bottom: 6px;
+      gap: 8px;
+      flex-wrap: nowrap;
+      margin-bottom: 6px;
     }
 
-    #collapseAllBtn { margin-left: auto; }
+    #collapseAllBtn {
+      margin-left: auto;
+    }
 
     .tabs-actions .secondary-btn,
     .tabs-actions .mini-btn {
-      height: 32px;
+      height: 36px;
       padding: 0 12px;
-      font-size: 12px;
+      font-size: 13px;
       border-radius: 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      white-space: nowrap;
+      flex: 0 0 auto;
     }
 
     .tab {
@@ -843,15 +916,6 @@
 </head>
 <body>
   <div class="container">
-    <div class="top-toolbar">
-      <button class="mini-btn" id="themeToggleBtn" type="button" title="Toggle light mode">☀️ Light</button>
-      <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
-      <button class="mini-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
-      <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
-      <div class="spacer"></div>
-      <button class="mini-btn" id="voiceModeBtn" type="button" title="Voice input">🎙️</button>
-      <div class="voice-status" id="voiceStatusText" style="margin:0; display:flex; align-items:center;">Voice: off</div>
-    </div>
 
     <div class="card" style="position: relative;">
       <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
@@ -893,7 +957,7 @@
       </div>
     </div>
 
-    <div class="tabs-actions" style="margin-bottom:6px;">
+    <div class="tabs-actions">
       <button class="mini-btn" id="audioModeBtn" type="button" title="Audio output">🔊</button>
       <button class="secondary-btn" id="topResetBtn" type="button">Reset all</button>
       <button class="mini-btn" id="resetPhaseBtn" type="button" title="Reset active phase">↺ Phase</button>
@@ -987,6 +1051,14 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="top-toolbar">
+      <button class="mini-btn" id="themeToggleBtn" type="button" title="Toggle light mode">☀️ Light</button>
+      <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️ Edit</button>
+      <button class="mini-btn" id="importProfileBtn" type="button" title="Import profile">⬆️ Import</button>
+      <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️ Export</button>
+      <button class="mini-btn" id="voiceModeBtn" type="button" title="Voice input">🎙️ Mic</button>
+      <div class="voice-status" id="voiceStatusText">Voice off</div>
     </div>
 
     <div class="card install-area">
