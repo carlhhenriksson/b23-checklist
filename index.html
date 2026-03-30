@@ -12,6 +12,19 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <style>
+    body.light-mode {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --accent: #2563eb;
+      --success: #16a34a;
+      --success-soft: #dcfce7;
+      --locked: #64748b;
+      --warning: #ca8a04;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
     :root {
       --bg: #111827;
       --card: #1f2937;
@@ -63,6 +76,113 @@
       gap: 8px;
       margin-bottom: 8px;
       flex-wrap: wrap;
+      align-items: center;
+    }
+
+    body.light-mode .top-meta-pill,
+    body.light-mode .header-input-pill,
+    body.light-mode .voice-status {
+      background: #f8fafc;
+    }
+
+    body.light-mode .header-input-pill input,
+    body.light-mode .header-input-pill select,
+    body.light-mode .fuel-input-card input,
+    body.light-mode .edit-panel input,
+    body.light-mode .edit-panel textarea {
+      background: #ffffff;
+      color: var(--text);
+    }
+
+    body.light-mode .tab,
+    body.light-mode .header-disclaimer,
+    body.light-mode .info-box-section,
+    body.light-mode .step,
+    body.light-mode .summary-item {
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    /* Fix Quick Ref card in light mode */
+    body.light-mode .info-box-card {
+      background: #ffffff;
+    }
+
+    body.light-mode .info-box-section {
+      background: #ffffff;
+    }
+
+    body.light-mode .muted,
+    body.light-mode .step-detail,
+    body.light-mode .step-note,
+    body.light-mode .fuel-helper,
+    body.light-mode .summary-label,
+    body.light-mode .footer-note,
+    body.light-mode .install-help,
+    body.light-mode .phase-intro {
+      color: #334155;
+    }
+
+    body.light-mode .header-input-value {
+      color: var(--text);
+    }
+
+    body.light-mode .top-meta-pill,
+    body.light-mode .header-input-pill {
+      color: var(--text);
+    }
+
+    body.light-mode .tab:hover {
+      background: #e2e8f0;
+    }
+
+    body.light-mode .secondary-btn,
+    body.light-mode .mini-btn {
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    body.light-mode .phase-card.active-phase {
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    /* Fix emergency phase color in light mode */
+    body.light-mode .phase-card.emergency-phase {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: #ef4444 !important;
+    }
+
+    body.light-mode .phase-card.emergency-phase.active-phase {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: #ef4444 !important;
+    }
+
+    body.light-mode .phase-card.completed {
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    body.light-mode .step.completed {
+      border-color: #16a34a;
+      background: #dcfce7;
+      color: #14532d;
+    }
+
+    body.light-mode .step.completed .step-detail,
+    body.light-mode .step.completed .step-note,
+    body.light-mode .step.completed .fuel-helper,
+    body.light-mode .step.completed .step-number,
+    body.light-mode .step.completed .step-title {
+      color: #14532d;
+    }
+
+    body.light-mode .status.done {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #16a34a;
+    }
+
+    body.light-mode .edit-panel {
+      background: #eff6ff;
     }
 
     .card {
@@ -208,6 +328,47 @@
       background: #2b3642;
       color: var(--text);
       border: 1px solid var(--border);
+    }
+
+    /* Audio button visibility + state */
+    #audioModeBtn,
+    #voiceModeBtn {
+      position: relative;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    #audioModeBtn {
+      position: relative;
+      font-size: 14px;
+      line-height: 1;
+      filter: saturate(1.1);
+    }
+
+    body.light-mode #audioModeBtn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+      filter: saturate(1.4) contrast(1.05);
+    }
+
+    /* Off state: add red cross */
+    #audioModeBtn.off::after,
+    #voiceModeBtn.off::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%),
+                  linear-gradient(-45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%);
+      opacity: 0.9;
+      border-radius: 8px;
+    }
+
+    /* On states: make icon vivid */
+    #audioModeBtn.active {
+      box-shadow: 0 0 0 1px rgba(96,165,250,0.5) inset;
+      filter: saturate(1.5) contrast(1.1);
     }
 
     .primary-btn {
@@ -460,7 +621,18 @@
       background: #18212d;
     }
 
-    .step.completed { border-color: var(--success); background: #11241d; }
+    .step.completed {
+      border-color: var(--success);
+      background: #11241d;
+    }
+
+    .step.completed .step-title,
+    .step.completed .step-detail,
+    .step.completed .step-note,
+    .step.completed .fuel-helper,
+    .step.completed .step-number {
+      color: #d1fae5;
+    }
     .step.next-focus { outline: 2px solid var(--accent); }
     .step-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
     .step-number { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
@@ -539,6 +711,7 @@
 <body>
   <div class="container">
     <div class="top-toolbar">
+      <button class="mini-btn" id="themeToggleBtn" type="button" title="Toggle light mode">☀️ Light</button>
       <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
       <button class="mini-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
       <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
@@ -583,7 +756,8 @@
     </div>
 
     <div class="tabs-actions" style="margin-bottom:6px;">
-      <button class="mini-btn" id="audioModeBtn" type="button" title="Audio and voice">🎙️🔊</button>
+      <button class="mini-btn" id="audioModeBtn" type="button" title="Audio output">🔊</button>
+      <button class="mini-btn" id="voiceModeBtn" type="button" title="Voice input">🎙️</button>
       <div class="voice-status" id="voiceStatusText" style="margin:0; display:flex; align-items:center;">Voice: off</div>
       <button class="secondary-btn" id="topResetBtn" type="button">Reset all</button>
       <button class="mini-btn" id="resetPhaseBtn" type="button" title="Reset active phase">↺ Phase</button>
@@ -698,7 +872,7 @@
         { title: 'Cabin - Loading', detail: 'Check weight and balance, and that loading is secured' },
         { title: 'Cabin - Master switch', detail: 'ON' },
         { title: 'Cabin - Avionics switch', detail: 'ON' },
-        { title: 'Cabin - Fuel quantity indication (ref)', detail: 'Check' },
+        { title: 'Cabin - Fuel quantity indication', detail: 'Check' },
         { title: 'Cabin - Flap', detail: 'Check operation, select down for inspection' },
         { title: 'Cabin - Lights', detail: 'Check for VFR night flight, then set dimmers OFF' },
         { title: 'Cabin - Pitot tube heating', detail: 'Check' },
@@ -774,7 +948,7 @@
         { title: 'EFIS', detail: 'ON' },
         { title: 'Altimeter', detail: 'SET QNH' }
       ]},
-      { title: 'Taxiing', intro: 'Taxi checks and techniques.', items: [
+      { title: 'Taxi', intro: 'Taxi checks and techniques.', items: [
         { title: 'Ground control', detail: 'Check nose gear steering' },
         { title: 'Brakes', detail: 'Check function' },
         { title: 'Flight instruments', detail: 'Check' },
@@ -893,6 +1067,7 @@
     const importProfileBtn = document.getElementById('importProfileBtn');
     const importProfileInput = document.getElementById('importProfileInput');
     const audioModeBtn = document.getElementById('audioModeBtn');
+    const voiceModeBtn = document.getElementById('voiceModeBtn');
     const appTitle = document.getElementById('appTitle');
     const appDescription = document.getElementById('appDescription');
     const editHeaderBtn = document.getElementById('editHeaderBtn');
@@ -904,6 +1079,7 @@
     const voiceStatusText = document.getElementById('voiceStatusText');
     const tabsContainer = document.getElementById('tabsContainer');
     const tabTools = document.getElementById('tabTools');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
 
     const storageKey = 'b23-ground-check-progress-v11';
     const customChecklistKey = 'b23-ground-check-custom-v5';
@@ -923,6 +1099,7 @@
     const airportAltKey = 'b23-airport-alt';
     const radioFreqKey = 'b23-radio-freq';
     const tabsStorageKey = 'b23-ground-check-tabs-v1';
+    const themeStorageKey = 'b23-theme-v1';
 
     let phases = [];
     let tabDefinitions = [];
@@ -932,7 +1109,7 @@
     let hobbsValue = '';
     let deferredPrompt = null;
     let isEditMode = localStorage.getItem(editModeKey) === 'true';
-    let isAudioEnabled = localStorage.getItem(audioEnabledKey) === 'true';
+    let isAudioEnabled = localStorage.getItem(audioEnabledKey) === null ? true : localStorage.getItem(audioEnabledKey) === 'true';
     let isVoiceModeEnabled = localStorage.getItem(voiceModeEnabledKey) === 'true';
     let editorState = null;
     let collapsedPhases = [];
@@ -1107,6 +1284,13 @@
       else installHelp.textContent = 'To install, host this app online, open it in your browser, then use Add to Home Screen or Install.';
     }
     function updateInstallButton() { installBtn.style.display = deferredPrompt && !isIos() && !isInStandaloneMode() ? 'inline-flex' : 'none'; updateInstallHelp(); }
+    function applyTheme(theme) {
+      const isLight = theme === 'light';
+      document.body.classList.toggle('light-mode', isLight);
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute('content', isLight ? '#f3f4f6' : '#111827');
+      if (themeToggleBtn) themeToggleBtn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+    }
     function countedStepsInPhase(phaseIndex) { let count = 0; phases[phaseIndex].items.forEach(function(item, itemIndex) { if (isCountedStep(phases[phaseIndex].title, item, itemIndex)) count += 1; }); return count; }
     function completedCountInPhase(phaseIndex) {
       let count = 0;
@@ -1177,11 +1361,16 @@
     }
     function updateAudioToggleUi() {
       if (!audioModeBtn) return;
-      audioModeBtn.classList.toggle('active', isAudioEnabled || isVoiceModeEnabled);
-      if (isVoiceModeEnabled && isAudioEnabled) { audioModeBtn.textContent = '🎙️🔊'; audioModeBtn.title = 'Voice and audio on'; }
-      else if (isVoiceModeEnabled) { audioModeBtn.textContent = '🎙️'; audioModeBtn.title = 'Voice on'; }
-      else if (isAudioEnabled) { audioModeBtn.textContent = '🔊'; audioModeBtn.title = 'Audio on'; }
-      else { audioModeBtn.textContent = '🔈'; audioModeBtn.title = 'Audio and voice off'; }
+      audioModeBtn.classList.toggle('active', isAudioEnabled);
+      audioModeBtn.classList.toggle('off', !isAudioEnabled);
+      audioModeBtn.textContent = isAudioEnabled ? '🔊' : '🔈';
+      audioModeBtn.title = isAudioEnabled ? 'Audio on' : 'Audio off';
+
+      if (!voiceModeBtn) return;
+      voiceModeBtn.classList.toggle('active', isVoiceModeEnabled);
+      voiceModeBtn.classList.toggle('off', !isVoiceModeEnabled);
+      voiceModeBtn.textContent = '🎙️';
+      voiceModeBtn.title = isVoiceModeEnabled ? 'Voice on' : 'Voice off';
     }
     function updateVoiceModeUi() {
       if (!voiceStatusText) return;
@@ -1239,8 +1428,21 @@
       utterance.rate = 1.1;
       utterance.pitch = 0.8;
       utterance.volume = 1;
-      utterance.onend = function() { isSpeaking = false; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 100); } };
-      utterance.onerror = function() { isSpeaking = false; lastRecognitionError = 'speech error'; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 100); } };
+      utterance.onend = function() {
+        isSpeaking = false;
+        updateVoiceModeUi();
+        if (isVoiceModeEnabled) {
+          recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 100);
+        }
+      };
+      utterance.onerror = function() {
+        isSpeaking = false;
+        lastRecognitionError = 'speech error';
+        updateVoiceModeUi();
+        if (isVoiceModeEnabled) {
+          recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 100);
+        }
+      };
       window.speechSynthesis.speak(utterance);
     }
     function speakStepWithPhase(index, forcePhaseHeader) {
@@ -1262,7 +1464,7 @@
       speakStepWithPhase(index, forcePhaseHeader);
     }
     function schedulePhaseActivationAnnouncement(phaseIndex) {
-      if (!isVoiceModeEnabled || !isAudioEnabled) return;
+      if (!isAudioEnabled) return;
       const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex);
       if (actionableIndex === null) return;
       clearPhaseAnnouncementTimer();
@@ -1466,7 +1668,7 @@
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 0);
       }
-      if (isVoiceModeEnabled) speakCurrentActionableStep(false, currentVoicePhaseIndex);
+      if (isAudioEnabled) speakCurrentActionableStep(false, currentVoicePhaseIndex);
     }
     function renderHeaderEditor() {
       const existing = document.getElementById('headerInlineEditorWrap');
@@ -1723,7 +1925,6 @@
         activePhaseIndex = null;
         pendingFocusStepIndex = null;
 
-        // 🔧 Auto-expand first phase in Emergency tab
         if (nextTab === 'emergency') {
           const idx = phases.findIndex(function(p) { return p.title === 'Emergency'; });
           collapsedPhases = phases.map(function() { return true; });
@@ -1736,9 +1937,16 @@
 
         render();
       });
+
       initVoiceRecognition();
+
       if (topResetBtn) topResetBtn.addEventListener('click', resetChecklist);
-      if (collapseAllBtn) collapseAllBtn.addEventListener('click', function() { collapsedPhases = phases.map(function() { return true; }); activePhaseIndex = null; saveCollapsedState(); render(); });
+      if (collapseAllBtn) collapseAllBtn.addEventListener('click', function() {
+        collapsedPhases = phases.map(function() { return true; });
+        activePhaseIndex = null;
+        saveCollapsedState();
+        render();
+      });
 
       const resetPhaseBtn = document.getElementById('resetPhaseBtn');
       if (resetPhaseBtn) resetPhaseBtn.addEventListener('click', function() {
@@ -1752,10 +1960,31 @@
         saveProgress();
         render();
       });
-      if (finishBtn) finishBtn.addEventListener('click', function() { let completedRequiredPhases = 0; let totalRequiredPhases = 0; phases.forEach(function(phase, phaseIndex) { if (!isRequiredPhase(phase.title)) return; totalRequiredPhases += 1; if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1; }); if (completedRequiredPhases === totalRequiredPhases) showFinishSummary(); });
-      if (keepReviewBtn) keepReviewBtn.addEventListener('click', function() { finishSummaryCard.classList.remove('visible'); });
+
+      if (finishBtn) finishBtn.addEventListener('click', function() {
+        let completedRequiredPhases = 0;
+        let totalRequiredPhases = 0;
+        phases.forEach(function(phase, phaseIndex) {
+          if (!isRequiredPhase(phase.title)) return;
+          totalRequiredPhases += 1;
+          if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1;
+        });
+        if (completedRequiredPhases === totalRequiredPhases) showFinishSummary();
+      });
+
+      if (keepReviewBtn) keepReviewBtn.addEventListener('click', function() {
+        finishSummaryCard.classList.remove('visible');
+      });
       if (summaryResetBtn) summaryResetBtn.addEventListener('click', resetChecklist);
-      if (installBtn) installBtn.addEventListener('click', async function() { if (!deferredPrompt) return; deferredPrompt.prompt(); try { await deferredPrompt.userChoice; } catch (_) {} deferredPrompt = null; updateInstallButton(); });
+
+      if (installBtn) installBtn.addEventListener('click', async function() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        try { await deferredPrompt.userChoice; } catch (_) {}
+        deferredPrompt = null;
+        updateInstallButton();
+      });
+
       if (headerAirport) {
         headerAirport.value = localStorage.getItem(airportKey) || 'ESGA';
         function applyAirportDefaults(code) {
@@ -1767,20 +1996,33 @@
           }
         }
         applyAirportDefaults(headerAirport.value);
-        headerAirport.addEventListener('change', function() { localStorage.setItem(airportKey, headerAirport.value); applyAirportDefaults(headerAirport.value); });
+        headerAirport.addEventListener('change', function() {
+          localStorage.setItem(airportKey, headerAirport.value);
+          applyAirportDefaults(headerAirport.value);
+        });
       }
+
       if (headerAircraft) {
         headerAircraft.value = localStorage.getItem(aircraftKey) || 'SE-MOY';
-        headerAircraft.addEventListener('change', function() { localStorage.setItem(aircraftKey, headerAircraft.value); });
+        headerAircraft.addEventListener('change', function() {
+          localStorage.setItem(aircraftKey, headerAircraft.value);
+        });
       }
-      if (headerAirportAlt) {
-        headerAirportAlt.textContent = localStorage.getItem(airportAltKey) || '';
-      }
-      if (headerRadioFreq) {
-        headerRadioFreq.textContent = localStorage.getItem(radioFreqKey) || '';
-      }
+
+      if (headerAirportAlt) headerAirportAlt.textContent = localStorage.getItem(airportAltKey) || '';
+      if (headerRadioFreq) headerRadioFreq.textContent = localStorage.getItem(radioFreqKey) || '';
       if (headerStartTime) headerStartTime.textContent = localStorage.getItem(startTimeKey) || '--';
       if (headerEndTime) headerEndTime.textContent = localStorage.getItem(endTimeKey) || '--';
+
+      if (themeToggleBtn) {
+        applyTheme(localStorage.getItem(themeStorageKey) || 'dark');
+        themeToggleBtn.addEventListener('click', function() {
+          const nextTheme = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+          localStorage.setItem(themeStorageKey, nextTheme);
+          applyTheme(nextTheme);
+        });
+      }
+
       if (editModeBtn) {
         editModeBtn.textContent = isEditMode ? '✓' : '✏️';
         editModeBtn.addEventListener('click', function() {
@@ -1792,33 +2034,58 @@
           render();
         });
       }
+
       if (editHeaderBtn) {
         editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
-        editHeaderBtn.addEventListener('click', function() { editorState = { mode: 'edit-header', title: appTitle.textContent, disclaimer: (headerDisclaimer ? headerDisclaimer.textContent : ''), detail: '', note: '' }; render(); });
-      }
-      if (audioModeBtn) {
-        audioModeBtn.addEventListener('click', function() {
-          const nextEnabled = !(isAudioEnabled || isVoiceModeEnabled);
-          isAudioEnabled = nextEnabled;
-          isVoiceModeEnabled = nextEnabled && recognitionAvailable;
-          localStorage.setItem(audioEnabledKey, String(isAudioEnabled));
-          localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled));
-          lastRecognitionError = '';
-          updateAudioToggleUi();
-          updateVoiceModeUi();
-          if (!nextEnabled) {
-            stopVoiceRecognition();
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            return;
-          }
-          currentVoicePhaseIndex = currentVoicePhaseIndex !== null ? currentVoicePhaseIndex : getActivePhaseIndex();
-          if (isAudioEnabled && currentVoicePhaseIndex !== null) speakCurrentActionableStep(true, currentVoicePhaseIndex);
-          else if (isVoiceModeEnabled) startVoiceRecognition();
+        editHeaderBtn.addEventListener('click', function() {
+          editorState = {
+            mode: 'edit-header',
+            title: appTitle.textContent,
+            disclaimer: (headerDisclaimer ? headerDisclaimer.textContent : ''),
+            detail: '',
+            note: ''
+          };
+          render();
         });
       }
+
+      if (audioModeBtn) {
+        audioModeBtn.addEventListener('click', function() {
+          isAudioEnabled = !isAudioEnabled;
+          localStorage.setItem(audioEnabledKey, String(isAudioEnabled));
+          if (!isAudioEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+          updateAudioToggleUi();
+        });
+      }
+
+      if (voiceModeBtn) {
+        voiceModeBtn.addEventListener('click', function() {
+          isVoiceModeEnabled = !isVoiceModeEnabled;
+          localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled));
+          if (!isVoiceModeEnabled) {
+            stopVoiceRecognition();
+          } else {
+            startVoiceRecognition();
+          }
+          updateAudioToggleUi();
+          updateVoiceModeUi();
+        });
+      }
+
       if (exportProfileBtn) {
         exportProfileBtn.addEventListener('click', function() {
-          const profile = { version: 1, exportedAt: new Date().toISOString(), airport: headerAirport.value, aircraft: headerAircraft.value, altitude: headerAirportAlt.textContent, radioFreq: headerRadioFreq.textContent, appTitle: appTitle.textContent, appDescription: appDescription ? appDescription.textContent : '', tabs: tabDefinitions, phases: phases };
+          const profile = {
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            airport: headerAirport.value,
+            aircraft: headerAircraft.value,
+            altitude: headerAirportAlt.textContent,
+            radioFreq: headerRadioFreq.textContent,
+            appTitle: appTitle.textContent,
+            appDescription: appDescription ? appDescription.textContent : '',
+            tabs: tabDefinitions,
+            phases: phases
+          };
           const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
@@ -1831,15 +2098,24 @@
           URL.revokeObjectURL(url);
         });
       }
-      if (importProfileBtn) importProfileBtn.addEventListener('click', function() { importProfileInput.click(); });
+
+      if (importProfileBtn) importProfileBtn.addEventListener('click', function() {
+        importProfileInput.click();
+      });
+
       if (importProfileInput) importProfileInput.addEventListener('change', function(event) {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(loadEvent) {
-          try { const parsed = JSON.parse(String(loadEvent.target.result || '')); importChecklistProfileObject(parsed); }
-          catch (error) { alert(error && error.message ? error.message : 'Could not import checklist profile.'); }
-          finally { importProfileInput.value = ''; }
+          try {
+            const parsed = JSON.parse(String(loadEvent.target.result || ''));
+            importChecklistProfileObject(parsed);
+          } catch (error) {
+            alert(error && error.message ? error.message : 'Could not import checklist profile.');
+          } finally {
+            importProfileInput.value = '';
+          }
         };
         reader.readAsText(file);
       });
@@ -1860,7 +2136,13 @@
       attachStaticEvents();
       setInterval(updateTopMeta, 30000);
       render();
-      if (isVoiceModeEnabled) { currentVoicePhaseIndex = getActivePhaseIndex(); startVoiceRecognition(); }
+      if (isVoiceModeEnabled) {
+        currentVoicePhaseIndex = getActivePhaseIndex();
+        startVoiceRecognition();
+      }
+      if (isAudioEnabled && currentVoicePhaseIndex !== null) {
+        speakCurrentActionableStep(true, currentVoicePhaseIndex);
+      }
     }
     window.addEventListener('beforeinstallprompt', function(event) { event.preventDefault(); deferredPrompt = event; updateInstallButton(); });
     window.addEventListener('appinstalled', function() { deferredPrompt = null; updateInstallButton(); });
@@ -1868,6 +2150,7 @@
       console.assert(Boolean(document.getElementById('editModeBtn')), 'editModeBtn should exist');
       console.assert(Boolean(document.getElementById('importProfileBtn')), 'importProfileBtn should exist');
       console.assert(Boolean(document.getElementById('exportProfileBtn')), 'exportProfileBtn should exist');
+      console.assert(Boolean(document.getElementById('themeToggleBtn')), 'themeToggleBtn should exist');
       console.assert(Array.isArray(defaultPhases), 'defaultPhases should be an array');
       console.assert(typeof syncTabsWithPhases === 'function', 'syncTabsWithPhases should exist');
       console.assert(typeof render === 'function', 'render should exist');
