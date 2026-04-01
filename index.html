@@ -1114,6 +1114,8 @@
 
     let defaultPhases = [
       { title: 'Pre-flight inspection', intro: 'Walk-around and exterior inspection before entering the final cockpit setup flow.', items: [
+        { title: 'Left-hand leading edge - Pitot cover', detail: 'Remove' },
+        { title: 'Left-hand leading edge - Pitot tube', detail: 'Check condition' },
         { title: 'Cabin - Ignition', detail: 'OFF' },
         { title: 'Cabin - Avionics/Instruments', detail: 'Check condition' },
         { title: 'Cabin - Cockpit', detail: 'Check for loose objects and general condition' },
@@ -1154,8 +1156,6 @@
         { title: 'Left-hand leading edge - Stall strips', detail: 'Check condition' },
         { title: 'Left-hand leading edge - Filler cap', detail: 'Check closing' },
         { title: 'Left-hand leading edge - Fuel vent openings', detail: 'Check' },
-        { title: 'Left-hand leading edge - Pitot tube', detail: 'Check condition' },
-        { title: 'Left-hand leading edge - Pitot cover', detail: 'Remove' },
         { title: 'Left-hand trailing edge - Wing tip', detail: 'Check surface condition, attachment and light attachment' },
         { title: 'Left-hand trailing edge - Aileron', detail: 'Check surface condition, attachment, clearance, movement and trim tab condition' },
         { title: 'Left-hand trailing edge - Flap', detail: 'Check surface condition, attachment, clearance and hinge bolts', note: 'The left flap has a one degree offset versus the right flap. When retracted, the left flap sits about 7 mm below the stub wing contour, while the right flap is streamlined.' },
@@ -1346,6 +1346,7 @@
     const collapsedStorageKey = 'b23-ground-check-collapsed-v8';
     const fuelStorageKey = 'b23-ground-check-fuel-v1';
     const hobbsStorageKey = 'b23-ground-check-hobbs-v1';
+    const oilAddedStorageKey = 'b23-ground-check-oil-added-v1';
     const headerContentKey = 'b23-ground-check-header-v1';
     const airportsStorageKey = 'b23-airports-v1';
     const disclaimerContentKey = 'b23-ground-check-disclaimer-v1';
@@ -1370,6 +1371,7 @@
     let flatSteps = [];
     let fuelState = { left: '', right: '' };
     let hobbsValue = '';
+    let oilAddedValue = '0';
     let deferredPrompt = null;
     let isEditMode = localStorage.getItem(editModeKey) === 'true';
     let isAudioEnabled = localStorage.getItem(audioEnabledKey) === null ? true : localStorage.getItem(audioEnabledKey) === 'true';
@@ -1399,9 +1401,15 @@
     function specialStepType(phaseTitle, item, itemIndex) {
       if (phaseTitle === 'Before Engine Start' && item.title === 'Pre-flight inspection') return 'derived_preflight';
       if (item.title === 'Taxi technique') return 'tip';
-      if (phaseTitle === 'Pre-flight inspection' && itemIndex === 22) return 'fuel_input';
+      if (phaseTitle === 'Pre-flight inspection' && item.title === 'Engine - Oil quantity') return 'oil_input';
+      if (phaseTitle === 'Pre-flight inspection' && item.title === 'Right-hand leading edge - Actual fuel quantity') return 'fuel_input';
       if (item.title === 'Hobs') return 'hobbs_input';
       return null;
+    }
+    function hasFuelInputValues() { return String(fuelState.left || '').trim() !== '' && String(fuelState.right || '').trim() !== ''; }
+    function canConfirmSpecialStep(type) {
+      if (type === 'fuel_input') return hasFuelInputValues();
+      return true;
     }
     function isProtectedStep(phaseTitle, item, itemIndex) { return specialStepType(phaseTitle, item, itemIndex) !== null; }
     function isRequiredPhase(phaseTitle) { return !OPTIONAL_PHASES.has(phaseTitle); }
@@ -1553,6 +1561,11 @@
     function saveFuelState() { localStorage.setItem(fuelStorageKey, JSON.stringify(fuelState)); }
     function loadHobbsValue() { hobbsValue = localStorage.getItem(hobbsStorageKey) || ''; }
     function saveHobbsValue() { localStorage.setItem(hobbsStorageKey, hobbsValue); }
+    function loadOilAddedValue() {
+      const saved = localStorage.getItem(oilAddedStorageKey);
+      oilAddedValue = (saved === null || saved === undefined || saved === '') ? '0' : String(saved);
+    }
+    function saveOilAddedValue() { localStorage.setItem(oilAddedStorageKey, oilAddedValue); }
     function loadLastSummary() { try { lastSummary = JSON.parse(localStorage.getItem(finishSummaryKey) || 'null'); } catch (_) { lastSummary = null; } }
     function saveLastSummary() { if (lastSummary) localStorage.setItem(finishSummaryKey, JSON.stringify(lastSummary)); }
     function clearLastSummary() { lastSummary = null; localStorage.removeItem(finishSummaryKey); }
@@ -1602,9 +1615,12 @@
     function isUnlocked(index) {
       const step = flatSteps[index];
       if (!step) return false;
-      if (step.itemIndex === 0) return true;
+      const phase = phases[step.phaseIndex];
+      const item = phase && phase.items[step.itemIndex];
+      const type = phase && item ? specialStepType(phase.title, item, step.itemIndex) : null;
+      if (step.itemIndex === 0) return canConfirmSpecialStep(type);
       const previousIndex = globalIndexFor(step.phaseIndex, step.itemIndex - 1);
-      return Boolean(flatSteps[previousIndex] && flatSteps[previousIndex].confirmed);
+      return Boolean(flatSteps[previousIndex] && flatSteps[previousIndex].confirmed) && canConfirmSpecialStep(type);
     }
     function isPhaseFullyCompleted(phaseIndex) {
       const phase = phases[phaseIndex];
@@ -1800,6 +1816,8 @@
     }
     function buildCompletionSummary() {
       const parts = getCurrentZuluParts();
+      const oilAddedNumeric = parseFloat(String(oilAddedValue || '').replace(',', '.'));
+      const includeOilAdded = !Number.isNaN(oilAddedNumeric) && oilAddedNumeric !== 0;
       return {
         aircraft: headerAircraft.value,
         airport: headerAirport.value,
@@ -1811,12 +1829,15 @@
         hobbs: hobbsValue || '--',
         fuelLeft: fuelState.left || '--',
         fuelRight: fuelState.right || '--',
+        oilAdded: includeOilAdded ? oilAddedValue : '',
         completedAt: parts.timeText
       };
     }
     function renderSummaryCard() {
       if (!lastSummary) { finishSummaryCard.classList.remove('visible'); finishSummaryGrid.innerHTML = ''; return; }
-      const fields = [['Aircraft', lastSummary.aircraft], ['Airport', lastSummary.airport], ['Altitude (ft)', lastSummary.altitude], ['Radio (MHz)', lastSummary.radioFreq], ['Date (UTC)', lastSummary.date], ['Start time (Z)', lastSummary.startTime], ['End time (Z)', lastSummary.endTime], ['Hobs', lastSummary.hobbs], ['Fuel left', lastSummary.fuelLeft], ['Fuel right', lastSummary.fuelRight], ['Completed at (Z)', lastSummary.completedAt]];
+      const fields = [['Aircraft', lastSummary.aircraft], ['Airport', lastSummary.airport], ['Altitude (ft)', lastSummary.altitude], ['Radio (MHz)', lastSummary.radioFreq], ['Date (UTC)', lastSummary.date], ['Start time (Z)', lastSummary.startTime], ['End time (Z)', lastSummary.endTime], ['Hobs', lastSummary.hobbs], ['Fuel left', lastSummary.fuelLeft], ['Fuel right', lastSummary.fuelRight]];
+      if (lastSummary.oilAdded) fields.push(['Added oil', lastSummary.oilAdded]);
+      fields.push(['Completed at (Z)', lastSummary.completedAt]);
       finishSummaryGrid.innerHTML = fields.map(function(entry) { return '<div class="summary-item"><span class="summary-label">' + escapeHtml(entry[0]) + '</span><div class="summary-value">' + escapeHtml(entry[1] || '--') + '</div></div>'; }).join('');
       finishSummaryCard.classList.add('visible');
     }
@@ -2026,15 +2047,17 @@
       const isDerived = type === 'derived_preflight';
       const isTip = type === 'tip';
       const isFuelInput = type === 'fuel_input';
+      const isOilInput = type === 'oil_input';
       const isHobbsInput = type === 'hobbs_input';
       const stateClass = step && step.confirmed ? 'done' : (unlocked ? 'ready' : 'locked');
-      const stateLabel = isDerived && step && step.confirmed ? 'Auto completed' : (step && step.confirmed ? 'Confirmed' : (unlocked ? 'Ready' : 'Locked'));
+      const stateLabel = isDerived && step && step.confirmed ? 'Auto completed' : (step && step.confirmed ? 'Confirmed' : (isFuelInput && !hasFuelInputValues() ? 'Enter values' : (unlocked ? 'Ready' : 'Locked')));
       const focusClass = pendingFocusStepIndex === stepIndex ? 'next-focus' : '';
       const isEditingThisStep = editorState && editorState.mode === 'edit' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex;
       const isProtected = isProtectedStep(phase.title, item, itemIndex);
       if (isEditingThisStep) return buildInlineEditorHtml();
       return '<div class="step ' + (step && step.confirmed ? 'completed' : '') + ' ' + focusClass + '" data-step-card="' + stepIndex + '" data-step-index="' + stepIndex + '"><div class="step-header"><div>' + (isTip ? '' : '<div class="step-number">Step ' + (itemIndex + 1) + '</div>') + '<h3 class="step-title">' + (isTip ? '💡 TIP — Taxi technique' : escapeHtml(getDisplayStepTitle(phase, item))) + '</h3><p class="step-detail">' + escapeHtml(item.detail) + '</p></div>' + (isTip ? '' : '<span class="status ' + stateClass + '">' + escapeHtml(stateLabel) + '</span>') + '</div>' +
-        (isFuelInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="fuel-left-' + stepIndex + '">Left tank</label><input id="fuel-left-' + stepIndex + '" type="number" inputmode="decimal" placeholder="Enter value" value="' + escapeHtml(fuelState.left) + '" data-fuel-side="left"></div><div class="fuel-input-card"><label for="fuel-right-' + stepIndex + '">Right tank</label><input id="fuel-right-' + stepIndex + '" type="number" inputmode="decimal" placeholder="Enter value" value="' + escapeHtml(fuelState.right) + '" data-fuel-side="right"></div></div><div class="fuel-helper">Enter measured fuel quantity for both tanks. These values remain visible in the collapsed phase header.</div>' : '') +
+        (isOilInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="oil-added-' + stepIndex + '">Added oil</label><input id="oil-added-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="0" value="' + escapeHtml(oilAddedValue) + '" data-oil-added-input="true"></div></div><div class="fuel-helper">Optional. Leave at 0 if no oil was added. Non-zero values will appear in the final report.</div>' : '') +
+        (isFuelInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="fuel-left-' + stepIndex + '">Left tank</label><input id="fuel-left-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="Enter value" value="' + escapeHtml(fuelState.left) + '" data-fuel-side="left"></div><div class="fuel-input-card"><label for="fuel-right-' + stepIndex + '">Right tank</label><input id="fuel-right-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="Enter value" value="' + escapeHtml(fuelState.right) + '" data-fuel-side="right"></div></div><div class="fuel-helper">Enter measured fuel quantity for both tanks before confirming this step. These values remain visible in the collapsed phase header.</div>' : '') +
         (isHobbsInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="hobbs-' + stepIndex + '">Hobs</label><input id="hobbs-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="Enter value" value="' + escapeHtml(hobbsValue) + '" data-hobbs-input="true"></div></div><div class="fuel-helper">Enter the Hobs value. This value remains visible in the collapsed phase header.</div>' : '') +
         (step && step.note ? '<div class="step-note">' + escapeHtml(step.note) + '</div>' : '') +
         (isDerived && (!step || !step.confirmed) ? '<div class="fuel-helper">This step is completed automatically when the Pre-flight inspection phase is fully completed.</div>' : '') +
@@ -2113,6 +2136,7 @@
       const cancelEditorBtn = document.getElementById('cancelEditorBtn');
       if (cancelEditorBtn) cancelEditorBtn.addEventListener('click', closeEditor);
       document.querySelectorAll('input[data-fuel-side]').forEach(function(input) { input.addEventListener('input', function() { fuelState[input.dataset.fuelSide] = input.value; saveFuelState(); updateTopMeta(); }); });
+      document.querySelectorAll('input[data-oil-added-input="true"]').forEach(function(input) { input.addEventListener('input', function() { oilAddedValue = input.value === '' ? '' : input.value; saveOilAddedValue(); }); });
       document.querySelectorAll('input[data-hobbs-input="true"]').forEach(function(input) { input.addEventListener('input', function() { hobbsValue = input.value; saveHobbsValue(); updateTopMeta(); }); });
     }
     function render() {
@@ -2235,6 +2259,7 @@
       flatSteps.forEach(function(step) { step.confirmed = false; });
       fuelState = { left: '', right: '' };
       hobbsValue = '';
+      oilAddedValue = '0';
       pendingFocusStepIndex = null;
       focusPhaseIndex = null;
       emergencyFlowReturnStepIndex = null;
@@ -2252,6 +2277,7 @@
       saveCollapsedState();
       saveFuelState();
       saveHobbsValue();
+      saveOilAddedValue();
       updateTopMeta();
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2531,6 +2557,7 @@
       loadProgress();
       loadFuelState();
       loadHobbsValue();
+      loadOilAddedValue();
       loadLastSummary();
       syncDerivedSteps();
       updateTopMeta();
