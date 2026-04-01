@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#111827" />
+  <meta name="app-version" content="v2" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="B23 Checklist" />
@@ -12,6 +13,19 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <style>
+    body.light-mode {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --accent: #2563eb;
+      --success: #16a34a;
+      --success-soft: #dcfce7;
+      --locked: #64748b;
+      --warning: #ca8a04;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
     :root {
       --bg: #111827;
       --card: #1f2937;
@@ -28,9 +42,21 @@
     }
 
     * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
+    html, body { touch-action: pan-x pan-y; }
+
+    button,
+    .tab,
+    .phase-toggle,
+    .step,
+    input,
+    select,
+    textarea,
+    label {
+      touch-action: manipulation;
+    }
 
     body {
+      min-height: 100%;
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
@@ -45,6 +71,135 @@
       margin: 0 auto;
       padding: max(24px, env(safe-area-inset-top)) 16px max(48px, env(safe-area-inset-bottom));
     }
+
+    .top-toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: stretch;
+    }
+
+    .top-toolbar .mini-btn,
+    .top-toolbar .voice-status {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .top-toolbar .spacer {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .top-toolbar {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .top-toolbar .mini-btn {
+        min-height: 38px;
+        padding: 0 8px;
+        font-size: 12px;
+      }
+
+      #voiceModeBtn,
+      .top-toolbar .voice-status {
+        grid-column: span 1;
+      }
+    }
+
+    .top-toolbar .mini-btn {
+      flex: 0 0 auto; /* prevent shrinking weirdly */
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+
+    .top-toolbar .spacer {
+      margin-left: auto;
+      flex: 0 0 auto;
+    }
+
+    .top-toolbar .spacer {
+      margin-left: auto;
+    }
+
+    .top-meta,
+    .top-actions,
+    .btn-row,
+    .phase-tools,
+    .step-tools,
+    .install-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .top-meta {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    /* Default: 3 per row (each spans 2 of 6 columns) */
+    .top-meta > * {
+      grid-column: span 2;
+      min-width: 0;
+    }
+
+    /* Airport + Aircraft share full first row (2 items) */
+    .top-meta > :nth-child(1),
+    .top-meta > :nth-child(2) {
+      grid-column: span 3;
+    }
+
+    /* Keep the same 6-column logic on small screens so items do not stack */
+    @media (max-width: 760px) {
+      .top-meta {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .top-meta {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .top-meta-pill,
+      .header-input-pill,
+      .header-input-value,
+      .header-input-pill input,
+      .header-input-pill select {
+        font-size: 10px;
+      }
+
+      .top-meta-pill,
+      .header-input-pill {
+        min-height: 34px;
+        padding: 5px 7px;
+      }
+
+      .header-input-pill input,
+      .header-input-pill select {
+        max-width: 58%;
+        padding: 3px 7px;
+      }
+    }
+
+    .top-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    
+    .btn-row { margin-top: 18px; }
+    .phase-tools { margin-top: 10px; margin-bottom: 12px; }
+    .step-tools { gap: 8px; }
+    .install-row { margin-top: 14px; }
 
     .card {
       background: var(--card);
@@ -65,9 +220,7 @@
       font-size: 20px;
     }
 
-    h3 {
-      margin: 0;
-    }
+    h3 { margin: 0; }
 
     p {
       margin: 0;
@@ -76,36 +229,22 @@
 
     .muted { color: var(--muted); }
 
-    .top-meta,
-    .top-actions,
-    .btn-row,
-    .phase-tools,
-    .step-tools,
-    .install-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .top-meta,
-    .top-actions { margin-top: 12px; }
-    .btn-row { margin-top: 18px; }
-    .phase-tools { margin-top: 10px; margin-bottom: 12px; }
-    .step-tools { gap: 8px; }
-    .install-row { margin-top: 14px; }
-
     .top-meta-pill,
     .header-input-pill {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 8px;
+      border-radius: 12px;
       background: #243140;
       border: 1px solid var(--border);
       color: var(--text);
-      font-size: 13px;
-      font-weight: bold;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.1;
     }
 
     .header-input-pill input,
@@ -118,7 +257,9 @@
       background: #111827;
       color: var(--text);
       padding: 10px 12px;
-      font-size: 14px;
+      font-size: 16px; /* prevent iOS zoom */
+      font-family: inherit;
+      width: 100%;
       font-family: inherit;
       width: 100%;
     }
@@ -126,27 +267,160 @@
     .header-input-pill input,
     .header-input-pill select {
       width: auto;
+      max-width: 60%;
+      min-width: 0;
       border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 13px;
-      font-weight: bold;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
     }
 
-    .header-input-pill input:focus,
-    .header-input-pill select:focus,
-    .fuel-input-card input:focus,
-    .edit-panel input:focus,
-    .edit-panel textarea:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: 1px;
+    .header-input-value {
+      color: #ffffff;
+      font-weight: 700;
+      text-align: right;
+      margin-left: auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
     }
-
-    .header-input-value { color: #ffffff; }
 
     .voice-status {
-      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 10px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: #243140;
       color: var(--muted);
-      margin-top: 8px;
+      height: 36px;
+      min-height: 36px;
+      line-height: 1;
+    }
+
+    .voice-status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0.95;
+    }
+
+    .voice-status.off {
+      color: #9ca3af;
+      background: #1f2937;
+      border-color: #4b5563;
+    }
+
+    .voice-status.listening {
+      color: #34d399;
+      background: #064e3b;
+      border-color: #34d399;
+    }
+
+    .voice-status.speaking {
+      color: #60a5fa;
+      background: #1e3a8a;
+      border-color: #60a5fa;
+    }
+
+    .voice-status.error {
+      color: #fca5a5;
+      background: #7f1d1d;
+      border-color: #ef4444;
+    }
+
+    body.light-mode .top-meta-pill,
+    body.light-mode .header-input-pill {
+      background: #f8fafc;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    body.light-mode .voice-status {
+      border-color: var(--border);
+    }
+
+    body.light-mode .voice-status.off {
+      background: #f8fafc;
+      color: #64748b;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .voice-status.listening {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #22c55e;
+    }
+
+    body.light-mode .voice-status.speaking {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+    }
+
+    body.light-mode .voice-status.error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #ef4444;
+    }
+
+    body.light-mode .header-input-pill input,
+    body.light-mode .header-input-pill select,
+    body.light-mode .fuel-input-card input,
+    body.light-mode .edit-panel input,
+    body.light-mode .edit-panel textarea {
+      background: #ffffff;
+      color: var(--text);
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .header-input-value {
+      color: var(--text);
+    }
+
+    body.light-mode .muted,
+    body.light-mode .step-detail,
+    body.light-mode .step-note,
+    body.light-mode .fuel-helper,
+    body.light-mode .summary-label,
+    body.light-mode .footer-note,
+    body.light-mode .install-help,
+    body.light-mode .phase-intro {
+      color: #334155;
+    }
+
+    body.light-mode .card,
+    body.light-mode .summary-item,
+    body.light-mode .step,
+    body.light-mode .edit-panel,
+    body.light-mode .header-disclaimer,
+    body.light-mode .info-box-card,
+    body.light-mode .info-box-section,
+    body.light-mode .summary-item,
+    body.light-mode .step {
+      background: #ffffff;
+    }
+
+    body.light-mode .edit-panel {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #111827;
+    }
+
+    body.light-mode .info-box-list {
+      color: #475569;
+    }
+
+    body.light-mode .info-box-list strong {
+      color: #111827;
     }
 
     button {
@@ -158,72 +432,85 @@
       cursor: pointer;
     }
 
-    .emergency-jump-btn {
-      background: #ef4444;
-      color: #ffffff;
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 13px;
-    }
-
     .secondary-btn,
     .mini-btn {
       background: #2b3642;
       color: var(--text);
       border: 1px solid var(--border);
-      padding: 4px 6px;
-      font-size: 10px;
-      border-radius: 7px;
     }
 
-    .secondary-btn,
-    .edit-btn,
-    .primary-btn { min-width: auto; }
+    /* Audio button visibility + state */
+    #audioModeBtn,
+    #voiceModeBtn {
+      position: relative;
+      font-size: 14px;
+      line-height: 1;
+    }
 
-    .edit-btn {
+    /* OFF state red cross */
+    #audioModeBtn.off::after,
+    #voiceModeBtn.off::after {
+      content: '';
       position: absolute;
-      top: 12px;
-      right: 12px;
-      background: #374151;
-      color: #e5e7eb;
-      border: 1px solid #4b5563;
-      border-radius: 8px;
-      padding: 6px 8px;
-      font-size: 12px;
-      min-width: auto;
-      width: 32px;
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      width: 60%;
+      height: 60%;
+      top: 20%;
+      left: 20%;
+      pointer-events: none;
+      background: linear-gradient(45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%),
+                  linear-gradient(-45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%);
+      opacity: 0.9;
+      border-radius: 4px;
     }
 
-    .header-icon-btn {
-      position: absolute;
-      top: 12px;
-      background: #374151;
-      color: #e5e7eb;
-      border: 1px solid #4b5563;
-      border-radius: 8px;
-      padding: 6px 8px;
-      font-size: 12px;
-      min-width: auto;
-      width: 32px;
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    #audioModeBtn {
+      position: relative;
+      font-size: 14px;
+      line-height: 1;
+      filter: saturate(1.1);
     }
 
-    .header-import-btn { right: 12px; }
-    .header-export-btn { right: 52px; }
-    .header-audio-btn { right: 132px; }
-    .header-voice-btn { right: 172px; }
+    body.light-mode .secondary-btn,
+    body.light-mode .mini-btn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+    }
 
-    .header-icon-btn.active {
-      background: #1e3a8a;
-      color: #dbeafe;
-      border-color: #3b82f6;
+    body.light-mode #editModeBtn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode #editModeBtn.active,
+    body.light-mode #editModeBtn[title="Edit"]:focus,
+    body.light-mode #editHeaderBtn,
+    body.light-mode #editAirportsBtn {
+      color: #111827;
+    }
+
+    body.light-mode .secondary-btn:hover,
+    body.light-mode .mini-btn:hover,
+    body.light-mode .tab:hover {
+      background: #f1f5f9;
+    }
+
+    body.light-mode #audioModeBtn,
+    body.light-mode #voiceModeBtn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+      filter: saturate(1.4) contrast(1.05);
+    }
+
+    body.light-mode #audioModeBtn.active,
+    body.light-mode #voiceModeBtn.active {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 1px rgba(96,165,250,0.35) inset;
+      filter: saturate(1.5) contrast(1.1);
     }
 
     .primary-btn {
@@ -232,8 +519,11 @@
     }
 
     .primary-btn:disabled {
-      background: #bbd7c3;
+      background: #374151;
+      color: #9ca3af;
+      border: 1px solid #4b5563;
       cursor: not-allowed;
+      opacity: 0.7;
     }
 
     .danger-btn {
@@ -261,14 +551,8 @@
       line-height: 1.3;
     }
 
-    .install-area h2 {
-      font-size: 10px;
-    }
-
-    .install-area p {
-      font-size: 10px;
-      line-height: 1.2;
-    }
+    .install-area h2 { font-size: 10px; }
+    .install-area p { font-size: 10px; line-height: 1.2; }
 
     .progress-wrap { margin-top: 14px; }
 
@@ -279,6 +563,11 @@
       border-radius: 999px;
       overflow: hidden;
       margin-bottom: 8px;
+    }
+
+    body.light-mode .progress-bar {
+      background: #e5e7eb;
+      border: 1px solid #cbd5e1;
     }
 
     .progress-fill {
@@ -321,25 +610,40 @@
 
     .tabs-actions {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
       align-items: center;
-      padding-bottom: 6px;
+      gap: 6px;
+      flex-wrap: nowrap;
+      margin-bottom: 6px;
+      min-width: 0;
     }
 
     #collapseAllBtn {
       margin-left: auto;
+      min-width: 0;
+      max-width: 42%;
     }
 
     .tabs-actions .secondary-btn,
-    .tabs-actions .mini-btn {
-      height: 24px;
-      padding: 0 6px;
-      font-size: 10px;
-      border-radius: 7px;
+    .tabs-actions .mini-btn,
+    .tabs-actions .voice-status {
+      height: 36px; /* fixed uniform height */
+      min-height: 36px;
+      max-height: 36px;
+      padding: 0 10px;
+      font-size: 12px;
+      border-radius: 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      white-space: nowrap;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    /* ensure text doesn't stretch height */
+    #collapseAllBtn {
+      height: 36px;
+      line-height: 1;
     }
 
     .tab {
@@ -355,9 +659,32 @@
       opacity: 0.95;
     }
 
-    .tab:hover {
-      opacity: 1;
-      background: #243140;
+    .tab:hover { opacity: 1; background: #243140; }
+
+    body.light-mode .tab {
+      background: #f8fafc;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .tab.active {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+      outline: 2px solid #22c55e;
+    }
+
+    body.light-mode .tab[data-tab-id="emergency"] {
+      color: #dc2626;
+      border-color: rgba(239, 68, 68, 0.45);
+      background: #fef2f2;
+    }
+
+    body.light-mode .tab[data-tab-id="emergency"].active {
+      background: #ffffff;
+      color: #b91c1c;
+      border-color: #cbd5e1;
+      outline: 2px solid #ef4444;
     }
 
     .tab.active {
@@ -390,35 +717,20 @@
       padding: 4px 6px;
     }
 
-    .tab-tools {
-      display: none;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin: 0 0 14px;
-    }
-
-    .tab-tools.visible {
-      display: flex;
-    }
+    .tab-tools { display: none; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+    .tab-tools.visible { display: flex; }
 
     .summary-card { display: none; }
     .summary-card.visible { display: block; }
 
-    .footer-note {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 13px;
-    }
+    .footer-note { margin-top: 10px; color: var(--muted); font-size: 13px; }
 
     .info-box-card {
       border: 1px solid var(--border);
       background: #18212d;
     }
 
-    .info-box-title {
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
+    .info-box-title { margin-bottom: 10px; font-size: 18px; }
 
     .info-box-grid {
       display: grid;
@@ -442,26 +754,9 @@
       letter-spacing: 0.04em;
     }
 
-    .info-box-list {
-      display: grid;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .info-box-list div {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: baseline;
-    }
-
-    .info-box-list strong {
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
+    .info-box-list { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+    .info-box-list div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .info-box-list strong { color: var(--text); font-size: 13px; font-weight: 700; white-space: nowrap; }
 
     .phase-card.active-phase {
       border: 4px solid #22c55e;
@@ -475,10 +770,7 @@
       box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 12px rgba(34, 197, 94, 0.4);
     }
 
-    .phase-card.highlight-green {
-      border: 1px solid var(--border);
-    }
-
+    .phase-card.highlight-green,
     .phase-card.highlight-blue {
       border: 1px solid var(--border);
     }
@@ -488,9 +780,65 @@
       background: rgba(239, 68, 68, 0.08);
     }
 
-    .phase-card.collapsed .phase-content {
-      display: none;
+    /* Override active state for emergency */
+    .phase-card.emergency-phase.active-phase {
+      border: 4px solid #ef4444 !important;
+      background: rgba(239, 68, 68, 0.12);
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.6), 0 0 12px rgba(239, 68, 68, 0.4);
     }
+
+    body.light-mode .phase-card.active-phase {
+      background: rgba(34, 197, 94, 0.08);
+      border-color: #22c55e;
+    }
+
+    body.light-mode .phase-card.completed {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: #16a34a;
+    }
+
+    body.light-mode .phase-card.emergency-phase {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: #ef4444 !important;
+    }
+
+    body.light-mode .phase-card.emergency-phase.active-phase {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: #ef4444 !important;
+    }
+
+    body.light-mode .step.completed {
+      border-color: #16a34a;
+      background: #dcfce7;
+    }
+
+    body.light-mode .step.completed .step-title,
+    body.light-mode .step.completed .step-detail,
+    body.light-mode .step.completed .step-note,
+    body.light-mode .step.completed .fuel-helper,
+    body.light-mode .step.completed .step-number {
+      color: #14532d;
+    }
+
+    body.light-mode .status.done {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #16a34a;
+    }
+
+    body.light-mode .status.ready {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+    }
+
+    body.light-mode .status.locked {
+      background: #e5e7eb;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+
+    .phase-card.collapsed .phase-content { display: none; }
 
     .phase-toggle {
       width: 100%;
@@ -500,34 +848,11 @@
       text-align: left;
     }
 
-    .phase-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .phase-summary {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .phase-meta {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-    }
-
-    .phase-content {
-      margin-top: 14px;
-    }
-
-    .phase-intro {
-      margin-bottom: 14px;
-      color: var(--muted);
-    }
+    .phase-header { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .phase-summary { display: flex; align-items: center; gap: 10px; }
+    .phase-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .phase-content { margin-top: 14px; }
+    .phase-intro { margin-bottom: 14px; color: var(--muted); }
 
     .step {
       border: 1px solid var(--border);
@@ -542,38 +867,20 @@
       background: #11241d;
     }
 
-    .step.next-focus {
-      outline: 2px solid var(--accent);
+    .step.completed .step-title,
+    .step.completed .step-detail,
+    .step.completed .step-note,
+    .step.completed .fuel-helper,
+    .step.completed .step-number {
+      color: #d1fae5;
     }
-
-    .step-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .step-number {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .step-title {
-      margin: 0 0 6px;
-      font-size: 17px;
-    }
-
-    .step-detail {
-      color: var(--muted);
-    }
-
+    .step.next-focus { outline: 2px solid var(--accent); }
+    .step-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .step-number { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .step-title { margin: 0 0 6px; font-size: 17px; }
+    .step-detail { color: var(--muted); }
     .step-note,
-    .fuel-helper {
-      margin-top: 10px;
-      font-size: 13px;
-      color: var(--muted);
-    }
+    .fuel-helper { margin-top: 10px; font-size: 13px; color: var(--muted); }
 
     .status {
       display: inline-flex;
@@ -586,23 +893,9 @@
       border: 1px solid var(--border);
     }
 
-    .status.done {
-      background: var(--success-soft);
-      color: #d1fae5;
-      border-color: var(--success);
-    }
-
-    .status.ready {
-      background: #1e3a8a;
-      color: #dbeafe;
-      border-color: #60a5fa;
-    }
-
-    .status.locked {
-      background: #374151;
-      color: #d1d5db;
-      border-color: #6b7280;
-    }
+    .status.done { background: var(--success-soft); color: #d1fae5; border-color: var(--success); }
+    .status.ready { background: #1e3a8a; color: #dbeafe; border-color: #60a5fa; }
+    .status.locked { background: #374151; color: #d1d5db; border-color: #6b7280; }
 
     .subsection-heading {
       margin: 18px 0 10px;
@@ -639,17 +932,8 @@
     }
 
     .summary-label,
-    .small-label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .summary-value {
-      font-size: 16px;
-      font-weight: bold;
-    }
+    .small-label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--muted); }
+    .summary-value { font-size: 16px; font-weight: bold; }
 
     .edit-panel {
       border: 1px solid var(--accent);
@@ -667,15 +951,17 @@
 </head>
 <body>
   <div class="container">
+
     <div class="card" style="position: relative;">
       <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
       
-      <h1 id="appTitle">Bristell B23 Check List</h1>
-      <p class="muted" id="appDescription">Ground checklist grouped by phase using your SE-MOA checklist and the Bristell B23 SOP / training manual details. Each item must be confirmed before the next step unlocks.</p>
+      <h1><span id="appTitle">Bristell B23 - Checklists</span></h1>
+      
       <div class="top-meta">
         <div class="header-input-pill">Airport
           <select id="headerAirport">
             <option value="ESGA" selected>ESGA</option>
+            <option value="ESGT">ESGT</option>
           </select>
         </div>
         <div class="header-input-pill">Aircraft
@@ -684,51 +970,49 @@
             <option value="SE-MOA">SE-MOA</option>
           </select>
         </div>
-        <div class="header-input-pill">Altitude
-          <input id="headerAirportAlt" type="number" placeholder="ft" />
-        </div>
-        <div class="header-input-pill">Radio
-          <input id="headerRadioFreq" type="text" placeholder="MHz" />
-        </div>
+        <div class="header-input-pill">Altitude <span class="header-input-value" id="headerAirportAlt">--</span></div>
+        <div class="header-input-pill">Radio <span class="header-input-value" id="headerRadioFreq">--</span></div>
         <div class="top-meta-pill" id="todayDate">Date --</div>
         <div class="top-meta-pill" id="zuluTime">Time -- Z</div>
         <div class="header-input-pill">Start <span class="header-input-value" id="headerStartTime">--</span></div>
         <div class="header-input-pill">End <span class="header-input-value" id="headerEndTime">--</span></div>
         <div class="header-input-pill">L Fuel <span class="header-input-value" id="headerFuelLeftValue">--</span></div>
         <div class="header-input-pill">R Fuel <span class="header-input-value" id="headerFuelRightValue">--</span></div>
-        <div class="header-input-pill">Hobbs <span class="header-input-value" id="headerHobbsValue">--</span></div>
+        <div class="header-input-pill">Hobs <span class="header-input-value" id="headerHobbsValue">--</span></div>
       </div>
       <div class="top-actions">
         <button class="mini-btn" id="editHeaderBtn" type="button">Edit header</button>
+        <button class="mini-btn" id="editAirportsBtn" type="button">Edit airports</button>
       </div>
-      <div class="voice-status" id="voiceStatusText">Voice: off</div>
-      <div class="header-disclaimer">
-        ⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.
-      </div>
+      
+      <div class="header-disclaimer" id="headerDisclaimer">⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.</div>
       <div class="progress-wrap">
         <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
         <p id="progressText" class="muted">0 required phases completed</p>
       </div>
     </div>
-    <div class="tabs-actions" style="margin-bottom:6px;">
-        <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️</button>
-        <button class="mini-btn" id="importProfileBtn" type="button" title="Import profile">⬆️</button>
-        <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️</button>
-        <button class="mini-btn" id="audioModeBtn" type="button" title="Audio and voice">🎙️🔊</button>
-        <button class="secondary-btn" id="topResetBtn" type="button">Reset</button>
-        <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
-      </div>
-      <div class="tabs-bar">
-        <div class="tabs" id="tabsContainer"></div>
-      </div>
+
+    <div class="tabs-actions">
+      <button class="mini-btn" id="audioModeBtn" type="button" title="Audio output">🔊</button>
+      <button class="secondary-btn" id="topResetBtn" type="button">Reset all</button>
+      <button class="mini-btn" id="resetPhaseBtn" type="button" title="Reset active phase">↺ Phase</button>
+      <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
+    </div>
+
+    <div class="tabs-bar">
+      <div class="tabs" id="tabsContainer"></div>
+    </div>
+
     <div class="tab-tools" id="tabTools"></div>
     <div id="stepsContainer"></div>
-    <div class="card">
+
+    <div class="card" id="finalReportCard">
       <div class="btn-row">
         <button class="primary-btn" id="finishBtn" disabled type="button">Final Report</button>
       </div>
-      <p class="footer-note">Grouped by phase with detailed notes added from the uploaded Bristell B23 SOP and training manual.</p>
+      <p class="footer-note">Report of start end time and inputs done during the flight such as fuel quantity, hobs etc</p>
     </div>
+
     <div class="card summary-card" id="finishSummaryCard">
       <h2>Checklist complete</h2>
       <p class="muted">Review the saved summary below.</p>
@@ -738,6 +1022,7 @@
         <button class="primary-btn" id="summaryResetBtn" type="button">Reset</button>
       </div>
     </div>
+
     <div class="card info-box-card">
       <h2 class="info-box-title">Quick reference</h2>
       <p class="muted">AFM-based throttle, RPM and speed references for rapid scan. Always verify against the approved AFM before flight.</p>
@@ -802,6 +1087,15 @@
         </div>
       </div>
     </div>
+    <div class="top-toolbar">
+      <button class="mini-btn" id="themeToggleBtn" type="button" title="Toggle light mode">☀️ Light</button>
+      <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️ Edit</button>
+      <button class="mini-btn" id="importProfileBtn" type="button" title="Import profile">⬆️ Import</button>
+      <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️ Export</button>
+      <button class="mini-btn" id="voiceModeBtn" type="button" title="Voice input">🎙️ Mic</button>
+      <div class="voice-status" id="voiceStatusText">Voice off</div>
+    </div>
+
     <div class="card install-area">
       <h2>Install app</h2>
       <p class="muted">Add this checklist to your Home Screen for a cleaner app-like experience and offline access after the first load.</p>
@@ -811,7 +1105,13 @@
       <p class="install-help" id="installHelp">On iPhone: open in Safari, tap Share, then Add to Home Screen.</p>
     </div>
   </div>
+
   <script>
+    let defaultAirports = [
+      { code: 'ESGA', altitude: '424 ft', radio: '123.550 Backamo' },
+      { code: 'ESGT', altitude: '137 ft', radio: '122.730 Trollhättan TWR' }
+    ];
+
     let defaultPhases = [
       { title: 'Pre-flight inspection', intro: 'Walk-around and exterior inspection before entering the final cockpit setup flow.', items: [
         { title: 'Cabin - Ignition', detail: 'OFF' },
@@ -820,7 +1120,7 @@
         { title: 'Cabin - Loading', detail: 'Check weight and balance, and that loading is secured' },
         { title: 'Cabin - Master switch', detail: 'ON' },
         { title: 'Cabin - Avionics switch', detail: 'ON' },
-        { title: 'Cabin - Fuel quantity indication (ref)', detail: 'Check' },
+        { title: 'Cabin - Fuel quantity indication', detail: 'Check' },
         { title: 'Cabin - Flap', detail: 'Check operation, select down for inspection' },
         { title: 'Cabin - Lights', detail: 'Check for VFR night flight, then set dimmers OFF' },
         { title: 'Cabin - Pitot tube heating', detail: 'Check' },
@@ -852,18 +1152,17 @@
         { title: 'Left-hand leading edge - Wing surface', detail: 'Check condition' },
         { title: 'Left-hand leading edge - Leading edge', detail: 'Check condition' },
         { title: 'Left-hand leading edge - Stall strips', detail: 'Check condition' },
-        { title: 'Left-hand leading edge - Actual fuel quantity', detail: 'Check against indication by opening filler cap' },
         { title: 'Left-hand leading edge - Filler cap', detail: 'Check closing' },
         { title: 'Left-hand leading edge - Fuel vent openings', detail: 'Check' },
-        { title: 'Left-hand leading edge - Pitot tube', detail: 'Check condition and remove cover' },
+        { title: 'Left-hand leading edge - Pitot tube', detail: 'Check condition' },
+        { title: 'Left-hand leading edge - Pitot cover', detail: 'Remove' },
         { title: 'Left-hand trailing edge - Wing tip', detail: 'Check surface condition, attachment and light attachment' },
         { title: 'Left-hand trailing edge - Aileron', detail: 'Check surface condition, attachment, clearance, movement and trim tab condition' },
         { title: 'Left-hand trailing edge - Flap', detail: 'Check surface condition, attachment, clearance and hinge bolts', note: 'The left flap has a one degree offset versus the right flap. When retracted, the left flap sits about 7 mm below the stub wing contour, while the right flap is streamlined.' },
         { title: 'Left-hand trailing edge - Wing locker', detail: 'Check loading, inspect drain hole and lock' },
-        { title: 'Left fuselage - Landing gear', detail: 'Check damage, wheel attachment, brakes, and tire condition/pressure' },
-        { title: 'Left fuselage - Static port', detail: 'Check clean and clear of obstructions' },
+        { title: 'Left-hand fuselage - Landing gear', detail: 'Check damage, wheel attachment, brakes, and tire condition/pressure' },
+        { title: 'Left-hand fuselage - Static port', detail: 'Check clean and clear of obstructions' },
         { title: 'Before entering cockpit - Chocks', detail: 'Removed' },
-        { title: 'Before entering cockpit - Pitot cover', detail: 'Off' },
         { title: 'Before entering cockpit - Tow bar', detail: 'Removed if used' },
         { title: 'Before entering cockpit - Prop area and taxi path', detail: 'Clear, including wingtips and stabilizer if immediate turn is planned' }
       ]},
@@ -908,7 +1207,7 @@
         { title: 'EFIS', detail: 'ON' },
         { title: 'Altimeter', detail: 'SET QNH' }
       ]},
-      { title: 'Taxiing', intro: 'Taxi checks and techniques.', items: [
+      { title: 'Taxi', intro: 'Taxi checks and techniques.', items: [
         { title: 'Ground control', detail: 'Check nose gear steering' },
         { title: 'Brakes', detail: 'Check function' },
         { title: 'Flight instruments', detail: 'Check' },
@@ -980,7 +1279,7 @@
         { title: 'Throttle', detail: 'Idle' },
         { title: 'Ignition', detail: 'OFF' },
         { title: 'ALT 1 and 2', detail: 'OFF' },
-        { title: 'Hobbs', detail: 'Note' },
+        { title: 'Hobs', detail: 'Note' },
         { title: 'Avionics', detail: 'OFF' },
         { title: 'EFIS', detail: 'OFF' },
         { title: 'Ext Lights', detail: 'OFF' },
@@ -1027,9 +1326,11 @@
     const importProfileBtn = document.getElementById('importProfileBtn');
     const importProfileInput = document.getElementById('importProfileInput');
     const audioModeBtn = document.getElementById('audioModeBtn');
+    const voiceModeBtn = document.getElementById('voiceModeBtn');
     const appTitle = document.getElementById('appTitle');
     const appDescription = document.getElementById('appDescription');
     const editHeaderBtn = document.getElementById('editHeaderBtn');
+    const headerDisclaimer = document.getElementById('headerDisclaimer');
     const finishSummaryCard = document.getElementById('finishSummaryCard');
     const finishSummaryGrid = document.getElementById('finishSummaryGrid');
     const keepReviewBtn = document.getElementById('keepReviewBtn');
@@ -1037,6 +1338,7 @@
     const voiceStatusText = document.getElementById('voiceStatusText');
     const tabsContainer = document.getElementById('tabsContainer');
     const tabTools = document.getElementById('tabTools');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
 
     const storageKey = 'b23-ground-check-progress-v11';
     const customChecklistKey = 'b23-ground-check-custom-v5';
@@ -1045,6 +1347,8 @@
     const fuelStorageKey = 'b23-ground-check-fuel-v1';
     const hobbsStorageKey = 'b23-ground-check-hobbs-v1';
     const headerContentKey = 'b23-ground-check-header-v1';
+    const airportsStorageKey = 'b23-airports-v1';
+    const disclaimerContentKey = 'b23-ground-check-disclaimer-v1';
     const finishSummaryKey = 'b23-ground-check-last-summary-v1';
     const audioEnabledKey = 'b23-ground-check-audio-enabled-v1';
     const voiceModeEnabledKey = 'b23-ground-check-voice-mode-enabled-v1';
@@ -1055,7 +1359,11 @@
     const airportAltKey = 'b23-airport-alt';
     const radioFreqKey = 'b23-radio-freq';
     const tabsStorageKey = 'b23-ground-check-tabs-v1';
+    const themeStorageKey = 'b23-theme-v1';
+    const appVersionKey = 'b23-app-version';
+    const currentAppVersion = 'v2';
 
+    let airports = [];
     let phases = [];
     let tabDefinitions = [];
     let currentTab = 'normal';
@@ -1064,7 +1372,7 @@
     let hobbsValue = '';
     let deferredPrompt = null;
     let isEditMode = localStorage.getItem(editModeKey) === 'true';
-    let isAudioEnabled = localStorage.getItem(audioEnabledKey) === 'true';
+    let isAudioEnabled = localStorage.getItem(audioEnabledKey) === null ? true : localStorage.getItem(audioEnabledKey) === 'true';
     let isVoiceModeEnabled = localStorage.getItem(voiceModeEnabledKey) === 'true';
     let editorState = null;
     let collapsedPhases = [];
@@ -1085,13 +1393,14 @@
     let phaseAnnouncementTimer = null;
     let lastAnnouncedPhaseIndex = null;
 
+    function cloneDefaultAirports() { return JSON.parse(JSON.stringify(defaultAirports)); }
     function cloneDefaultPhases() { return JSON.parse(JSON.stringify(defaultPhases)); }
     function escapeHtml(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }
     function specialStepType(phaseTitle, item, itemIndex) {
       if (phaseTitle === 'Before Engine Start' && item.title === 'Pre-flight inspection') return 'derived_preflight';
       if (item.title === 'Taxi technique') return 'tip';
       if (phaseTitle === 'Pre-flight inspection' && itemIndex === 22) return 'fuel_input';
-      if (item.title === 'Hobbs') return 'hobbs_input';
+      if (item.title === 'Hobs') return 'hobbs_input';
       return null;
     }
     function isProtectedStep(phaseTitle, item, itemIndex) { return specialStepType(phaseTitle, item, itemIndex) !== null; }
@@ -1101,9 +1410,48 @@
     function getPreflightSubsection(item) { if (!item.title.includes(' - ')) return null; return item.title.split(' - ')[0]; }
     function globalIndexFor(phaseIndex, itemIndex) { let count = 0; for (let p = 0; p < phaseIndex; p += 1) count += phases[p].items.length; return count + itemIndex; }
 
+    function loadAirports() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(airportsStorageKey) || 'null');
+        if (Array.isArray(saved) && saved.length) {
+          airports = saved.map(function(item) {
+            return {
+              code: String(item.code || '').trim().toUpperCase(),
+              altitude: String(item.altitude || '').trim(),
+              radio: String(item.radio || '').trim()
+            };
+          }).filter(function(item) { return item.code; });
+        }
+      } catch (_) {}
+      if (!Array.isArray(airports) || !airports.length) airports = cloneDefaultAirports();
+    }
+    function saveAirports() { localStorage.setItem(airportsStorageKey, JSON.stringify(airports)); }
+    function getAirportConfig(code) {
+      return airports.find(function(item) { return item.code === code; }) || null;
+    }
+    function renderAirportOptions() {
+      if (!headerAirport) return;
+      headerAirport.innerHTML = airports.map(function(item) {
+        return '<option value="' + escapeHtml(item.code) + '">' + escapeHtml(item.code) + '</option>';
+      }).join('');
+    }
+    function applyAirportDefaults(code) {
+      const config = getAirportConfig(code);
+      if (!config) return;
+      headerAirportAlt.textContent = config.altitude || '--';
+      headerRadioFreq.textContent = config.radio || '--';
+      localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
+      localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
+    }
     function loadCustomChecklist() { phases = cloneDefaultPhases(); }
     function saveCustomChecklist() { localStorage.setItem(customChecklistKey, JSON.stringify(phases)); }
-    function buildDefaultTabs() { return [{ id: 'normal', label: 'Normal Operations', phaseTitles: phases.filter(p => p.title !== 'Emergency').map(p => p.title) }, { id: 'emergency', label: 'Emergency', phaseTitles: phases.filter(p => p.title === 'Emergency').map(p => p.title) }]; }
+    function buildDefaultTabs() { 
+      return [
+        { id: 'normal', label: 'Normal', phaseTitles: phases.filter(p => p.title !== 'Emergency').map(p => p.title) },
+        { id: 'emergency', label: 'Emergency', phaseTitles: phases.filter(p => p.title === 'Emergency').map(p => p.title) },
+        { id: 'quickref', label: 'Quick Ref', phaseTitles: [] }
+      ]; 
+    }
     function normalizeTabDefinitions(inputTabs) {
       if (!Array.isArray(inputTabs) || !inputTabs.length) return buildDefaultTabs();
       const phaseTitleSet = new Set(phases.map(p => p.title));
@@ -1111,141 +1459,287 @@
         const safeId = String(tab.id || ('tab-' + index)).trim() || ('tab-' + index);
         const safeLabel = String(tab.label || ('Tab ' + (index + 1))).trim() || ('Tab ' + (index + 1));
         const phaseTitles = Array.isArray(tab.phaseTitles) ? tab.phaseTitles.filter(title => phaseTitleSet.has(title)) : [];
-        return { id: safeId, label: safeLabel, phaseTitles };
-      }).filter(tab => tab.label);
+        return { id: safeId, label: safeLabel, phaseTitles: phaseTitles };
+      }).filter(function(tab) { return tab.label; });
       return normalized.length ? normalized : buildDefaultTabs();
     }
-    function loadTabDefinitions() { try { tabDefinitions = normalizeTabDefinitions(JSON.parse(localStorage.getItem(tabsStorageKey) || 'null')); } catch { tabDefinitions = buildDefaultTabs(); } if (!tabDefinitions.some(tab => tab.id === currentTab)) currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal'; }
+    function loadTabDefinitions() {
+      try { tabDefinitions = normalizeTabDefinitions(JSON.parse(localStorage.getItem(tabsStorageKey) || 'null')); }
+      catch (_) { tabDefinitions = buildDefaultTabs(); }
+      if (!tabDefinitions.some(function(tab) { return tab.id === currentTab; })) currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal';
+    }
     function saveTabDefinitions() { localStorage.setItem(tabsStorageKey, JSON.stringify(tabDefinitions)); }
     function syncTabsWithPhases() {
-      const phaseTitleSet = new Set(phases.map(p => p.title));
+      const phaseTitleSet = new Set(phases.map(function(p) { return p.title; }));
 
       tabDefinitions = normalizeTabDefinitions(tabDefinitions).map(function(tab, index) {
-        let filtered = tab.phaseTitles.filter(title => phaseTitleSet.has(title));
+        // Preserve Quick Ref tab
+        if (tab.id === 'quickref') {
+          return { id: tab.id, label: tab.label, phaseTitles: [] };
+        }
 
-        // Ensure normal tab always contains ALL non-emergency phases
+        let filtered = tab.phaseTitles.filter(function(title) { return phaseTitleSet.has(title); });
+
+        // Normal tab = all non-emergency phases
         if (tab.id !== 'emergency') {
-          filtered = phases.filter(p => p.title !== 'Emergency').map(p => p.title);
+          filtered = phases.filter(function(p) { return p.title !== 'Emergency'; }).map(function(p) { return p.title; });
         }
 
-        // Emergency tab only contains emergency phase
+        // Emergency tab
         if (tab.id === 'emergency') {
-          filtered = phases.filter(p => p.title === 'Emergency').map(p => p.title);
+          filtered = phases.filter(function(p) { return p.title === 'Emergency'; }).map(function(p) { return p.title; });
         }
 
-        return {
-          id: tab.id || ('tab-' + index),
-          label: tab.label,
-          phaseTitles: filtered
-        };
+        return { id: tab.id || ('tab-' + index), label: tab.label, phaseTitles: filtered };
       });
 
-      if (!tabDefinitions.some(tab => tab.id === currentTab)) {
+      // Ensure Quick Ref tab always exists
+      if (!tabDefinitions.some(function(t) { return t.id === 'quickref'; })) {
+        tabDefinitions.push({ id: 'quickref', label: 'Quick Ref', phaseTitles: [] });
+      }
+
+      if (!tabDefinitions.some(function(tab) { return tab.id === currentTab; })) {
         currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal';
       }
 
       saveTabDefinitions();
     }
-    function getCurrentTabDefinition() { return tabDefinitions.find(tab => tab.id === currentTab) || tabDefinitions[0] || null; }
-    function loadHeaderContent() { try { const saved = JSON.parse(localStorage.getItem(headerContentKey) || 'null'); if (!saved) return; if (typeof saved.title === 'string' && saved.title.trim()) appTitle.textContent = saved.title; if (typeof saved.description === 'string') appDescription.textContent = saved.description; } catch {} }
-    function saveHeaderContent() { localStorage.setItem(headerContentKey, JSON.stringify({ title: appTitle.textContent, description: appDescription.textContent })); }
-    function rebuildFlatSteps() { flatSteps = []; phases.forEach((phase, phaseIndex) => phase.items.forEach((item, itemIndex) => flatSteps.push({ title: item.title, detail: item.detail, note: item.note || '', confirmed: false, phaseTitle: phase.title, phaseIndex, itemIndex }))); }
-    function loadProgress() { try { const saved = JSON.parse(localStorage.getItem(storageKey) || '[]'); if (Array.isArray(saved) && saved.length === flatSteps.length) flatSteps.forEach((step, index) => step.confirmed = Boolean(saved[index])); } catch {} }
-    function saveProgress() { localStorage.setItem(storageKey, JSON.stringify(flatSteps.map(step => step.confirmed))); }
-    function loadCollapsedState() { try { const saved = JSON.parse(localStorage.getItem(collapsedStorageKey) || '[]'); if (Array.isArray(saved) && saved.length === phases.length) { collapsedPhases = saved.map(Boolean); return; } } catch {} collapsedPhases = phases.map(() => false); }
+    function getCurrentTabDefinition() { return tabDefinitions.find(function(tab) { return tab.id === currentTab; }) || tabDefinitions[0] || null; }
+    function loadHeaderContent() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(headerContentKey) || 'null');
+        if (saved && typeof saved.title === 'string' && saved.title.trim()) {
+          appTitle.textContent = saved.title;
+        }
+      } catch (_) {}
+      try {
+        const savedDisclaimer = localStorage.getItem(disclaimerContentKey);
+        if (headerDisclaimer && typeof savedDisclaimer === 'string' && savedDisclaimer.trim()) {
+          headerDisclaimer.textContent = savedDisclaimer;
+        }
+      } catch (_) {}
+    }
+    function saveHeaderContent() {
+      localStorage.setItem(headerContentKey, JSON.stringify({
+        title: appTitle.textContent,
+        description: appDescription ? appDescription.textContent : ''
+      }));
+      if (headerDisclaimer) {
+        localStorage.setItem(disclaimerContentKey, headerDisclaimer.textContent || '');
+      }
+    }
+    function rebuildFlatSteps() { flatSteps = []; phases.forEach(function(phase, phaseIndex) { phase.items.forEach(function(item, itemIndex) { flatSteps.push({ title: item.title, detail: item.detail, note: item.note || '', confirmed: false, phaseTitle: phase.title, phaseIndex: phaseIndex, itemIndex: itemIndex }); }); }); }
+    function loadProgress() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        if (Array.isArray(saved) && saved.length === flatSteps.length) flatSteps.forEach(function(step, index) { step.confirmed = Boolean(saved[index]); });
+      } catch (_) {}
+    }
+    function saveProgress() { localStorage.setItem(storageKey, JSON.stringify(flatSteps.map(function(step) { return step.confirmed; }))); }
+    function loadCollapsedState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(collapsedStorageKey) || '[]');
+        if (Array.isArray(saved) && saved.length === phases.length) { collapsedPhases = saved.map(Boolean); return; }
+      } catch (_) {}
+      collapsedPhases = phases.map(function() { return false; });
+    }
     function saveCollapsedState() { localStorage.setItem(collapsedStorageKey, JSON.stringify(collapsedPhases)); }
-    function loadFuelState() { try { const saved = JSON.parse(localStorage.getItem(fuelStorageKey) || '{}'); fuelState = { left: typeof saved.left === 'string' ? saved.left : '', right: typeof saved.right === 'string' ? saved.right : '' }; } catch {} }
+    function loadFuelState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(fuelStorageKey) || '{}');
+        fuelState = { left: typeof saved.left === 'string' ? saved.left : '', right: typeof saved.right === 'string' ? saved.right : '' };
+      } catch (_) {}
+    }
     function saveFuelState() { localStorage.setItem(fuelStorageKey, JSON.stringify(fuelState)); }
     function loadHobbsValue() { hobbsValue = localStorage.getItem(hobbsStorageKey) || ''; }
     function saveHobbsValue() { localStorage.setItem(hobbsStorageKey, hobbsValue); }
-    function loadLastSummary() { try { lastSummary = JSON.parse(localStorage.getItem(finishSummaryKey) || 'null'); } catch { lastSummary = null; } }
+    function loadLastSummary() { try { lastSummary = JSON.parse(localStorage.getItem(finishSummaryKey) || 'null'); } catch (_) { lastSummary = null; } }
     function saveLastSummary() { if (lastSummary) localStorage.setItem(finishSummaryKey, JSON.stringify(lastSummary)); }
     function clearLastSummary() { lastSummary = null; localStorage.removeItem(finishSummaryKey); }
-    function getCurrentZuluParts() { const now = new Date(); return { dateText: new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' }).format(now), timeText: new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }).format(now) }; }
+    function getCurrentZuluParts() {
+      const now = new Date();
+      return {
+        dateText: new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' }).format(now),
+        timeText: new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }).format(now)
+      };
+    }
     function getCurrentZuluTimeValue() { const now = new Date(); return String(now.getUTCHours()).padStart(2, '0') + ':' + String(now.getUTCMinutes()).padStart(2, '0'); }
-    function updateTopMeta() { const parts = getCurrentZuluParts(); document.getElementById('todayDate').textContent = 'Date ' + parts.dateText; document.getElementById('zuluTime').textContent = 'Time ' + parts.timeText + ' Z'; headerFuelLeftValue.textContent = fuelState.left || '--'; headerFuelRightValue.textContent = fuelState.right || '--'; headerHobbsValue.textContent = hobbsValue || '--'; }
+    function updateTopMeta() {
+      const parts = getCurrentZuluParts();
+      document.getElementById('todayDate').textContent = 'Date ' + parts.dateText;
+      document.getElementById('zuluTime').textContent = 'Time ' + parts.timeText + ' Z';
+      headerFuelLeftValue.textContent = fuelState.left || '--';
+      headerFuelRightValue.textContent = fuelState.right || '--';
+      headerHobbsValue.textContent = hobbsValue || '--';
+    }
     function isIos() { return /iphone|ipad|ipod/i.test(window.navigator.userAgent); }
     function isInStandaloneMode() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
-    function updateInstallHelp() { if (isInStandaloneMode()) installHelp.textContent = 'Installed on Home Screen.'; else if (isIos()) installHelp.textContent = 'On iPhone: open in Safari, tap Share, then Add to Home Screen.'; else if (deferredPrompt) installHelp.textContent = 'Install this checklist for a full-screen app experience and offline access.'; else installHelp.textContent = 'To install, host this app online, open it in your browser, then use Add to Home Screen or Install.'; }
+    function updateInstallHelp() {
+      if (isInStandaloneMode()) installHelp.textContent = 'Installed on Home Screen.';
+      else if (isIos()) installHelp.textContent = 'On iPhone: open in Safari, tap Share, then Add to Home Screen.';
+      else if (deferredPrompt) installHelp.textContent = 'Install this checklist for a full-screen app experience and offline access.';
+      else installHelp.textContent = 'To install, host this app online, open it in your browser, then use Add to Home Screen or Install.';
+    }
     function updateInstallButton() { installBtn.style.display = deferredPrompt && !isIos() && !isInStandaloneMode() ? 'inline-flex' : 'none'; updateInstallHelp(); }
-    function countedStepsInPhase(phaseIndex) { let count = 0; phases[phaseIndex].items.forEach((item, itemIndex) => { if (isCountedStep(phases[phaseIndex].title, item, itemIndex)) count += 1; }); return count; }
-    function completedCountInPhase(phaseIndex) { let count = 0; const phase = phases[phaseIndex]; phase.items.forEach((item, itemIndex) => { if (!isCountedStep(phase.title, item, itemIndex)) return; const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)]; if (step && step.confirmed) count += 1; }); return count; }
-    function isUnlocked(index) { const step = flatSteps[index]; if (!step) return false; if (step.itemIndex === 0) return true; const previousIndex = globalIndexFor(step.phaseIndex, step.itemIndex - 1); return Boolean(flatSteps[previousIndex] && flatSteps[previousIndex].confirmed); }
-    function isPhaseFullyCompleted(phaseIndex) { const phase = phases[phaseIndex]; let hasCountedStep = false; for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) { const item = phase.items[itemIndex]; if (!isCountedStep(phase.title, item, itemIndex)) continue; hasCountedStep = true; const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)]; if (!step || !step.confirmed) return false; } return hasCountedStep; }
+    function applyTheme(theme) {
+      const isLight = theme === 'light';
+      document.body.classList.toggle('light-mode', isLight);
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute('content', isLight ? '#f3f4f6' : '#111827');
+      if (themeToggleBtn) themeToggleBtn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+    }
+    function countedStepsInPhase(phaseIndex) { let count = 0; phases[phaseIndex].items.forEach(function(item, itemIndex) { if (isCountedStep(phases[phaseIndex].title, item, itemIndex)) count += 1; }); return count; }
+    function completedCountInPhase(phaseIndex) {
+      let count = 0;
+      const phase = phases[phaseIndex];
+      phase.items.forEach(function(item, itemIndex) {
+        if (!isCountedStep(phase.title, item, itemIndex)) return;
+        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
+        if (step && step.confirmed) count += 1;
+      });
+      return count;
+    }
+    function isUnlocked(index) {
+      const step = flatSteps[index];
+      if (!step) return false;
+      if (step.itemIndex === 0) return true;
+      const previousIndex = globalIndexFor(step.phaseIndex, step.itemIndex - 1);
+      return Boolean(flatSteps[previousIndex] && flatSteps[previousIndex].confirmed);
+    }
+    function isPhaseFullyCompleted(phaseIndex) {
+      const phase = phases[phaseIndex];
+      let hasCountedStep = false;
+      for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) {
+        const item = phase.items[itemIndex];
+        if (!isCountedStep(phase.title, item, itemIndex)) continue;
+        hasCountedStep = true;
+        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
+        if (!step || !step.confirmed) return false;
+      }
+      return hasCountedStep;
+    }
     function syncDerivedSteps() {
-      const preflightPhaseIndex = phases.findIndex(phase => phase.title === 'Pre-flight inspection');
-      const beforeEngineStartPhaseIndex = phases.findIndex(phase => phase.title === 'Before Engine Start');
+      const preflightPhaseIndex = phases.findIndex(function(phase) { return phase.title === 'Pre-flight inspection'; });
+      const beforeEngineStartPhaseIndex = phases.findIndex(function(phase) { return phase.title === 'Before Engine Start'; });
       if (preflightPhaseIndex === -1 || beforeEngineStartPhaseIndex === -1) return;
-      const derivedStepIndex = phases[beforeEngineStartPhaseIndex].items.findIndex(item => item.title === 'Pre-flight inspection');
+      const derivedStepIndex = phases[beforeEngineStartPhaseIndex].items.findIndex(function(item) { return item.title === 'Pre-flight inspection'; });
       if (derivedStepIndex === -1) return;
       const globalDerivedIndex = globalIndexFor(beforeEngineStartPhaseIndex, derivedStepIndex);
       if (flatSteps[globalDerivedIndex]) flatSteps[globalDerivedIndex].confirmed = isPhaseFullyCompleted(preflightPhaseIndex);
     }
     function getActivePhaseIndex() { return activePhaseIndex; }
-    function getFirstActionableStepIndexInPhase(phaseIndex) { const phase = phases[phaseIndex]; for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) { const item = phase.items[itemIndex]; if (!isCountedStep(phase.title, item, itemIndex)) continue; const index = globalIndexFor(phaseIndex, itemIndex); const step = flatSteps[index]; if (!step || step.confirmed || !isUnlocked(index)) continue; return index; } return null; }
-    function getCurrentActionableStepIndex(preferredPhaseIndex) { if (typeof preferredPhaseIndex === 'number' && preferredPhaseIndex >= 0 && preferredPhaseIndex < phases.length) { const inPhase = getFirstActionableStepIndexInPhase(preferredPhaseIndex); if (inPhase !== null) return inPhase; } for (let index = 0; index < flatSteps.length; index += 1) { const step = flatSteps[index]; const phase = phases[step.phaseIndex]; const item = phase && phase.items[step.itemIndex]; if (!phase || !item) continue; if (!isCountedStep(phase.title, item, step.itemIndex)) continue; if (step.confirmed || !isUnlocked(index)) continue; return index; } return null; }
-    function updateAudioToggleUi() { if (!audioModeBtn) return; audioModeBtn.classList.toggle('active', isAudioEnabled || isVoiceModeEnabled); if (isVoiceModeEnabled && isAudioEnabled) { audioModeBtn.textContent = '🎙️🔊'; audioModeBtn.title = 'Voice and audio on'; } else if (isVoiceModeEnabled) { audioModeBtn.textContent = '🎙️'; audioModeBtn.title = 'Voice on'; } else if (isAudioEnabled) { audioModeBtn.textContent = '🔊'; audioModeBtn.title = 'Audio on'; } else { audioModeBtn.textContent = '🔈'; audioModeBtn.title = 'Audio and voice off'; } }
-    function updateVoiceModeUi() { if (!voiceStatusText) return; if (!recognitionAvailable) voiceStatusText.textContent = 'Voice: unavailable in this browser'; else if (!isVoiceModeEnabled) voiceStatusText.textContent = 'Voice: off'; else if (isSpeaking) voiceStatusText.textContent = 'Voice: speaking'; else if (recognitionActive) voiceStatusText.textContent = 'Voice: listening'; else if (lastRecognitionError) voiceStatusText.textContent = 'Voice: ' + lastRecognitionError; else voiceStatusText.textContent = 'Voice: starting'; }
+    function getFirstActionableStepIndexInPhase(phaseIndex) {
+      const phase = phases[phaseIndex];
+      for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) {
+        const item = phase.items[itemIndex];
+        if (!isCountedStep(phase.title, item, itemIndex)) continue;
+        const index = globalIndexFor(phaseIndex, itemIndex);
+        const step = flatSteps[index];
+        if (!step || step.confirmed || !isUnlocked(index)) continue;
+        return index;
+      }
+      return null;
+    }
+    function getCurrentActionableStepIndex(preferredPhaseIndex) {
+      if (typeof preferredPhaseIndex === 'number' && preferredPhaseIndex >= 0 && preferredPhaseIndex < phases.length) {
+        const inPhase = getFirstActionableStepIndexInPhase(preferredPhaseIndex);
+        if (inPhase !== null) return inPhase;
+      }
+      for (let index = 0; index < flatSteps.length; index += 1) {
+        const step = flatSteps[index];
+        const phase = phases[step.phaseIndex];
+        const item = phase && phase.items[step.itemIndex];
+        if (!phase || !item) continue;
+        if (!isCountedStep(phase.title, item, step.itemIndex)) continue;
+        if (step.confirmed || !isUnlocked(index)) continue;
+        return index;
+      }
+      return null;
+    }
+    function updateAudioToggleUi() {
+      if (!audioModeBtn) return;
+      audioModeBtn.classList.toggle('active', isAudioEnabled);
+      audioModeBtn.classList.toggle('off', !isAudioEnabled);
+      audioModeBtn.textContent = isAudioEnabled ? '🔊' : '🔈';
+      audioModeBtn.title = isAudioEnabled ? 'Audio on' : 'Audio off';
+
+      if (!voiceModeBtn) return;
+      voiceModeBtn.classList.toggle('active', isVoiceModeEnabled);
+      voiceModeBtn.classList.toggle('off', !isVoiceModeEnabled);
+      voiceModeBtn.textContent = '🎙️';
+      voiceModeBtn.title = isVoiceModeEnabled ? 'Voice on' : 'Voice off';
+    }
+    function updateVoiceModeUi() {
+      if (!voiceStatusText) return;
+      voiceStatusText.classList.remove('off', 'listening', 'speaking', 'error');
+      if (!recognitionAvailable) {
+        voiceStatusText.textContent = 'Voice unavailable';
+        voiceStatusText.classList.add('error');
+      } else if (!isVoiceModeEnabled) {
+        voiceStatusText.textContent = 'Voice off';
+        voiceStatusText.classList.add('off');
+      } else if (isSpeaking) {
+        voiceStatusText.textContent = 'Speaking';
+        voiceStatusText.classList.add('speaking');
+      } else if (recognitionActive) {
+        voiceStatusText.textContent = 'Listening';
+        voiceStatusText.classList.add('listening');
+      } else if (lastRecognitionError) {
+        voiceStatusText.textContent = 'Voice error';
+        voiceStatusText.classList.add('error');
+      } else {
+        voiceStatusText.textContent = 'Starting';
+        voiceStatusText.classList.add('speaking');
+      }
+    }
     function pickPreferredVoice() {
       if (!('speechSynthesis' in window)) return null;
       const voices = window.speechSynthesis.getVoices() || [];
       if (!voices.length) return null;
-      const preferredNames = [
-        // Prefer UK English male voices first (more "ATC/pilot" tone)
-        'Google UK English Male',
-        'Microsoft Ryan',
-        'Microsoft Guy',
-        'Microsoft David',
-        'Microsoft Mark',
-        // Fallback well-known male voices
-        'Alex',
-        'Daniel'
-      ];
+      const preferredNames = ['Google UK English Male', 'Microsoft Ryan', 'Microsoft Guy', 'Microsoft David', 'Microsoft Mark', 'Alex', 'Daniel'];
       for (let i = 0; i < preferredNames.length; i += 1) {
-        const found = voices.find(function(voice) {
-          return (voice.name || '').toLowerCase().includes(preferredNames[i].toLowerCase());
-        });
+        const found = voices.find(function(voice) { return (voice.name || '').toLowerCase().includes(preferredNames[i].toLowerCase()); });
         if (found) return found;
       }
-      const anyEnglish = voices.find(function(voice) {
-        return (voice.lang || '').toLowerCase().startsWith('en');
-      });
-      return anyEnglish || voices[0] || null;
+      return voices.find(function(voice) { return (voice.lang || '').toLowerCase().startsWith('en'); }) || voices[0] || null;
     }
-    function ensureVoiceReady() { if ('speechSynthesis' in window && !preferredVoice) { preferredVoice = pickPreferredVoice(); } }
-    if ('speechSynthesis' in window) { window.speechSynthesis.onvoiceschanged = function() { preferredVoice = pickPreferredVoice(); }; }
+    function ensureVoiceReady() { if ('speechSynthesis' in window && !preferredVoice) preferredVoice = pickPreferredVoice(); }
+    if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = function() { preferredVoice = pickPreferredVoice(); };
     function speakText(text) {
       if (!isAudioEnabled) return;
       if (!('speechSynthesis' in window)) return;
       ensureVoiceReady();
       clearPhaseAnnouncementTimer();
       if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; }
-      if (isVoiceModeEnabled) { stopVoiceRecognition(); }
+      if (isVoiceModeEnabled) stopVoiceRecognition();
       isSpeaking = true;
       updateVoiceModeUi();
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       if (preferredVoice) {
         utterance.voice = preferredVoice;
-        // Prefer UK cadence if available
-        utterance.lang = (preferredVoice.lang && preferredVoice.lang.toLowerCase().startsWith('en-gb'))
-          ? preferredVoice.lang
-          : (preferredVoice.lang || 'en-US');
+        utterance.lang = (preferredVoice.lang && preferredVoice.lang.toLowerCase().startsWith('en-gb')) ? preferredVoice.lang : (preferredVoice.lang || 'en-US');
       } else {
         utterance.lang = 'en-GB';
       }
-      // Slightly slower and deeper for clearer, more distinct delivery
       utterance.rate = 1.1;
       utterance.pitch = 0.8;
       utterance.volume = 1;
-      utterance.onend = function() { isSpeaking = false; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() {
-            recognitionRestartTimer = null;
-            startVoiceRecognition();
-          }, 100); } };
-      utterance.onerror = function() { isSpeaking = false; lastRecognitionError = 'speech error'; updateVoiceModeUi(); if (isVoiceModeEnabled) { recognitionRestartTimer = setTimeout(function() {
-            recognitionRestartTimer = null;
-            startVoiceRecognition();
-          }, 100); } };
+      utterance.onend = function() {
+        isSpeaking = false;
+        updateVoiceModeUi();
+        if (isVoiceModeEnabled) {
+          recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 100);
+        }
+      };
+      utterance.onerror = function() {
+        isSpeaking = false;
+        lastRecognitionError = 'speech error';
+        updateVoiceModeUi();
+        if (isVoiceModeEnabled) {
+          recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 100);
+        }
+      };
       window.speechSynthesis.speak(utterance);
     }
     function speakStepWithPhase(index, forcePhaseHeader) {
@@ -1257,7 +1751,7 @@
       if (!phase || !item) return;
       const title = getDisplayStepTitle(phase, item);
       if (forcePhaseHeader) { lastAnnouncedPhaseIndex = step.phaseIndex; speakText(phase.title + '. ' + title + '. ' + step.detail); }
-      else { speakText(title + '. ' + step.detail); }
+      else speakText(title + '. ' + step.detail);
     }
     function speakCurrentActionableStep(forcePhaseHeader, preferredPhaseIndex) {
       const phaseIndex = typeof preferredPhaseIndex === 'number' ? preferredPhaseIndex : currentVoicePhaseIndex;
@@ -1266,31 +1760,210 @@
       currentVoicePhaseIndex = flatSteps[index] ? flatSteps[index].phaseIndex : currentVoicePhaseIndex;
       speakStepWithPhase(index, forcePhaseHeader);
     }
-    function schedulePhaseActivationAnnouncement(phaseIndex) { if (!isVoiceModeEnabled || !isAudioEnabled) return; const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex); if (actionableIndex === null) return; clearPhaseAnnouncementTimer(); phaseAnnouncementTimer = setTimeout(function() {
-        phaseAnnouncementTimer = null;
-        speakStepWithPhase(actionableIndex, true);
-      }, 0); }
+    function schedulePhaseActivationAnnouncement(phaseIndex) {
+      if (!isAudioEnabled) return;
+      const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex);
+      if (actionableIndex === null) return;
+      clearPhaseAnnouncementTimer();
+      phaseAnnouncementTimer = setTimeout(function() { phaseAnnouncementTimer = null; speakStepWithPhase(actionableIndex, true); }, 0);
+    }
     function clearPhaseAnnouncementTimer() { if (phaseAnnouncementTimer) { clearTimeout(phaseAnnouncementTimer); phaseAnnouncementTimer = null; } }
-    function startVoiceRecognition() { if (!recognition || !recognitionAvailable || recognitionStarting || recognitionActive || isSpeaking) return; recognitionStarting = true; lastRecognitionError = ''; updateVoiceModeUi(); try { recognition.start(); } catch { recognitionStarting = false; lastRecognitionError = 'mic start failed'; updateVoiceModeUi(); } setTimeout(function() { recognitionStarting = false; updateVoiceModeUi(); }, 500); }
-    function stopVoiceRecognition() { if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; } recognitionActive = false; recognitionStarting = false; updateVoiceModeUi(); if (!recognition || !recognitionAvailable) return; try { recognition.stop(); } catch {} }
-    function maybeAutoRecordTime(step) { if (!step) return; if (step.phaseTitle === 'Engine Start' && step.title === 'Master switch' && headerStartTime.textContent === '--') { const value = getCurrentZuluTimeValue(); headerStartTime.textContent = value; localStorage.setItem(startTimeKey, value); } if (step.phaseTitle === 'Parking' && step.title === 'Master Switch') { const value = getCurrentZuluTimeValue(); headerEndTime.textContent = value; localStorage.setItem(endTimeKey, value); } }
-    function buildCompletionSummary() { const parts = getCurrentZuluParts(); return { aircraft: headerAircraft.value, airport: headerAirport.value, altitude: headerAirportAlt.value || '--', radioFreq: headerRadioFreq.value || '--', date: parts.dateText, startTime: headerStartTime.textContent, endTime: headerEndTime.textContent, hobbs: hobbsValue || '--', fuelLeft: fuelState.left || '--', fuelRight: fuelState.right || '--', completedAt: parts.timeText }; }
-    function renderSummaryCard() { if (!lastSummary) { finishSummaryCard.classList.remove('visible'); finishSummaryGrid.innerHTML = ''; return; } const fields = [['Aircraft', lastSummary.aircraft], ['Airport', lastSummary.airport], ['Altitude (ft)', lastSummary.altitude], ['Radio (MHz)', lastSummary.radioFreq], ['Date (UTC)', lastSummary.date], ['Start time (Z)', lastSummary.startTime], ['End time (Z)', lastSummary.endTime], ['Hobbs', lastSummary.hobbs], ['Fuel left', lastSummary.fuelLeft], ['Fuel right', lastSummary.fuelRight], ['Completed at (Z)', lastSummary.completedAt]]; finishSummaryGrid.innerHTML = fields.map(entry => '<div class="summary-item"><span class="summary-label">' + escapeHtml(entry[0]) + '</span><div class="summary-value">' + escapeHtml(entry[1] || '--') + '</div></div>').join(''); finishSummaryCard.classList.add('visible'); }
+    function startVoiceRecognition() {
+      if (!recognition || !recognitionAvailable || recognitionStarting || recognitionActive || isSpeaking) return;
+      recognitionStarting = true;
+      lastRecognitionError = '';
+      updateVoiceModeUi();
+      try { recognition.start(); }
+      catch (_) { recognitionStarting = false; lastRecognitionError = 'mic start failed'; updateVoiceModeUi(); }
+      setTimeout(function() { recognitionStarting = false; updateVoiceModeUi(); }, 500);
+    }
+    function stopVoiceRecognition() {
+      if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; }
+      recognitionActive = false;
+      recognitionStarting = false;
+      updateVoiceModeUi();
+      if (!recognition || !recognitionAvailable) return;
+      try { recognition.stop(); } catch (_) {}
+    }
+    function maybeAutoRecordTime(step) {
+      if (!step) return;
+      if (step.phaseTitle === 'Engine Start' && step.title === 'Master switch' && headerStartTime.textContent === '--') {
+        const value = getCurrentZuluTimeValue();
+        headerStartTime.textContent = value;
+        localStorage.setItem(startTimeKey, value);
+      }
+      if (step.phaseTitle === 'Parking' && step.title === 'Master Switch') {
+        const value = getCurrentZuluTimeValue();
+        headerEndTime.textContent = value;
+        localStorage.setItem(endTimeKey, value);
+      }
+    }
+    function buildCompletionSummary() {
+      const parts = getCurrentZuluParts();
+      return {
+        aircraft: headerAircraft.value,
+        airport: headerAirport.value,
+        altitude: headerAirportAlt.textContent || '--',
+        radioFreq: headerRadioFreq.textContent || '--',
+        date: parts.dateText,
+        startTime: headerStartTime.textContent,
+        endTime: headerEndTime.textContent,
+        hobbs: hobbsValue || '--',
+        fuelLeft: fuelState.left || '--',
+        fuelRight: fuelState.right || '--',
+        completedAt: parts.timeText
+      };
+    }
+    function renderSummaryCard() {
+      if (!lastSummary) { finishSummaryCard.classList.remove('visible'); finishSummaryGrid.innerHTML = ''; return; }
+      const fields = [['Aircraft', lastSummary.aircraft], ['Airport', lastSummary.airport], ['Altitude (ft)', lastSummary.altitude], ['Radio (MHz)', lastSummary.radioFreq], ['Date (UTC)', lastSummary.date], ['Start time (Z)', lastSummary.startTime], ['End time (Z)', lastSummary.endTime], ['Hobs', lastSummary.hobbs], ['Fuel left', lastSummary.fuelLeft], ['Fuel right', lastSummary.fuelRight], ['Completed at (Z)', lastSummary.completedAt]];
+      finishSummaryGrid.innerHTML = fields.map(function(entry) { return '<div class="summary-item"><span class="summary-label">' + escapeHtml(entry[0]) + '</span><div class="summary-value">' + escapeHtml(entry[1] || '--') + '</div></div>'; }).join('');
+      finishSummaryCard.classList.add('visible');
+    }
     function showFinishSummary() { lastSummary = buildCompletionSummary(); saveLastSummary(); renderSummaryCard(); finishSummaryCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    function resetProgressForStructureChange() { rebuildFlatSteps(); flatSteps.forEach(step => step.confirmed = false); syncDerivedSteps(); saveProgress(); }
-    function openInsertEditor(phaseIndex, insertAt, existingStep) { editorState = { mode: existingStep ? 'edit' : 'insert', phaseIndex, insertAt, title: existingStep ? existingStep.title : '', detail: existingStep ? existingStep.detail : '', note: existingStep ? (existingStep.note || '') : '' }; render(); }
+    function resetProgressForStructureChange() { rebuildFlatSteps(); flatSteps.forEach(function(step) { step.confirmed = false; }); syncDerivedSteps(); saveProgress(); }
+    function openInsertEditor(phaseIndex, insertAt, existingStep) {
+      editorState = { mode: existingStep ? 'edit' : 'insert', phaseIndex: phaseIndex, insertAt: insertAt, title: existingStep ? existingStep.title : '', detail: existingStep ? existingStep.detail : '', note: existingStep ? (existingStep.note || '') : '' };
+      render();
+    }
     function closeEditor() { editorState = null; render(); }
-    function saveEditorStep() { if (!editorState) return; if (editorState.mode === 'edit-header') { const title = editorState.title.trim(); const detail = editorState.detail.trim(); if (!title) return alert('Header title is required.'); appTitle.textContent = title; appDescription.textContent = detail; saveHeaderContent(); closeEditor(); return; } const phase = phases[editorState.phaseIndex]; if (!phase) return; const title = editorState.title.trim(); const detail = editorState.detail.trim(); const note = editorState.note.trim(); if (!title || !detail) return alert('Step title and detail are required.'); const newStep = { title, detail, note }; if (editorState.mode === 'edit') phase.items[editorState.insertAt] = newStep; else phase.items.splice(editorState.insertAt, 0, newStep); saveCustomChecklist(); resetProgressForStructureChange(); closeEditor(); }
-    function deleteStep(phaseIndex, itemIndex) { const phase = phases[phaseIndex]; if (!phase) return; const item = phase.items[itemIndex]; if (!item || isProtectedStep(phase.title, item, itemIndex)) return; phase.items.splice(itemIndex, 1); saveCustomChecklist(); resetProgressForStructureChange(); render(); }
-    function buildInlineEditorHtml() { if (!editorState) return ''; const isHeaderEditor = editorState.mode === 'edit-header'; return `<div class="edit-panel" data-inline-editor="true">${isHeaderEditor ? `<div><label class="small-label">Header title</label><input id="editorTitle" type="text" value="${escapeHtml(editorState.title)}" autofocus></div><div><label class="small-label">Header description</label><textarea id="editorDetail">${escapeHtml(editorState.detail)}</textarea></div>` : `<div class="edit-grid"><div><label class="small-label">Step title</label><input id="editorTitle" type="text" value="${escapeHtml(editorState.title)}" autofocus></div><div><label class="small-label">Step detail</label><input id="editorDetail" type="text" value="${escapeHtml(editorState.detail)}"></div></div><div><label class="small-label">Optional note</label><textarea id="editorNote">${escapeHtml(editorState.note)}</textarea></div>`}<div class="step-tools"><button class="mini-btn" id="saveEditorBtn" type="button">${isHeaderEditor ? 'Save header' : 'Save step'}</button><button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button></div></div>`; }
+    function saveEditorStep() {
+      if (!editorState) return;
+      if (editorState.mode === 'edit-header') {
+        const title = editorState.title.trim();
+        const disclaimer = (editorState.disclaimer || '').trim();
+        if (!title) return alert('Header title is required.');
+        appTitle.textContent = title;
+        if (headerDisclaimer) headerDisclaimer.textContent = disclaimer;
+        saveHeaderContent();
+        closeEditor();
+        return;
+      }
+      if (editorState.mode === 'edit-airports') {
+        const nextAirports = (editorState.airports || []).map(function(item) {
+          return {
+            code: String(item.code || '').trim().toUpperCase(),
+            altitude: String(item.altitude || '').trim(),
+            radio: String(item.radio || '').trim()
+          };
+        }).filter(function(item) { return item.code; });
+        const codes = new Set();
+        for (let i = 0; i < nextAirports.length; i += 1) {
+          if (codes.has(nextAirports[i].code)) return alert('Airport codes must be unique.');
+          codes.add(nextAirports[i].code);
+        }
+        if (!nextAirports.length) return alert('At least one airport is required.');
+        airports = nextAirports;
+        saveAirports();
+        renderAirportOptions();
+        if (!getAirportConfig(headerAirport.value)) {
+          headerAirport.value = airports[0].code;
+          localStorage.setItem(airportKey, headerAirport.value);
+        }
+        applyAirportDefaults(headerAirport.value);
+        closeEditor();
+        return;
+      }
+      const phase = phases[editorState.phaseIndex];
+      if (!phase) return;
+      const title = editorState.title.trim();
+      const detail = editorState.detail.trim();
+      const note = editorState.note.trim();
+      if (!title || !detail) return alert('Step title and detail are required.');
+      const newStep = { title: title, detail: detail, note: note };
+      if (editorState.mode === 'edit') phase.items[editorState.insertAt] = newStep;
+      else phase.items.splice(editorState.insertAt, 0, newStep);
+      saveCustomChecklist();
+      resetProgressForStructureChange();
+      closeEditor();
+    }
+    function deleteStep(phaseIndex, itemIndex) {
+      const phase = phases[phaseIndex];
+      if (!phase) return;
+      const item = phase.items[itemIndex];
+      if (!item || isProtectedStep(phase.title, item, itemIndex)) return;
+      phase.items.splice(itemIndex, 1);
+      saveCustomChecklist();
+      resetProgressForStructureChange();
+      render();
+    }
+    function buildInlineEditorHtml() {
+      if (!editorState) return '';
+      const isHeaderEditor = editorState.mode === 'edit-header';
+      if (editorState.mode === 'edit-airports') {
+        const rows = (editorState.airports || []).map(function(item, index) {
+          return '<div class="edit-grid" data-airport-row="' + index + '" style="margin-top:8px;align-items:end;">' +
+            '<div><label class="small-label">ICAO</label><input data-airport-code="' + index + '" type="text" value="' + escapeHtml(item.code || '') + '" placeholder="ESGA"></div>' +
+            '<div><label class="small-label">Altitude</label><input data-airport-altitude="' + index + '" type="text" value="' + escapeHtml(item.altitude || '') + '" placeholder="424 ft"></div>' +
+            '<div><label class="small-label">Radio</label><input data-airport-radio="' + index + '" type="text" value="' + escapeHtml(item.radio || '') + '" placeholder="123.550 Backamo"></div>' +
+            '<div><button class="mini-btn danger-btn" data-remove-airport-row="' + index + '" type="button">Remove</button></div>' +
+          '</div>';
+        }).join('');
+        return '<div class="edit-panel" data-inline-editor="true">' +
+          '<div><label class="small-label">Airports</label>' + rows + '</div>' +
+          '<div class="step-tools" style="margin-top:12px;"><button class="mini-btn" id="addAirportRowBtn" type="button">Add airport</button><button class="mini-btn" id="saveEditorBtn" type="button">Save airports</button><button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button></div></div>';
+      }
+      return '<div class="edit-panel" data-inline-editor="true">' +
+        (isHeaderEditor
+          ? '<div><label class="small-label">Header title</label><input id="editorTitle" type="text" value="' + escapeHtml(editorState.title) + '" autofocus></div>' +
+            '<div><label class="small-label">Disclaimer text</label><textarea id="editorDisclaimer">' + escapeHtml(editorState.disclaimer || '') + '</textarea></div>'
+          : '<div class="edit-grid"><div><label class="small-label">Step title</label><input id="editorTitle" type="text" value="' + escapeHtml(editorState.title) + '" autofocus></div><div><label class="small-label">Step detail</label><input id="editorDetail" type="text" value="' + escapeHtml(editorState.detail) + '"></div></div><div><label class="small-label">Optional note</label><textarea id="editorNote">' + escapeHtml(editorState.note) + '</textarea></div>') +
+        '<div class="step-tools"><button class="mini-btn" id="saveEditorBtn" type="button">' + (isHeaderEditor ? 'Save header' : 'Save step') + '</button><button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button></div></div>';
+    }
     function setActiveTab(tabName) { currentTab = tabName; }
-    function openTabEditor(tabId) { const existing = tabDefinitions.find(tab => tab.id === tabId); editorState = { mode: existing ? 'edit-tab' : 'add-tab', tabId: existing ? existing.id : null, title: existing ? existing.label : '', phaseTitles: existing ? existing.phaseTitles.slice() : [] }; render(); }
-    function saveTabEditor() { if (!editorState || (editorState.mode !== 'edit-tab' && editorState.mode !== 'add-tab')) return; const label = String(editorState.title || '').trim(); if (!label) return alert('Tab name is required.'); const phaseTitles = Array.isArray(editorState.phaseTitles) ? editorState.phaseTitles.slice() : []; if (editorState.mode === 'edit-tab') tabDefinitions = tabDefinitions.map(tab => tab.id !== editorState.tabId ? tab : { id: tab.id, label, phaseTitles }); else { const newId = 'tab-' + Date.now(); tabDefinitions.push({ id: newId, label, phaseTitles }); currentTab = newId; } syncTabsWithPhases(); editorState = null; render(); }
-    function deleteCurrentTab() { if (tabDefinitions.length <= 1) return alert('At least one tab is required.'); tabDefinitions = tabDefinitions.filter(tab => tab.id !== currentTab); currentTab = tabDefinitions[0].id; syncTabsWithPhases(); editorState = null; render(); }
-    function buildTabEditorHtml() { if (!editorState || (editorState.mode !== 'edit-tab' && editorState.mode !== 'add-tab')) return ''; const selected = new Set(editorState.phaseTitles || []); return '<div class="edit-panel" data-tab-editor="true">' + '<div><label class="small-label">Tab name</label><input id="tabEditorTitle" type="text" value="' + escapeHtml(editorState.title || '') + '" /></div>' + '<div style="margin-top:12px;"><label class="small-label">Include phases</label>' + phases.map((phase, index) => '<label style="display:flex;align-items:center;gap:8px;margin-top:6px;"><input type="checkbox" data-tab-phase-index="' + index + '"' + (selected.has(phase.title) ? ' checked' : '') + '> <span>' + escapeHtml(phase.title) + '</span></label>').join('') + '</div><div class="step-tools" style="margin-top:12px;"><button class="mini-btn" id="saveTabEditorBtn" type="button">Save tab</button><button class="mini-btn" id="cancelTabEditorBtn" type="button">Cancel</button></div></div>'; }
+    function openTabEditor(tabId) {
+      const existing = tabDefinitions.find(function(tab) { return tab.id === tabId; });
+      editorState = { mode: existing ? 'edit-tab' : 'add-tab', tabId: existing ? existing.id : null, title: existing ? existing.label : '', phaseTitles: existing ? existing.phaseTitles.slice() : [] };
+      render();
+    }
+    function saveTabEditor() {
+      if (!editorState || (editorState.mode !== 'edit-tab' && editorState.mode !== 'add-tab')) return;
+      const label = String(editorState.title || '').trim();
+      if (!label) return alert('Tab name is required.');
+      const phaseTitles = Array.isArray(editorState.phaseTitles) ? editorState.phaseTitles.slice() : [];
+      if (editorState.mode === 'edit-tab') tabDefinitions = tabDefinitions.map(function(tab) { return tab.id !== editorState.tabId ? tab : { id: tab.id, label: label, phaseTitles: phaseTitles }; });
+      else { const newId = 'tab-' + Date.now(); tabDefinitions.push({ id: newId, label: label, phaseTitles: phaseTitles }); currentTab = newId; }
+      syncTabsWithPhases();
+      editorState = null;
+      render();
+    }
+    function deleteCurrentTab() {
+      if (tabDefinitions.length <= 1) return alert('At least one tab is required.');
+      tabDefinitions = tabDefinitions.filter(function(tab) { return tab.id !== currentTab; });
+      currentTab = tabDefinitions[0].id;
+      syncTabsWithPhases();
+      editorState = null;
+      render();
+    }
+    function buildTabEditorHtml() {
+      if (!editorState || (editorState.mode !== 'edit-tab' && editorState.mode !== 'add-tab')) return '';
+      const selected = new Set(editorState.phaseTitles || []);
+      return '<div class="edit-panel" data-tab-editor="true">' +
+        '<div><label class="small-label">Tab name</label><input id="tabEditorTitle" type="text" value="' + escapeHtml(editorState.title || '') + '" /></div>' +
+        '<div style="margin-top:12px;"><label class="small-label">Include phases</label>' +
+        phases.map(function(phase, index) { return '<label style="display:flex;align-items:center;gap:8px;margin-top:6px;"><input type="checkbox" data-tab-phase-index="' + index + '"' + (selected.has(phase.title) ? ' checked' : '') + '> <span>' + escapeHtml(phase.title) + '</span></label>'; }).join('') +
+        '</div><div class="step-tools" style="margin-top:12px;"><button class="mini-btn" id="saveTabEditorBtn" type="button">Save tab</button><button class="mini-btn" id="cancelTabEditorBtn" type="button">Cancel</button></div></div>';
+    }
     function getNextPhaseIndexInOrder(currentPhaseIndex) { for (let phaseIndex = currentPhaseIndex + 1; phaseIndex < phases.length; phaseIndex += 1) if (!isPhaseFullyCompleted(phaseIndex)) return phaseIndex; return null; }
-    function activatePhase(phaseIndex) { const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex); collapsedPhases[phaseIndex] = false; activePhaseIndex = phaseIndex; currentVoicePhaseIndex = phaseIndex; pendingFocusStepIndex = actionableIndex; saveCollapsedState(); render(); schedulePhaseActivationAnnouncement(phaseIndex); }
-    function deactivatePhase(phaseIndex) { collapsedPhases[phaseIndex] = true; if (activePhaseIndex === phaseIndex) activePhaseIndex = null; if (currentVoicePhaseIndex === phaseIndex) currentVoicePhaseIndex = null; pendingFocusStepIndex = null; clearPhaseAnnouncementTimer(); saveCollapsedState(); render(); }
+    function activatePhase(phaseIndex) {
+      const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex);
+      collapsedPhases[phaseIndex] = false;
+      activePhaseIndex = phaseIndex;
+      currentVoicePhaseIndex = phaseIndex;
+      pendingFocusStepIndex = actionableIndex;
+      saveCollapsedState();
+      render();
+      schedulePhaseActivationAnnouncement(phaseIndex);
+    }
+    function deactivatePhase(phaseIndex) {
+      collapsedPhases[phaseIndex] = true;
+      if (activePhaseIndex === phaseIndex) activePhaseIndex = null;
+      if (currentVoicePhaseIndex === phaseIndex) currentVoicePhaseIndex = null;
+      pendingFocusStepIndex = null;
+      clearPhaseAnnouncementTimer();
+      saveCollapsedState();
+      render();
+    }
     function confirmStep(index) {
       if (!flatSteps[index] || flatSteps[index].confirmed || !isUnlocked(index)) return;
       const currentStep = flatSteps[index];
@@ -1305,15 +1978,13 @@
         const completedPhaseIndex = currentStep.phaseIndex;
         saveProgress();
         const nextPhaseIndex = getNextPhaseIndexInOrder(completedPhaseIndex);
-        collapsedPhases = phases.map(() => true);
+        collapsedPhases = phases.map(function() { return true; });
         activePhaseIndex = null;
         focusPhaseIndex = completedPhaseIndex;
         pendingFocusStepIndex = null;
         currentVoicePhaseIndex = nextPhaseIndex;
         saveCollapsedState();
         render();
-
-        // scroll next phase into center
         if (nextPhaseIndex !== null) {
           setTimeout(function() {
             const btn = document.querySelector('[data-phase-index="' + nextPhaseIndex + '"]');
@@ -1321,24 +1992,32 @@
             if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 0);
         }
-
-        if (isAudioEnabled) { speakText(phases[completedPhaseIndex].title + '. Checks completed.'); }
+        if (isAudioEnabled) speakText(phases[completedPhaseIndex].title + '. Checks completed.');
         return;
       }
       saveProgress();
       render();
-
-      // scroll next step into center
       if (pendingFocusStepIndex !== null) {
         setTimeout(function() {
           const el = document.querySelector('[data-step-index="' + pendingFocusStepIndex + '"]');
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 0);
       }
-
-      if (isVoiceModeEnabled) { speakCurrentActionableStep(false, currentVoicePhaseIndex); }
+      if (isAudioEnabled) speakCurrentActionableStep(false, currentVoicePhaseIndex);
     }
-    function renderHeaderEditor() { const existing = document.getElementById('headerInlineEditorWrap'); if (existing) existing.remove(); if (!(editorState && editorState.mode === 'edit-header')) return; const headerCard = document.querySelector('.container > .card'); if (!headerCard) return; const wrap = document.createElement('div'); wrap.id = 'headerInlineEditorWrap'; wrap.innerHTML = buildInlineEditorHtml(); const progressWrap = headerCard.querySelector('.progress-wrap'); if (progressWrap) progressWrap.parentNode.insertBefore(wrap, progressWrap); else headerCard.appendChild(wrap); }
+    function renderHeaderEditor() {
+      const existing = document.getElementById('headerInlineEditorWrap');
+      if (existing) existing.remove();
+      if (!(editorState && (editorState.mode === 'edit-header' || editorState.mode === 'edit-airports'))) return;
+      const headerCard = document.querySelector('.container > .card');
+      if (!headerCard) return;
+      const wrap = document.createElement('div');
+      wrap.id = 'headerInlineEditorWrap';
+      wrap.innerHTML = buildInlineEditorHtml();
+      const progressWrap = headerCard.querySelector('.progress-wrap');
+      if (progressWrap) progressWrap.parentNode.insertBefore(wrap, progressWrap);
+      else headerCard.appendChild(wrap);
+    }
     function buildStepHtml(phase, phaseIndex, item, itemIndex) {
       const stepIndex = globalIndexFor(phaseIndex, itemIndex);
       const step = flatSteps[stepIndex];
@@ -1354,7 +2033,12 @@
       const isEditingThisStep = editorState && editorState.mode === 'edit' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex;
       const isProtected = isProtectedStep(phase.title, item, itemIndex);
       if (isEditingThisStep) return buildInlineEditorHtml();
-      return `<div class="step ${step && step.confirmed ? 'completed' : ''} ${focusClass}" data-step-card="${stepIndex}" data-step-index="${stepIndex}"><div class="step-header"><div>${isTip ? '' : `<div class="step-number">Step ${itemIndex + 1}</div>`}<h3 class="step-title">${isTip ? '💡 TIP — Taxi technique' : escapeHtml(getDisplayStepTitle(phase, item))}</h3><p class="step-detail">${escapeHtml(item.detail)}</p></div>${isTip ? '' : `<span class="status ${stateClass}">${escapeHtml(stateLabel)}</span>`}</div>${isFuelInput ? `<div class="fuel-input-grid"><div class="fuel-input-card"><label for="fuel-left-${stepIndex}">Left tank</label><input id="fuel-left-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.left)}" data-fuel-side="left"></div><div class="fuel-input-card"><label for="fuel-right-${stepIndex}">Right tank</label><input id="fuel-right-${stepIndex}" type="number" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(fuelState.right)}" data-fuel-side="right"></div></div><div class="fuel-helper">Enter measured fuel quantity for both tanks. These values remain visible in the collapsed phase header.</div>` : ''}${isHobbsInput ? `<div class="fuel-input-grid"><div class="fuel-input-card"><label for="hobbs-${stepIndex}">Hobbs</label><input id="hobbs-${stepIndex}" type="text" inputmode="decimal" placeholder="Enter value" value="${escapeHtml(hobbsValue)}" data-hobbs-input="true"></div></div><div class="fuel-helper">Enter the Hobbs value. This value remains visible in the collapsed phase header.</div>` : ''}${step && step.note ? `<div class="step-note">${escapeHtml(step.note)}</div>` : ''}${isDerived && (!step || !step.confirmed) ? `<div class="fuel-helper">This step is completed automatically when the Pre-flight inspection phase is fully completed.</div>` : ''}${isEditMode ? `<div class="step-tools"><button class="mini-btn" data-insert-before="${phaseIndex}:${itemIndex}" type="button">Insert before</button><button class="mini-btn" data-insert-after="${phaseIndex}:${itemIndex + 1}" type="button">Insert after</button>${!isProtected ? `<button class="mini-btn" data-edit-step="${phaseIndex}:${itemIndex}" type="button">Edit</button>` : ''}${!isProtected ? `<button class="mini-btn danger-btn" data-delete-step="${phaseIndex}:${itemIndex}" type="button">Delete</button>` : ''}</div>` : ''}</div>`;
+      return '<div class="step ' + (step && step.confirmed ? 'completed' : '') + ' ' + focusClass + '" data-step-card="' + stepIndex + '" data-step-index="' + stepIndex + '"><div class="step-header"><div>' + (isTip ? '' : '<div class="step-number">Step ' + (itemIndex + 1) + '</div>') + '<h3 class="step-title">' + (isTip ? '💡 TIP — Taxi technique' : escapeHtml(getDisplayStepTitle(phase, item))) + '</h3><p class="step-detail">' + escapeHtml(item.detail) + '</p></div>' + (isTip ? '' : '<span class="status ' + stateClass + '">' + escapeHtml(stateLabel) + '</span>') + '</div>' +
+        (isFuelInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="fuel-left-' + stepIndex + '">Left tank</label><input id="fuel-left-' + stepIndex + '" type="number" inputmode="decimal" placeholder="Enter value" value="' + escapeHtml(fuelState.left) + '" data-fuel-side="left"></div><div class="fuel-input-card"><label for="fuel-right-' + stepIndex + '">Right tank</label><input id="fuel-right-' + stepIndex + '" type="number" inputmode="decimal" placeholder="Enter value" value="' + escapeHtml(fuelState.right) + '" data-fuel-side="right"></div></div><div class="fuel-helper">Enter measured fuel quantity for both tanks. These values remain visible in the collapsed phase header.</div>' : '') +
+        (isHobbsInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="hobbs-' + stepIndex + '">Hobs</label><input id="hobbs-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="Enter value" value="' + escapeHtml(hobbsValue) + '" data-hobbs-input="true"></div></div><div class="fuel-helper">Enter the Hobs value. This value remains visible in the collapsed phase header.</div>' : '') +
+        (step && step.note ? '<div class="step-note">' + escapeHtml(step.note) + '</div>' : '') +
+        (isDerived && (!step || !step.confirmed) ? '<div class="fuel-helper">This step is completed automatically when the Pre-flight inspection phase is fully completed.</div>' : '') +
+        (isEditMode ? '<div class="step-tools"><button class="mini-btn" data-insert-before="' + phaseIndex + ':' + itemIndex + '" type="button">Insert before</button><button class="mini-btn" data-insert-after="' + phaseIndex + ':' + (itemIndex + 1) + '" type="button">Insert after</button>' + (!isProtected ? '<button class="mini-btn" data-edit-step="' + phaseIndex + ':' + itemIndex + '" type="button">Edit</button>' : '') + (!isProtected ? '<button class="mini-btn danger-btn" data-delete-step="' + phaseIndex + ':' + itemIndex + '" type="button">Delete</button>' : '') + '</div>' : '') + '</div>';
     }
     function attachRenderEvents() {
       document.querySelectorAll('.phase-toggle[data-phase-index]').forEach(function(btn) {
@@ -1374,49 +2058,90 @@
           confirmStep(stepIndex);
         });
       });
-      document.querySelectorAll('[data-insert-before]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.insertBefore.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }));
-      document.querySelectorAll('[data-insert-after]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.insertAfter.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }));
-      document.querySelectorAll('[data-add-end]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.addEnd.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }));
-      document.querySelectorAll('[data-edit-step]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.editStep.split(':').map(Number); const phase = phases[parts[0]]; if (!phase || !phase.items[parts[1]]) return; openInsertEditor(parts[0], parts[1], phase.items[parts[1]]); }));
-      document.querySelectorAll('[data-delete-step]').forEach(btn => btn.addEventListener('click', () => { const parts = btn.dataset.deleteStep.split(':').map(Number); deleteStep(parts[0], parts[1]); }));
+      document.querySelectorAll('[data-insert-before]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.insertBefore.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }); });
+      document.querySelectorAll('[data-insert-after]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.insertAfter.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }); });
+      document.querySelectorAll('[data-add-end]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.addEnd.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }); });
+      document.querySelectorAll('[data-edit-step]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.editStep.split(':').map(Number); const phase = phases[parts[0]]; if (!phase || !phase.items[parts[1]]) return; openInsertEditor(parts[0], parts[1], phase.items[parts[1]]); }); });
+      document.querySelectorAll('[data-delete-step]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.deleteStep.split(':').map(Number); deleteStep(parts[0], parts[1]); }); });
       const saveEditorBtn = document.getElementById('saveEditorBtn');
-      if (saveEditorBtn) saveEditorBtn.addEventListener('click', function() { const titleEl = document.getElementById('editorTitle'); const detailEl = document.getElementById('editorDetail'); const noteEl = document.getElementById('editorNote'); if (!editorState || !titleEl || !detailEl) return; editorState.title = titleEl.value; editorState.detail = detailEl.value; editorState.note = noteEl ? noteEl.value : ''; saveEditorStep(); });
+      if (saveEditorBtn) saveEditorBtn.addEventListener('click', function() {
+        if (!editorState) return;
+        if (editorState.mode === 'edit-airports') {
+          const rows = Array.from(document.querySelectorAll('[data-airport-row]'));
+          editorState.airports = rows.map(function(row, index) {
+            const codeEl = row.querySelector('[data-airport-code="' + index + '"]');
+            const altitudeEl = row.querySelector('[data-airport-altitude="' + index + '"]');
+            const radioEl = row.querySelector('[data-airport-radio="' + index + '"]');
+            return {
+              code: codeEl ? codeEl.value : '',
+              altitude: altitudeEl ? altitudeEl.value : '',
+              radio: radioEl ? radioEl.value : ''
+            };
+          });
+          saveEditorStep();
+          return;
+        }
+        const titleEl = document.getElementById('editorTitle');
+        const detailEl = document.getElementById('editorDetail');
+        const noteEl = document.getElementById('editorNote');
+        if (!titleEl) return;
+        editorState.title = titleEl.value;
+        if (editorState.mode === 'edit-header') {
+          const disclaimerEl = document.getElementById('editorDisclaimer');
+          editorState.disclaimer = disclaimerEl ? disclaimerEl.value : '';
+        } else {
+          if (!detailEl) return;
+          editorState.detail = detailEl.value;
+          editorState.note = noteEl ? noteEl.value : '';
+        }
+        saveEditorStep();
+      });
+      document.querySelectorAll('[data-remove-airport-row]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (!editorState || editorState.mode !== 'edit-airports') return;
+          const index = Number(btn.dataset.removeAirportRow);
+          editorState.airports.splice(index, 1);
+          render();
+        });
+      });
+      const addAirportRowBtn = document.getElementById('addAirportRowBtn');
+      if (addAirportRowBtn) addAirportRowBtn.addEventListener('click', function() {
+        if (!editorState || editorState.mode !== 'edit-airports') return;
+        editorState.airports.push({ code: '', altitude: '', radio: '' });
+        render();
+      });
       const cancelEditorBtn = document.getElementById('cancelEditorBtn');
       if (cancelEditorBtn) cancelEditorBtn.addEventListener('click', closeEditor);
-      document.querySelectorAll('input[data-fuel-side]').forEach(input => input.addEventListener('input', function() { fuelState[input.dataset.fuelSide] = input.value; saveFuelState(); updateTopMeta(); }));
-      document.querySelectorAll('input[data-hobbs-input="true"]').forEach(input => input.addEventListener('input', function() { hobbsValue = input.value; saveHobbsValue(); updateTopMeta(); }));
+      document.querySelectorAll('input[data-fuel-side]').forEach(function(input) { input.addEventListener('input', function() { fuelState[input.dataset.fuelSide] = input.value; saveFuelState(); updateTopMeta(); }); });
+      document.querySelectorAll('input[data-hobbs-input="true"]').forEach(function(input) { input.addEventListener('input', function() { hobbsValue = input.value; saveHobbsValue(); updateTopMeta(); }); });
     }
     function render() {
+      const finalReportCard = document.getElementById('finalReportCard');
+      if (finalReportCard) {
+        finalReportCard.style.display = (currentTab === 'emergency' || currentTab === 'quickref') ? 'none' : 'block';
+      }
+      const quickRefCard = document.querySelector('.info-box-card');
+      if (quickRefCard) quickRefCard.style.display = (currentTab === 'quickref') ? 'block' : 'none';
       syncDerivedSteps();
       syncTabsWithPhases();
       stepsContainer.innerHTML = '';
-
       const currentTabDef = getCurrentTabDefinition();
-      tabsContainer.innerHTML =
-        tabDefinitions.map(tab =>
-          '<button class="tab ' + (tab.id === currentTab ? 'active' : '') +
-          '" data-tab-id="' + escapeHtml(tab.id) + '" type="button">' +
-          escapeHtml(tab.label) +
-          '</button>'
-        ).join('') +
-        (
-          isEditMode
-            ? '<button class="tab action-tab" id="addTabBtn" type="button">+ Tab</button>' +
-              (currentTabDef ? '<button class="tab icon-tab" id="editTabBtn" type="button">✏️</button>' : '') +
-              (currentTabDef && tabDefinitions.length > 1 ? '<button class="tab icon-tab" id="deleteTabBtn" type="button">🗑️</button>' : '')
-            : ''
-        );
-
-      const visiblePhases = phases.filter(p => currentTabDef ? currentTabDef.phaseTitles.includes(p.title) : true);
-
-      if (isEditMode && (editorState && (editorState.mode === 'edit-tab' || editorState.mode === 'add-tab'))) {
+      tabsContainer.innerHTML = tabDefinitions.map(function(tab) {
+        return '<button class="tab ' + (tab.id === currentTab ? 'active' : '') + '" data-tab-id="' + escapeHtml(tab.id) + '" type="button">' + escapeHtml(tab.label) + '</button>';
+      }).join('') + (isEditMode ? '<button class="tab action-tab" id="addTabBtn" type="button">+ Tab</button>' + (currentTabDef ? '<button class="tab icon-tab" id="editTabBtn" type="button">✏️</button>' : '') + (currentTabDef && tabDefinitions.length > 1 ? '<button class="tab icon-tab" id="deleteTabBtn" type="button">🗑️</button>' : '') : '');
+      let visiblePhases = [];
+      if (currentTab === 'quickref') {
+        visiblePhases = [];
+      } else {
+        visiblePhases = phases.filter(function(p) { return currentTabDef ? currentTabDef.phaseTitles.includes(p.title) : true; });
+      }
+      if (isEditMode && editorState && (editorState.mode === 'edit-tab' || editorState.mode === 'add-tab')) {
         tabTools.classList.add('visible');
         tabTools.innerHTML = buildTabEditorHtml();
       } else {
         tabTools.classList.remove('visible');
         tabTools.innerHTML = '';
       }
-
       visiblePhases.forEach(function(phase) {
         const phaseIndex = phases.indexOf(phase);
         const phaseDone = completedCountInPhase(phaseIndex);
@@ -1424,12 +2149,10 @@
         const isPhaseComplete = phaseTotal > 0 && phaseDone === phaseTotal;
         const isRequired = isRequiredPhase(phase.title);
         const fuelSummaryText = phase.title === 'Pre-flight inspection' && (fuelState.left || fuelState.right) ? 'Fuel Tank Volume  L: ' + (fuelState.left || '-') + '  R: ' + (fuelState.right || '-') : '';
-        const hobbsSummaryText = phase.title === 'Parking' && hobbsValue ? 'Hobbs ' + hobbsValue : '';
+        const hobbsSummaryText = phase.title === 'Parking' && hobbsValue ? 'Hobs ' + hobbsValue : '';
         const phaseCard = document.createElement('div');
-        const bluePhases = ['Taxi','Before Departure','Take off','After Take off','Cruise','Approach','After Landing'];
-        const baseClass = phase.title === 'Emergency'
-          ? ' emergency-phase'
-          : (bluePhases.includes(phase.title) ? ' highlight-blue' : ' highlight-green');
+        const bluePhases = ['Taxi', 'Before Departure', 'Take off', 'After Take off', 'Cruise', 'Approach', 'After Landing'];
+        const baseClass = phase.title === 'Emergency' ? ' emergency-phase' : (bluePhases.includes(phase.title) ? ' highlight-blue' : ' highlight-green');
         phaseCard.className = 'card phase-card' + baseClass;
         if (isPhaseComplete) phaseCard.classList.add('completed');
         if (activePhaseIndex === phaseIndex) phaseCard.classList.add('active-phase');
@@ -1445,7 +2168,7 @@
           stepsHtml += buildStepHtml(phase, phaseIndex, item, itemIndex);
         });
         if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === phase.items.length) stepsHtml += buildInlineEditorHtml();
-        phaseCard.innerHTML = `<button class="phase-toggle" data-phase-index="${phaseIndex}" type="button"><div class="phase-header"><div class="phase-title-wrap"><h2>${escapeHtml(phase.title)}</h2></div><div class="phase-summary"><div class="phase-meta">${fuelSummaryText ? `<div class="fuel-summary">${escapeHtml(fuelSummaryText)}</div>` : ''}${hobbsSummaryText ? `<div class="value-summary">${escapeHtml(hobbsSummaryText)}</div>` : ''}<span class="status ${isPhaseComplete ? 'done' : (isRequired ? 'ready' : 'locked')}">${phaseDone} / ${phaseTotal}${isRequired ? '' : ' optional'}</span></div><span class="phase-chevron">▾</span></div></div></button><div class="phase-content"><p class="phase-intro">${escapeHtml(phase.intro)}</p>${isEditMode ? `<div class="phase-tools"><button class="mini-btn" data-add-end="${phaseIndex}:${phase.items.length}" type="button">Add step at end</button></div>` : ''}${stepsHtml}</div>`;
+        phaseCard.innerHTML = '<button class="phase-toggle" data-phase-index="' + phaseIndex + '" type="button"><div class="phase-header"><div class="phase-title-wrap"><h2>' + escapeHtml(phase.title) + '</h2></div><div class="phase-summary"><div class="phase-meta">' + (fuelSummaryText ? '<div class="fuel-summary">' + escapeHtml(fuelSummaryText) + '</div>' : '') + (hobbsSummaryText ? '<div class="value-summary">' + escapeHtml(hobbsSummaryText) + '</div>' : '') + '<span class="status ' + (isPhaseComplete ? 'done' : (isRequired ? 'ready' : 'locked')) + '">' + phaseDone + ' / ' + phaseTotal + (isRequired ? '' : ' optional') + '</span></div><span class="phase-chevron">▾</span></div></div></button><div class="phase-content"><p class="phase-intro">' + escapeHtml(phase.intro) + '</p>' + (isEditMode ? '<div class="phase-tools"><button class="mini-btn" data-add-end="' + phaseIndex + ':' + phase.items.length + '" type="button">Add step at end</button></div>' : '') + stepsHtml + '</div>';
         stepsContainer.appendChild(phaseCard);
       });
       renderHeaderEditor();
@@ -1454,90 +2177,387 @@
       const addTabBtn = document.getElementById('addTabBtn'); if (addTabBtn) addTabBtn.addEventListener('click', function() { editorState = null; openTabEditor(null); });
       const editTabBtn = document.getElementById('editTabBtn'); if (editTabBtn && currentTabDef) editTabBtn.addEventListener('click', function() { editorState = null; openTabEditor(currentTabDef.id); });
       const deleteTabBtn = document.getElementById('deleteTabBtn'); if (deleteTabBtn) deleteTabBtn.addEventListener('click', deleteCurrentTab);
-      const saveTabEditorBtn = document.getElementById('saveTabEditorBtn'); if (saveTabEditorBtn) saveTabEditorBtn.addEventListener('click', function() { const titleEl = document.getElementById('tabEditorTitle'); const selectedTitles = Array.from(document.querySelectorAll('[data-tab-phase-index]:checked')).map(input => phases[Number(input.dataset.tabPhaseIndex)].title); if (titleEl) editorState.title = titleEl.value; editorState.phaseTitles = selectedTitles; saveTabEditor(); });
+      const saveTabEditorBtn = document.getElementById('saveTabEditorBtn'); if (saveTabEditorBtn) saveTabEditorBtn.addEventListener('click', function() { const titleEl = document.getElementById('tabEditorTitle'); const selectedTitles = Array.from(document.querySelectorAll('[data-tab-phase-index]:checked')).map(function(input) { return phases[Number(input.dataset.tabPhaseIndex)].title; }); if (titleEl) editorState.title = titleEl.value; editorState.phaseTitles = selectedTitles; saveTabEditor(); });
       const cancelTabEditorBtn = document.getElementById('cancelTabEditorBtn'); if (cancelTabEditorBtn) cancelTabEditorBtn.addEventListener('click', function() { editorState = null; render(); });
-      let completedRequiredPhases = 0, totalRequiredPhases = 0;
+      let completedRequiredPhases = 0;
+      let totalRequiredPhases = 0;
       phases.forEach(function(phase, phaseIndex) { if (!isRequiredPhase(phase.title)) return; totalRequiredPhases += 1; if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1; });
       progressFill.style.width = (totalRequiredPhases ? (completedRequiredPhases / totalRequiredPhases) * 100 : 0) + '%';
       progressText.textContent = completedRequiredPhases + ' of ' + totalRequiredPhases + ' required phases completed';
-      finishBtn.disabled = completedRequiredPhases !== totalRequiredPhases;
+      finishBtn.disabled = completedRequiredPhases !== totalRequiredPhases || currentTab === 'emergency' || currentTab === 'quickref';
       updateInstallButton();
       updateAudioToggleUi();
       updateVoiceModeUi();
     }
-    function parseVoiceCommand(transcript) { const normalized = String(transcript || '').toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim(); if (!normalized) return null; const words = normalized.split(' '); if (normalized === 'repeat' || words.includes('repeat')) return 'repeat'; if (normalized === 'stop' || normalized === 'stop listening') return 'stop'; if (normalized === 'checked' || normalized === 'check' || normalized === 'done') return 'confirm'; if (words.length === 1 && (words[0] === 'checked' || words[0] === 'check' || words[0] === 'done')) return 'confirm'; return null; }
-    function handleVoiceCommand(transcript) { if (isSpeaking) return; const command = parseVoiceCommand(transcript); if (!command) return; if (command === 'repeat') { speakCurrentActionableStep(false, currentVoicePhaseIndex); return; } if (command === 'stop') { isVoiceModeEnabled = false; localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled)); updateVoiceModeUi(); stopVoiceRecognition(); return; } if (command === 'confirm') { const currentIndex = getCurrentActionableStepIndex(currentVoicePhaseIndex); if (currentIndex !== null) confirmStep(currentIndex); } }
-    function initVoiceRecognition() { const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SpeechRecognitionCtor) { recognitionAvailable = false; updateVoiceModeUi(); return; } recognitionAvailable = true; recognition = new SpeechRecognitionCtor(); recognition.continuous = false; recognition.interimResults = true; recognition.maxAlternatives = 3; recognition.lang = 'en-US'; recognition.onstart = function() { recognitionStarting = false; recognitionActive = true; lastRecognitionError = ''; updateVoiceModeUi(); }; recognition.onresult = function(event) { if (isSpeaking) return; const result = event.results[event.results.length - 1]; if (!result) return; let transcript = ''; for (let i = 0; i < result.length; i += 1) transcript += ' ' + (result[i].transcript || ''); transcript = transcript.trim(); if (!transcript) return; if (result.isFinal) handleVoiceCommand(transcript); }; recognition.onend = function() { recognitionActive = false; updateVoiceModeUi(); if (isVoiceModeEnabled && !isSpeaking) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 300); } }; recognition.onerror = function(event) { recognitionActive = false; recognitionStarting = false; lastRecognitionError = event && event.error ? String(event.error) : 'mic error'; updateVoiceModeUi(); if (isVoiceModeEnabled && !isSpeaking) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 700); } }; updateVoiceModeUi(); }
-    function resetChecklist() { flatSteps.forEach(step => step.confirmed = false); fuelState = { left: '', right: '' }; hobbsValue = ''; pendingFocusStepIndex = null; focusPhaseIndex = null; emergencyFlowReturnStepIndex = null; collapsedPhases = phases.map(() => true); activePhaseIndex = null; currentVoicePhaseIndex = null; clearPhaseAnnouncementTimer(); headerStartTime.textContent = '--'; headerEndTime.textContent = '--'; localStorage.setItem(startTimeKey, ''); localStorage.setItem(endTimeKey, ''); clearLastSummary(); syncDerivedSteps(); saveProgress(); saveCollapsedState(); saveFuelState(); saveHobbsValue(); updateTopMeta(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function parseVoiceCommand(transcript) {
+      const normalized = String(transcript || '').toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!normalized) return null;
+      const words = normalized.split(' ');
+      if (normalized === 'repeat' || words.includes('repeat')) return 'repeat';
+      if (normalized === 'stop' || normalized === 'stop listening') return 'stop';
+      if (normalized === 'checked' || normalized === 'check' || normalized === 'done') return 'confirm';
+      if (words.length === 1 && (words[0] === 'checked' || words[0] === 'check' || words[0] === 'done')) return 'confirm';
+      return null;
+    }
+    function handleVoiceCommand(transcript) {
+      if (isSpeaking) return;
+      const command = parseVoiceCommand(transcript);
+      if (!command) return;
+      if (command === 'repeat') { speakCurrentActionableStep(false, currentVoicePhaseIndex); return; }
+      if (command === 'stop') { isVoiceModeEnabled = false; localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled)); updateVoiceModeUi(); stopVoiceRecognition(); return; }
+      if (command === 'confirm') { const currentIndex = getCurrentActionableStepIndex(currentVoicePhaseIndex); if (currentIndex !== null) confirmStep(currentIndex); }
+    }
+    function initVoiceRecognition() {
+      const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognitionCtor) { recognitionAvailable = false; updateVoiceModeUi(); return; }
+      recognitionAvailable = true;
+      recognition = new SpeechRecognitionCtor();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 3;
+      recognition.lang = 'en-US';
+      recognition.onstart = function() { recognitionStarting = false; recognitionActive = true; lastRecognitionError = ''; updateVoiceModeUi(); };
+      recognition.onresult = function(event) {
+        if (isSpeaking) return;
+        const result = event.results[event.results.length - 1];
+        if (!result) return;
+        let transcript = '';
+        for (let i = 0; i < result.length; i += 1) transcript += ' ' + (result[i].transcript || '');
+        transcript = transcript.trim();
+        if (!transcript) return;
+        if (result.isFinal) handleVoiceCommand(transcript);
+      };
+      recognition.onend = function() { recognitionActive = false; updateVoiceModeUi(); if (isVoiceModeEnabled && !isSpeaking) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 300); } };
+      recognition.onerror = function(event) { recognitionActive = false; recognitionStarting = false; lastRecognitionError = event && event.error ? String(event.error) : 'mic error'; updateVoiceModeUi(); if (isVoiceModeEnabled && !isSpeaking) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 700); } };
+      updateVoiceModeUi();
+    }
+    function resetChecklist() {
+      flatSteps.forEach(function(step) { step.confirmed = false; });
+      fuelState = { left: '', right: '' };
+      hobbsValue = '';
+      pendingFocusStepIndex = null;
+      focusPhaseIndex = null;
+      emergencyFlowReturnStepIndex = null;
+      collapsedPhases = phases.map(function() { return true; });
+      activePhaseIndex = null;
+      currentVoicePhaseIndex = null;
+      clearPhaseAnnouncementTimer();
+      headerStartTime.textContent = '--';
+      headerEndTime.textContent = '--';
+      localStorage.setItem(startTimeKey, '');
+      localStorage.setItem(endTimeKey, '');
+      clearLastSummary();
+      syncDerivedSteps();
+      saveProgress();
+      saveCollapsedState();
+      saveFuelState();
+      saveHobbsValue();
+      updateTopMeta();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     function importChecklistProfileObject(profile) {
       if (!profile || !Array.isArray(profile.phases) || !profile.phases.length) throw new Error('Invalid checklist profile file.');
-      phases = profile.phases.map(phase => ({ title: String(phase.title || ''), intro: String(phase.intro || ''), items: Array.isArray(phase.items) ? phase.items.map(item => ({ title: String(item.title || ''), detail: String(item.detail || ''), note: String(item.note || '') })) : [] }));
+      phases = profile.phases.map(function(phase) { return { title: String(phase.title || ''), intro: String(phase.intro || ''), items: Array.isArray(phase.items) ? phase.items.map(function(item) { return { title: String(item.title || ''), detail: String(item.detail || ''), note: String(item.note || '') }; }) : [] }; });
       defaultPhases = JSON.parse(JSON.stringify(phases));
       tabDefinitions = normalizeTabDefinitions(profile.tabs);
       if (typeof profile.appTitle === 'string' && profile.appTitle.trim()) appTitle.textContent = profile.appTitle;
-      if (typeof profile.appDescription === 'string') appDescription.textContent = profile.appDescription;
+      if (typeof profile.appDescription === 'string') if (appDescription) appDescription.textContent = profile.appDescription;
       saveHeaderContent();
       if (typeof profile.airport === 'string') { headerAirport.value = profile.airport; localStorage.setItem(airportKey, headerAirport.value); }
       if (typeof profile.aircraft === 'string') { headerAircraft.value = profile.aircraft; localStorage.setItem(aircraftKey, headerAircraft.value); }
-      if (typeof profile.altitude === 'string' || typeof profile.altitude === 'number') { headerAirportAlt.value = String(profile.altitude || ''); localStorage.setItem(airportAltKey, headerAirportAlt.value); }
-      if (typeof profile.radioFreq === 'string' || typeof profile.radioFreq === 'number') { headerRadioFreq.value = String(profile.radioFreq || ''); localStorage.setItem(radioFreqKey, headerRadioFreq.value); }
-      editorState = null; pendingFocusStepIndex = null; saveCustomChecklist(); saveTabDefinitions(); rebuildFlatSteps(); flatSteps.forEach(step => step.confirmed = false); loadCollapsedState(); syncDerivedSteps(); saveProgress(); saveCollapsedState(); updateTopMeta(); render();
+      if (typeof profile.altitude === 'string' || typeof profile.altitude === 'number') { headerAirportAlt.textContent = String(profile.altitude || ''); localStorage.setItem(airportAltKey, headerAirportAlt.textContent); }
+      if (typeof profile.radioFreq === 'string' || typeof profile.radioFreq === 'number') { headerRadioFreq.textContent = String(profile.radioFreq || ''); localStorage.setItem(radioFreqKey, headerRadioFreq.textContent); }
+      editorState = null;
+      pendingFocusStepIndex = null;
+      saveCustomChecklist();
+      saveTabDefinitions();
+      rebuildFlatSteps();
+      flatSteps.forEach(function(step) { step.confirmed = false; });
+      loadCollapsedState();
+      syncDerivedSteps();
+      saveProgress();
+      saveCollapsedState();
+      updateTopMeta();
+      render();
     }
     function attachStaticEvents() {
       document.addEventListener('click', function(event) {
         const tabBtn = event.target.closest('.tab[data-tab-id]');
         if (!tabBtn) return;
-        setActiveTab(tabBtn.dataset.tabId);
+        const nextTab = tabBtn.dataset.tabId;
+        setActiveTab(nextTab);
         activePhaseIndex = null;
         pendingFocusStepIndex = null;
+
+        if (nextTab === 'emergency') {
+          const idx = phases.findIndex(function(p) { return p.title === 'Emergency'; });
+          collapsedPhases = phases.map(function() { return true; });
+          if (idx >= 0) {
+            collapsedPhases[idx] = false;
+            activePhaseIndex = idx;
+          }
+          saveCollapsedState();
+        }
+
         render();
       });
+
       initVoiceRecognition();
-      topResetBtn.addEventListener('click', resetChecklist);
-      collapseAllBtn.addEventListener('click', function() { collapsedPhases = phases.map(() => true); activePhaseIndex = null; saveCollapsedState(); render(); });
-      finishBtn.addEventListener('click', function() { let completedRequiredPhases = 0; let totalRequiredPhases = 0; phases.forEach(function(phase, phaseIndex) { if (!isRequiredPhase(phase.title)) return; totalRequiredPhases += 1; if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1; }); if (completedRequiredPhases === totalRequiredPhases) showFinishSummary(); });
-      keepReviewBtn.addEventListener('click', function() { finishSummaryCard.classList.remove('visible'); });
-      summaryResetBtn.addEventListener('click', resetChecklist);
-      installBtn.addEventListener('click', async function() { if (!deferredPrompt) return; deferredPrompt.prompt(); try { await deferredPrompt.userChoice; } catch {} deferredPrompt = null; updateInstallButton(); });
-      headerAirport.value = localStorage.getItem(airportKey) || 'ESGA';
-      function applyAirportDefaults(code) {
-        if (code === 'ESGA') {
-          headerAirportAlt.value = '424';
-          headerRadioFreq.value = '123.550';
-          localStorage.setItem(airportAltKey, headerAirportAlt.value);
-          localStorage.setItem(radioFreqKey, headerRadioFreq.value);
-        }
-      }
-      applyAirportDefaults(headerAirport.value);
-      headerAirport.addEventListener('change', function() {
-        localStorage.setItem(airportKey, headerAirport.value);
-        applyAirportDefaults(headerAirport.value);
+
+      if (topResetBtn) topResetBtn.addEventListener('click', resetChecklist);
+      if (collapseAllBtn) collapseAllBtn.addEventListener('click', function() {
+        collapsedPhases = phases.map(function() { return true; });
+        activePhaseIndex = null;
+        saveCollapsedState();
+        render();
       });
-      headerAircraft.value = localStorage.getItem(aircraftKey) || 'SE-MOY';
-      headerAircraft.addEventListener('change', function() { localStorage.setItem(aircraftKey, headerAircraft.value); });
-      headerAirportAlt.value = localStorage.getItem(airportAltKey) || '';
-      headerAirportAlt.addEventListener('input', function() { localStorage.setItem(airportAltKey, headerAirportAlt.value); });
-      headerRadioFreq.value = localStorage.getItem(radioFreqKey) || '';
-      headerRadioFreq.addEventListener('input', function() { localStorage.setItem(radioFreqKey, headerRadioFreq.value); });
-      headerStartTime.textContent = localStorage.getItem(startTimeKey) || '--';
-      headerEndTime.textContent = localStorage.getItem(endTimeKey) || '--';
-      editModeBtn.textContent = isEditMode ? '✓' : '✏️';
-      editModeBtn.addEventListener('click', function() { isEditMode = !isEditMode; localStorage.setItem(editModeKey, String(isEditMode)); if (editorState && editorState.mode !== 'edit-header') editorState = null; editModeBtn.textContent = isEditMode ? '✓' : '✏️'; editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none'; render(); });
-      editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
-      editHeaderBtn.addEventListener('click', function() { editorState = { mode: 'edit-header', title: appTitle.textContent, detail: appDescription.textContent, note: '' }; render(); });
-      audioModeBtn.addEventListener('click', function() { const nextEnabled = !(isAudioEnabled || isVoiceModeEnabled); isAudioEnabled = nextEnabled; isVoiceModeEnabled = nextEnabled && recognitionAvailable; localStorage.setItem(audioEnabledKey, String(isAudioEnabled)); localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled)); lastRecognitionError = ''; updateAudioToggleUi(); updateVoiceModeUi(); if (!nextEnabled) { stopVoiceRecognition(); if ('speechSynthesis' in window) window.speechSynthesis.cancel(); return; } currentVoicePhaseIndex = currentVoicePhaseIndex !== null ? currentVoicePhaseIndex : getActivePhaseIndex(); if (isAudioEnabled && currentVoicePhaseIndex !== null) { speakCurrentActionableStep(true, currentVoicePhaseIndex); } else if (isVoiceModeEnabled) { startVoiceRecognition(); } });
-      exportProfileBtn.addEventListener('click', function() { const profile = { version: 1, exportedAt: new Date().toISOString(), airport: headerAirport.value, aircraft: headerAircraft.value, altitude: headerAirportAlt.value, radioFreq: headerRadioFreq.value, appTitle: appTitle.textContent, appDescription: appDescription.textContent, tabs: tabDefinitions, phases: phases }; const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_'); link.href = url; link.download = 'b23-checklist-profile-' + aircraft + '.json'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); });
-      importProfileBtn.addEventListener('click', function() { importProfileInput.click(); });
-      importProfileInput.addEventListener('change', function(event) { const file = event.target.files && event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(loadEvent) { try { const parsed = JSON.parse(String(loadEvent.target.result || '')); importChecklistProfileObject(parsed); } catch (error) { alert(error && error.message ? error.message : 'Could not import checklist profile.'); } finally { importProfileInput.value = ''; } }; reader.readAsText(file); });
+
+      const resetPhaseBtn = document.getElementById('resetPhaseBtn');
+      if (resetPhaseBtn) resetPhaseBtn.addEventListener('click', function() {
+        if (activePhaseIndex === null) return;
+        const phase = phases[activePhaseIndex];
+        if (!phase) return;
+        phase.items.forEach(function(item, itemIndex) {
+          const idx = globalIndexFor(activePhaseIndex, itemIndex);
+          if (flatSteps[idx]) flatSteps[idx].confirmed = false;
+        });
+        saveProgress();
+        render();
+      });
+
+      if (finishBtn) finishBtn.addEventListener('click', function() {
+        let completedRequiredPhases = 0;
+        let totalRequiredPhases = 0;
+        phases.forEach(function(phase, phaseIndex) {
+          if (!isRequiredPhase(phase.title)) return;
+          totalRequiredPhases += 1;
+          if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1;
+        });
+        if (completedRequiredPhases === totalRequiredPhases) showFinishSummary();
+      });
+
+      if (keepReviewBtn) keepReviewBtn.addEventListener('click', function() {
+        finishSummaryCard.classList.remove('visible');
+      });
+      if (summaryResetBtn) summaryResetBtn.addEventListener('click', resetChecklist);
+
+      if (installBtn) installBtn.addEventListener('click', async function() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        try { await deferredPrompt.userChoice; } catch (_) {}
+        deferredPrompt = null;
+        updateInstallButton();
+      });
+
+      if (headerAirport) {
+        headerAirport.value = localStorage.getItem(airportKey) || 'ESGA';
+        function applyAirportDefaults(code) {
+          if (code === 'ESGA') {
+            headerAirportAlt.textContent = '424 ft';
+            headerRadioFreq.textContent = '123.550 Backamo';
+            localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
+            localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
+          } else if (code === 'ESGT') {
+            headerAirportAlt.textContent = '137 ft';
+            headerRadioFreq.textContent = '122.730 Trollhättan TWR';
+            localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
+            localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
+          }
+        }
+        applyAirportDefaults(headerAirport.value);
+        headerAirport.addEventListener('change', function() {
+          localStorage.setItem(airportKey, headerAirport.value);
+          applyAirportDefaults(headerAirport.value);
+        });
+      }
+
+      if (headerAircraft) {
+        headerAircraft.value = localStorage.getItem(aircraftKey) || 'SE-MOY';
+        headerAircraft.addEventListener('change', function() {
+          localStorage.setItem(aircraftKey, headerAircraft.value);
+        });
+      }
+
+      if (headerAirportAlt) headerAirportAlt.textContent = localStorage.getItem(airportAltKey) || headerAirportAlt.textContent || '';
+      if (headerRadioFreq) headerRadioFreq.textContent = localStorage.getItem(radioFreqKey) || headerRadioFreq.textContent || '';
+      if (headerStartTime) headerStartTime.textContent = localStorage.getItem(startTimeKey) || '--';
+      if (headerEndTime) headerEndTime.textContent = localStorage.getItem(endTimeKey) || '--';
+
+      if (themeToggleBtn) {
+        applyTheme(localStorage.getItem(themeStorageKey) || 'dark');
+        themeToggleBtn.addEventListener('click', function() {
+          const nextTheme = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+          localStorage.setItem(themeStorageKey, nextTheme);
+          applyTheme(nextTheme);
+        });
+      }
+
+      if (editModeBtn) {
+        editModeBtn.textContent = isEditMode ? '✓' : '✏️';
+        editModeBtn.addEventListener('click', function() {
+          const nextEditMode = !isEditMode;
+          isEditMode = nextEditMode;
+          localStorage.setItem(editModeKey, String(isEditMode));
+
+          if (!isEditMode) {
+            editorState = null;
+          } else if (editorState && editorState.mode !== 'edit-header' && editorState.mode !== 'edit-airports') {
+            editorState = null;
+          }
+
+          editModeBtn.textContent = isEditMode ? '✓' : '✏️';
+          if (editHeaderBtn) editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+          const editAirportsBtn = document.getElementById('editAirportsBtn');
+          if (editAirportsBtn) editAirportsBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+          render();
+        });
+      }
+
+      if (editHeaderBtn) {
+        editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+        editHeaderBtn.addEventListener('click', function() {
+          editorState = {
+            mode: 'edit-header',
+            title: appTitle.textContent,
+            disclaimer: (headerDisclaimer ? headerDisclaimer.textContent : ''),
+            detail: '',
+            note: ''
+          };
+          render();
+        });
+      }
+
+      const editAirportsBtn = document.getElementById('editAirportsBtn');
+      if (editAirportsBtn) {
+        editAirportsBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+        editAirportsBtn.addEventListener('click', function() {
+          editorState = {
+            mode: 'edit-airports',
+            airports: JSON.parse(JSON.stringify(airports))
+          };
+          render();
+        });
+      }
+
+      if (audioModeBtn) {
+        audioModeBtn.addEventListener('click', function() {
+          isAudioEnabled = !isAudioEnabled;
+          localStorage.setItem(audioEnabledKey, String(isAudioEnabled));
+          if (!isAudioEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+          updateAudioToggleUi();
+        });
+      }
+
+      if (voiceModeBtn) {
+        voiceModeBtn.addEventListener('click', function() {
+          isVoiceModeEnabled = !isVoiceModeEnabled;
+          localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled));
+          if (!isVoiceModeEnabled) {
+            stopVoiceRecognition();
+          } else {
+            startVoiceRecognition();
+          }
+          updateAudioToggleUi();
+          updateVoiceModeUi();
+        });
+      }
+
+      if (exportProfileBtn) {
+        exportProfileBtn.addEventListener('click', function() {
+          const profile = {
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            airport: headerAirport.value,
+            aircraft: headerAircraft.value,
+            altitude: headerAirportAlt.textContent,
+            radioFreq: headerRadioFreq.textContent,
+            appTitle: appTitle.textContent,
+            appDescription: appDescription ? appDescription.textContent : '',
+            tabs: tabDefinitions,
+            phases: phases
+          };
+          const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_');
+          link.href = url;
+          link.download = 'b23-checklist-profile-' + aircraft + '.json';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        });
+      }
+
+      if (importProfileBtn) importProfileBtn.addEventListener('click', function() {
+        importProfileInput.click();
+      });
+
+      if (importProfileInput) importProfileInput.addEventListener('change', function(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(loadEvent) {
+          try {
+            const parsed = JSON.parse(String(loadEvent.target.result || ''));
+            importChecklistProfileObject(parsed);
+          } catch (error) {
+            alert(error && error.message ? error.message : 'Could not import checklist profile.');
+          } finally {
+            importProfileInput.value = '';
+          }
+        };
+        reader.readAsText(file);
+      });
     }
-    function initialize() { loadCustomChecklist(); loadHeaderContent(); rebuildFlatSteps(); loadTabDefinitions(); loadCollapsedState(); loadProgress(); loadFuelState(); loadHobbsValue(); loadLastSummary(); syncDerivedSteps(); updateTopMeta(); updateInstallButton(); attachStaticEvents(); setInterval(updateTopMeta, 30000); render(); if (isVoiceModeEnabled) { currentVoicePhaseIndex = getActivePhaseIndex(); startVoiceRecognition(); } }
+    function initialize() {
+      try {
+        const savedVersion = localStorage.getItem(appVersionKey);
+        if (savedVersion !== currentAppVersion) {
+          const themeValue = localStorage.getItem(themeStorageKey);
+          localStorage.clear();
+          if (themeValue !== null) localStorage.setItem(themeStorageKey, themeValue);
+          localStorage.setItem(appVersionKey, currentAppVersion);
+        }
+      } catch (_) {}
+      loadAirports();
+      loadCustomChecklist();
+      loadHeaderContent();
+      renderAirportOptions();
+      rebuildFlatSteps();
+      loadTabDefinitions();
+      loadCollapsedState();
+      loadProgress();
+      loadFuelState();
+      loadHobbsValue();
+      loadLastSummary();
+      syncDerivedSteps();
+      updateTopMeta();
+      updateInstallButton();
+      attachStaticEvents();
+      setInterval(updateTopMeta, 30000);
+      render();
+      if (isVoiceModeEnabled) {
+        currentVoicePhaseIndex = getActivePhaseIndex();
+        startVoiceRecognition();
+      }
+      if (isAudioEnabled && currentVoicePhaseIndex !== null) {
+        speakCurrentActionableStep(true, currentVoicePhaseIndex);
+      }
+    }
     window.addEventListener('beforeinstallprompt', function(event) { event.preventDefault(); deferredPrompt = event; updateInstallButton(); });
     window.addEventListener('appinstalled', function() { deferredPrompt = null; updateInstallButton(); });
     function runBasicSelfTests() {
+      console.assert(Boolean(document.getElementById('editModeBtn')), 'editModeBtn should exist');
+      console.assert(Boolean(document.getElementById('importProfileBtn')), 'importProfileBtn should exist');
+      console.assert(Boolean(document.getElementById('exportProfileBtn')), 'exportProfileBtn should exist');
+      console.assert(Boolean(document.getElementById('themeToggleBtn')), 'themeToggleBtn should exist');
+      console.assert(Array.isArray(defaultAirports), 'defaultAirports should be an array');
       console.assert(Array.isArray(defaultPhases), 'defaultPhases should be an array');
       console.assert(typeof syncTabsWithPhases === 'function', 'syncTabsWithPhases should exist');
       console.assert(typeof render === 'function', 'render should exist');
-      console.assert(phases.every(function(phase) { return Array.isArray(phase.items); }), 'Every phase should have an items array');
+      console.assert(defaultPhases.every(function(phase) { return Array.isArray(phase.items); }), 'Every phase should have an items array');
     }
     initialize();
     runBasicSelfTests();
