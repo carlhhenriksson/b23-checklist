@@ -1,0 +1,3425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="app-version" content="v2" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="B23 Checklist" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Bristell B23</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <style>
+    body.light-mode {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --accent: #2563eb;
+      --success: #16a34a;
+      --success-soft: #dcfce7;
+      --locked: #64748b;
+      --warning: #ca8a04;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    :root {
+      --bg: #111827;
+      --card: #1f2937;
+      --text: #f9fafb;
+      --muted: #cbd5e1;
+      --border: #4b5563;
+      --accent: #60a5fa;
+      --success: #34d399;
+      --success-soft: #064e3b;
+      --locked: #9ca3af;
+      --warning: #facc15;
+      --shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+      --radius: 9px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { touch-action: pan-x pan-y; }
+
+    button,
+    .tab,
+    .phase-toggle,
+    .step,
+    input,
+    select,
+    textarea,
+    label {
+      touch-action: manipulation;
+    }
+
+    body {
+      min-height: 100%;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overscroll-behavior-y: contain;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: max(24px, env(safe-area-inset-top)) 16px max(48px, env(safe-area-inset-bottom));
+    }
+
+    .top-toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) auto auto;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: stretch;
+    }
+
+    .top-toolbar .mini-btn,
+    .top-toolbar .voice-status {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .top-toolbar .spacer {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .top-toolbar {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .top-toolbar .mini-btn {
+        min-height: 38px;
+        padding: 0 8px;
+        font-size: 12px;
+      }
+
+      #voiceModeBtn,
+      .top-toolbar .voice-status {
+        grid-column: span 1;
+      }
+    }
+
+    .top-toolbar .mini-btn {
+      flex: 0 0 auto; /* prevent shrinking weirdly */
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+
+    .top-toolbar .spacer {
+      margin-left: auto;
+      flex: 0 0 auto;
+    }
+
+    .top-toolbar .spacer {
+      margin-left: auto;
+    }
+
+    .top-meta,
+    .top-actions,
+    .btn-row,
+    .phase-tools,
+    .step-tools,
+    .install-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .top-meta {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    /* Default: 3 per row (each spans 2 of 6 columns) */
+    .top-meta > * {
+      grid-column: span 2;
+      min-width: 0;
+    }
+
+    /* Airport + Aircraft share full first row (2 items) */
+    .top-meta > :nth-child(1),
+    .top-meta > :nth-child(2) {
+      grid-column: span 3;
+    }
+
+    /* Keep the same 6-column logic on small screens so items do not stack */
+    @media (max-width: 760px) {
+      .top-meta {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .top-meta {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .top-meta-pill,
+      .header-input-pill,
+      .header-input-value,
+      .header-input-pill input,
+      .header-input-pill select {
+        font-size: 10px;
+      }
+
+      .top-meta-pill,
+      .header-input-pill {
+        min-height: 34px;
+        padding: 5px 7px;
+      }
+
+      .header-input-pill input,
+      .header-input-pill select {
+        max-width: 58%;
+        padding: 3px 7px;
+      }
+    }
+
+    .top-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    
+    .btn-row { margin-top: 18px; }
+    .phase-tools { margin-top: 10px; margin-bottom: 12px; }
+    .step-tools { gap: 8px; }
+    .install-row { margin-top: 14px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    h3 { margin: 0; }
+
+    p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .muted { color: var(--muted); }
+
+    .top-meta-pill,
+    .header-input-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: #243140;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.1;
+    }
+
+    .clickable-pill {
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .clickable-pill:hover {
+      border-color: var(--accent, #4a9eff);
+    }
+
+    .clickable-pill:active {
+      background: #2c3d50;
+    }
+
+    /* Split Zulu-time pill: left half = stopwatch, right half = live Z time */
+    .split-pill {
+      padding: 0;
+      gap: 0;
+      overflow: hidden;
+    }
+    .split-pill-half {
+      flex: 1 1 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 6px 6px;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 600;
+      color: inherit;
+      line-height: 1.1;
+    }
+    .stopwatch-half {
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border);
+      border-radius: 0;
+      color: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .stopwatch-half:hover { background: #2c3d50; }
+    .stopwatch-half.running { color: var(--warning); }
+    body.light-mode .stopwatch-half:hover { background: rgba(0, 0, 0, 0.04); }
+
+    .header-input-pill input,
+    .header-input-pill select,
+    .fuel-input-card input,
+    .edit-panel input,
+    .edit-panel textarea {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: #111827;
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 16px; /* prevent iOS zoom */
+      font-family: inherit;
+      width: 100%;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    .header-input-pill input,
+    .header-input-pill select {
+      width: auto;
+      max-width: 60%;
+      min-width: 0;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .header-input-value {
+      color: #ffffff;
+      font-weight: 700;
+      text-align: right;
+      margin-left: auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
+    }
+
+    .voice-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 10px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: #243140;
+      color: var(--muted);
+      height: 36px;
+      min-height: 36px;
+      line-height: 1;
+    }
+
+    .voice-status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0.95;
+    }
+
+    .voice-status.off {
+      color: #9ca3af;
+      background: #1f2937;
+      border-color: #4b5563;
+    }
+
+    .voice-status.listening {
+      color: #34d399;
+      background: #064e3b;
+      border-color: #34d399;
+    }
+
+    .voice-status.speaking {
+      color: #60a5fa;
+      background: #1e3a8a;
+      border-color: #60a5fa;
+    }
+
+    .voice-status.error {
+      color: #fca5a5;
+      background: #7f1d1d;
+      border-color: #ef4444;
+    }
+
+    body.light-mode .top-meta-pill,
+    body.light-mode .header-input-pill {
+      background: #f8fafc;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    body.light-mode .voice-status {
+      border-color: var(--border);
+    }
+
+    body.light-mode .voice-status.off {
+      background: #f8fafc;
+      color: #64748b;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .voice-status.listening {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #22c55e;
+    }
+
+    body.light-mode .voice-status.speaking {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+    }
+
+    body.light-mode .voice-status.error {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #ef4444;
+    }
+
+    body.light-mode .header-input-pill input,
+    body.light-mode .header-input-pill select,
+    body.light-mode .fuel-input-card input,
+    body.light-mode .edit-panel input,
+    body.light-mode .edit-panel textarea {
+      background: #ffffff;
+      color: var(--text);
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .header-input-value {
+      color: var(--text);
+    }
+
+    body.light-mode .muted,
+    body.light-mode .step-detail,
+    body.light-mode .step-note,
+    body.light-mode .fuel-helper,
+    body.light-mode .summary-label,
+    body.light-mode .footer-note,
+    body.light-mode .install-help,
+    body.light-mode .phase-intro {
+      color: #334155;
+    }
+
+    body.light-mode .card,
+    body.light-mode .summary-item,
+    body.light-mode .step,
+    body.light-mode .edit-panel,
+    body.light-mode .header-disclaimer,
+    body.light-mode .info-box-card,
+    body.light-mode .info-box-section,
+    body.light-mode .summary-item,
+    body.light-mode .step {
+      background: #ffffff;
+    }
+
+    body.light-mode .edit-panel {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #111827;
+    }
+
+    body.light-mode .info-box-list {
+      color: #475569;
+    }
+
+    body.light-mode .info-box-list strong {
+      color: #111827;
+    }
+
+    button {
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .secondary-btn,
+    .mini-btn {
+      background: #2b3642;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* Audio button visibility + state */
+    #audioModeBtn,
+    #voiceModeBtn {
+      position: relative;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* OFF state red cross */
+    #audioModeBtn.off::after,
+    #voiceModeBtn.off::after {
+      content: '';
+      position: absolute;
+      width: 60%;
+      height: 60%;
+      top: 20%;
+      left: 20%;
+      pointer-events: none;
+      background: linear-gradient(45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%),
+                  linear-gradient(-45deg, transparent 46%, #ef4444 48%, #ef4444 52%, transparent 54%);
+      opacity: 0.9;
+      border-radius: 2px;
+    }
+
+    #audioModeBtn {
+      position: relative;
+      font-size: 14px;
+      line-height: 1;
+      filter: saturate(1.1);
+    }
+
+    body.light-mode .secondary-btn,
+    body.light-mode .mini-btn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode #editModeBtn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode #editModeBtn.active,
+    body.light-mode #editModeBtn[title="Edit"]:focus,
+    body.light-mode #editHeaderBtn,
+    body.light-mode #editAirportsBtn {
+      color: #111827;
+    }
+
+    body.light-mode .secondary-btn:hover,
+    body.light-mode .mini-btn:hover,
+    body.light-mode .tab:hover {
+      background: #f1f5f9;
+    }
+
+    body.light-mode #audioModeBtn,
+    body.light-mode #voiceModeBtn {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+      filter: saturate(1.4) contrast(1.05);
+    }
+
+    body.light-mode #audioModeBtn.active,
+    body.light-mode #voiceModeBtn.active {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 1px rgba(96,165,250,0.35) inset;
+      filter: saturate(1.5) contrast(1.1);
+    }
+
+    .primary-btn {
+      background: var(--success);
+      color: white;
+    }
+
+    .primary-btn:disabled {
+      background: #374151;
+      color: #9ca3af;
+      border: 1px solid #4b5563;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .danger-btn {
+      border-color: #ef4444;
+      color: #fecaca;
+    }
+
+    .mini-btn {
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 5px;
+    }
+
+    .install-btn {
+      background: #ffffff;
+      color: #111827;
+      border: 1px solid #ffffff;
+      display: none;
+    }
+
+    .install-help {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.3;
+    }
+
+    .install-area h2 { font-size: 10px; }
+    .install-area p { font-size: 10px; line-height: 1.2; }
+
+    .progress-wrap { margin-top: 14px; }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: #374151;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    body.light-mode .progress-bar {
+      background: #e5e7eb;
+      border: 1px solid #cbd5e1;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #22c55e;
+      transition: width 0.25s ease;
+    }
+
+    .header-disclaimer {
+      margin-top: 12px;
+      margin-bottom: 16px;
+      padding: 10px 12px;
+      border: 2px solid var(--warning);
+      border-radius: 6px;
+      background: #1b2531;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .tabs-bar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 8px 0 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-height: 38px;
+    }
+
+    .tabs-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+      margin-bottom: 6px;
+      min-width: 0;
+    }
+
+    #collapseAllBtn {
+      margin-left: auto;
+      min-width: 0;
+      max-width: 42%;
+    }
+
+    .tabs-actions .secondary-btn,
+    .tabs-actions .mini-btn,
+    .tabs-actions .voice-status {
+      height: 36px; /* fixed uniform height */
+      min-height: 36px;
+      max-height: 36px;
+      padding: 0 10px;
+      font-size: 12px;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    /* ensure text doesn't stretch height */
+    #collapseAllBtn {
+      height: 36px;
+      line-height: 1;
+    }
+
+    .tab {
+      padding: 10px 12px;
+      border-radius: 5px 5px 0 0;
+      background: #1b2531;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      opacity: 0.95;
+    }
+
+    .tab:hover { opacity: 1; background: #243140; }
+
+    body.light-mode .tab {
+      background: #f8fafc;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+
+    body.light-mode .tab.active {
+      background: #ffffff;
+      color: #111827;
+      border-color: #cbd5e1;
+      outline: 2px solid #3b82f6;
+    }
+
+    body.light-mode .tab[data-tab-id="emergency"],
+    body.light-mode .tab[data-tab-id="clubdrill"] {
+      color: #dc2626;
+      border-color: rgba(239, 68, 68, 0.45);
+      background: #fef2f2;
+    }
+
+    body.light-mode .tab[data-tab-id="emergency"].active,
+    body.light-mode .tab[data-tab-id="clubdrill"].active {
+      background: #ffffff;
+      color: #b91c1c;
+      border-color: #cbd5e1;
+      outline: 2px solid #ef4444;
+    }
+
+    .tab.active {
+      background: #1b2531;
+      color: #ffffff;
+      border: 1px solid var(--border);
+      outline: 2px solid #3b82f6;
+      outline-offset: -2px;
+      font-weight: 700;
+      opacity: 1;
+    }
+
+    .tab[data-tab-id="emergency"],
+    .tab[data-tab-id="clubdrill"] {
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.06);
+    }
+
+    .tab[data-tab-id="emergency"].active,
+    .tab[data-tab-id="clubdrill"].active {
+      background: #1b2531;
+      color: #fee2e2;
+      border: 1px solid var(--border);
+      outline: 2px solid #ef4444;
+      outline-offset: -2px;
+    }
+
+    .tab.icon-tab,
+    .tab.action-tab {
+      font-size: 10px;
+      padding: 4px 6px;
+    }
+
+    .tab-tools { display: none; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+    .tab-tools.visible { display: flex; }
+
+    .summary-card { display: none; }
+    .summary-card.visible { display: block; }
+
+    .footer-note { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+    .info-box-card {
+      border: 1px solid var(--border);
+      background: #18212d;
+    }
+
+    .info-box-title { margin-bottom: 10px; font-size: 18px; }
+
+    .info-box-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .info-box-section {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      background: #111827;
+    }
+
+    .info-box-section h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .info-box-list { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+    .info-box-list div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .info-box-list strong { color: var(--text); font-size: 13px; font-weight: 700; white-space: nowrap; }
+
+    .phase-card.active-phase {
+      border: 4px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.08);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.6), 0 0 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .phase-card.completed {
+      border: 4px solid #22c55e;
+      background: rgba(34, 197, 94, 0.15);
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.6), 0 0 12px rgba(34, 197, 94, 0.4);
+    }
+
+    .phase-card.highlight-green,
+    .phase-card.highlight-blue {
+      border: 1px solid var(--border);
+    }
+
+    .phase-card.emergency-phase {
+      border: 4px solid #ef4444 !important;
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    /* Override active state for emergency */
+    .phase-card.emergency-phase.active-phase {
+      border: 4px solid #ef4444 !important;
+      background: rgba(239, 68, 68, 0.12);
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.6), 0 0 12px rgba(239, 68, 68, 0.4);
+    }
+
+    body.light-mode .phase-card.active-phase {
+      background: rgba(59, 130, 246, 0.08);
+      border-color: #3b82f6;
+    }
+
+    body.light-mode .phase-card.completed {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: #16a34a;
+    }
+
+    body.light-mode .phase-card.emergency-phase {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: #ef4444 !important;
+    }
+
+    body.light-mode .phase-card.emergency-phase.active-phase {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: #ef4444 !important;
+    }
+
+    /* --- Safety / usefulness additions --- */
+    .memory-step { border-left: 6px solid #ef4444 !important; }
+    .memory-badge {
+      display: inline-block;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 3px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+    .step-source {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(148,163,184,0.10);
+    }
+    .disclaimer-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(2, 6, 23, 0.72);
+      -webkit-backdrop-filter: blur(2px);
+      backdrop-filter: blur(2px);
+    }
+    .disclaimer-modal {
+      max-width: 520px;
+      width: 100%;
+      background: var(--card);
+      border: 2px solid var(--warning);
+      border-radius: 9px;
+      padding: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      color: var(--text);
+    }
+    .disclaimer-modal h2 { margin: 0 0 10px; font-size: 16px; color: var(--warning); }
+    .disclaimer-modal p { margin: 0 0 16px; font-size: 14px; line-height: 1.5; color: var(--muted); white-space: pre-wrap; }
+    .disclaimer-modal .primary-btn {
+      width: 100%;
+      min-height: 48px;
+      background: var(--warning);
+      color: #111827;
+      font-weight: 800;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .step-timer-wrap { margin-top: 8px; }
+    .step-timer-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: rgba(37, 99, 235, 0.14);
+      color: var(--text);
+      font-weight: 700;
+      padding: 10px 14px;
+      min-height: 44px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .step-timer-btn.running { background: rgba(234, 179, 8, 0.20); border-color: var(--warning); }
+    .step-timer-btn.done { background: rgba(34, 197, 94, 0.22); border-color: var(--success); }
+    .emergency-index {
+      position: static;
+      padding: 12px;
+      border: 2px solid #ef4444;
+      background: var(--card);
+      margin-bottom: 12px;
+    }
+    .emergency-index-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+    .emg-stamp { font-size: 0.72rem; color: var(--muted); }
+    .emg-search {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      min-height: 44px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+    .emg-index-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 6px;
+    }
+    .emg-index-item {
+      text-align: left;
+      padding: 10px 12px;
+      min-height: 44px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: rgba(239, 68, 68, 0.06);
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .emg-index-item:hover { background: rgba(239, 68, 68, 0.14); }
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .status-chip.low { color: #fff; background: #ef4444; border-color: #ef4444; }
+    #wakeLockBtn.active { background: rgba(34, 197, 94, 0.20); border-color: var(--success); color: var(--text); }
+    .step { min-height: 44px; }
+    @media (pointer: coarse) {
+      .mini-btn, .secondary-btn, .primary-btn, .tab { min-height: 44px; }
+      .step-title { font-size: 1.02rem; }
+    }
+    @media (orientation: landscape) and (min-width: 900px) {
+      .emg-index-list { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    }
+
+    body.light-mode .step.completed {
+      border-color: #16a34a;
+      background: #dcfce7;
+    }
+
+    body.light-mode .step.completed .step-title,
+    body.light-mode .step.completed .step-detail,
+    body.light-mode .step.completed .step-note,
+    body.light-mode .step.completed .fuel-helper,
+    body.light-mode .step.completed .step-number {
+      color: #14532d;
+    }
+
+    body.light-mode .status.done {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #16a34a;
+    }
+
+    body.light-mode .status.ready {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+    }
+
+    body.light-mode .status.locked {
+      background: #e5e7eb;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+
+    .phase-card.collapsed .phase-content { display: none; }
+
+    .phase-toggle {
+      width: 100%;
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      text-align: left;
+    }
+
+    .phase-header { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .phase-summary { display: flex; align-items: center; gap: 10px; }
+    .phase-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .phase-content { margin-top: 14px; }
+    .phase-intro { margin-bottom: 14px; color: var(--muted); }
+    .phase-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+    .phase-reset-btn { background: transparent; color: var(--muted); border: 1px solid rgba(148,163,184,0.35); border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.1s ease; }
+    .phase-reset-btn:hover { color: #f87171; border-color: rgba(248,113,113,0.6); background: rgba(248,113,113,0.08); }
+    .phase-reset-btn:active { transform: scale(0.97); }
+
+    .step {
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #18212d;
+    }
+
+    .step.completed {
+      border-color: var(--success);
+      background: #11241d;
+    }
+
+    .step.completed .step-title,
+    .step.completed .step-detail,
+    .step.completed .step-note,
+    .step.completed .fuel-helper,
+    .step.completed .step-number {
+      color: #d1fae5;
+    }
+    .step.next-focus { outline: 2px solid var(--accent); }
+    .step-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .step-number { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .step-title { margin: 0 0 6px; font-size: 17px; }
+    .step-detail { color: var(--muted); }
+    .step-note,
+    .fuel-helper { margin-top: 10px; font-size: 13px; color: var(--muted); }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      padding: 6px 10px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid var(--border);
+    }
+
+    .status.done { background: var(--success-soft); color: #d1fae5; border-color: var(--success); }
+    .status.ready { background: #1e3a8a; color: #dbeafe; border-color: #60a5fa; }
+    .status.locked { background: #374151; color: #d1d5db; border-color: #6b7280; }
+
+    .subsection-heading {
+      margin: 18px 0 10px;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .fuel-input-grid,
+    .edit-grid,
+    .summary-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .fuel-input-grid,
+    .edit-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin-top: 12px;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin-top: 14px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      background: #18212d;
+    }
+
+    .summary-label,
+    .small-label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--muted); }
+    .summary-value { font-size: 16px; font-weight: bold; }
+
+    .edit-panel {
+      border: 1px solid var(--accent);
+      border-radius: 7px;
+      padding: 14px;
+      margin: 12px 0;
+      background: #162133;
+      width: 100%;
+    }
+
+    @media (display-mode: standalone) {
+      .install-area { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="disclaimer-gate" id="disclaimerGate" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="disclaimerGateTitle">
+    <div class="disclaimer-modal">
+      <h2 id="disclaimerGateTitle">⚠️ Before you rely on this checklist</h2>
+      <p id="disclaimerGateText"></p>
+      <button class="primary-btn" id="disclaimerAckBtn" type="button">I understand — this does not replace the approved AFM/checklist</button>
+    </div>
+  </div>
+  <div class="container">
+
+    <div class="card" style="position: relative;">
+      <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
+      
+      <h1><span id="appTitle">Bristell B23 - Checklists</span></h1>
+      
+      <div class="top-meta">
+        <div class="header-input-pill">Airport
+          <select id="headerAirport">
+            <option value="ESGA" selected>ESGA</option>
+            <option value="ESGT">ESGT</option>
+          </select>
+        </div>
+        <div class="header-input-pill">Aircraft
+          <select id="headerAircraft">
+            <option value="SE-MOY" selected>SE-MOY</option>
+            <option value="SE-MOA">SE-MOA</option>
+          </select>
+        </div>
+        <div class="header-input-pill">Altitude <span class="header-input-value" id="headerAirportAlt">--</span></div>
+        <div class="header-input-pill">Radio <span class="header-input-value" id="headerRadioFreq">--</span></div>
+        <div class="top-meta-pill" id="todayDate">Date --</div>
+        <div class="top-meta-pill split-pill" id="zuluTime">
+          <button type="button" class="split-pill-half stopwatch-half" id="stopwatchHalf" title="Tap: start / stop · Hold: reset">⏱ 0:00</button>
+          <span class="split-pill-half zulu-half" id="zuluHalf">Time -- Z</span>
+        </div>
+        <div class="header-input-pill clickable-pill" id="startTimePill" role="button" tabindex="0" title="Empty: tap to set · Set: hold to update">Start FlightTime <span class="header-input-value" id="headerStartTime">--</span></div>
+        <div class="header-input-pill clickable-pill" id="endTimePill" role="button" tabindex="0" title="Empty: tap to set · Set: hold to update">End FlightTime <span class="header-input-value" id="headerEndTime">--</span></div>
+        <div class="header-input-pill">L Fuel <span class="header-input-value" id="headerFuelLeftValue">--</span></div>
+        <div class="header-input-pill">R Fuel <span class="header-input-value" id="headerFuelRightValue">--</span></div>
+        <div class="header-input-pill">Hobs <span class="header-input-value" id="headerHobbsValue">--</span></div>
+      </div>
+      <div class="top-actions">
+        <button class="mini-btn" id="editHeaderBtn" type="button">Edit header</button>
+        <button class="mini-btn" id="editAirportsBtn" type="button">Edit airports</button>
+      </div>
+      
+      <div class="header-disclaimer" id="headerDisclaimer">⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.</div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+        <p id="progressText" class="muted">0 required phases completed</p>
+      </div>
+    </div>
+
+    <div class="tabs-actions">
+      <button class="mini-btn" id="audioModeBtn" type="button" title="Audio output">🔊</button>
+      <button class="secondary-btn" id="topResetBtn" type="button">Reset all</button>
+      <button class="mini-btn" id="resetPhaseBtn" type="button" title="Reset active phase">↺ Phase</button>
+      <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
+      <button class="mini-btn" id="wakeLockBtn" type="button" title="Keep screen awake">🔅 Keep awake</button>
+      <span class="status-chip" id="batteryChip" style="display:none;"></span>
+    </div>
+
+    <div class="tabs-bar">
+      <div class="tabs" id="tabsContainer"></div>
+    </div>
+
+    <div class="tab-tools" id="tabTools"></div>
+    <div id="stepsContainer"></div>
+
+    <div class="card" id="finalReportCard">
+      <div class="btn-row">
+        <button class="primary-btn" id="finishBtn" disabled type="button">Final Report</button>
+      </div>
+      <p class="footer-note">Report of start end time and inputs done during the flight such as fuel quantity, hobs etc</p>
+    </div>
+
+    <div class="card summary-card" id="finishSummaryCard">
+      <h2>Checklist complete</h2>
+      <p class="muted">Review the saved summary below.</p>
+      <div class="summary-grid" id="finishSummaryGrid"></div>
+      <div class="btn-row">
+        <button class="secondary-btn" id="keepReviewBtn" type="button">Keep for review</button>
+        <button class="primary-btn" id="summaryResetBtn" type="button">Reset</button>
+      </div>
+    </div>
+
+    <div class="card info-box-card">
+      <h2 class="info-box-title">Quick reference</h2>
+      <p class="muted">AFM-based throttle, RPM and speed references for rapid scan. Always verify against the approved AFM before flight.</p>
+      <div class="info-box-grid">
+        <div class="info-box-section">
+          <h3>Speed limits</h3>
+          <div class="info-box-list">
+            <div><span>VNE</span><strong>157 KIAS</strong></div>
+            <div><span>VNO</span><strong>136 KIAS</strong></div>
+            <div><span>VA</span><strong>99 KIAS</strong></div>
+            <div><span>VFE</span><strong>82 KIAS</strong></div>
+            <div><span>Vs1 clean</span><strong>51 KIAS</strong></div>
+            <div><span>Vs0 landing</span><strong>44 KIAS</strong></div>
+            <div><span>Best glide</span><strong>67 KIAS</strong></div>
+          </div>
+        </div>
+        <div class="info-box-section">
+          <h3>Take-off / climb</h3>
+          <div class="info-box-list">
+            <div><span>Nose wheel unstick</span><strong>40 KIAS</strong></div>
+            <div><span>Lift-off</span><strong>50 KIAS</strong></div>
+            <div><span>Initial climb</span><strong>64 KIAS</strong></div>
+            <div><span>Vx</span><strong>62 KIAS</strong></div>
+            <div><span>Vy</span><strong>74 KIAS</strong></div>
+            <div><span>Flap 10 best angle</span><strong>64 KIAS</strong></div>
+            <div><span>Flap 10 best rate</span><strong>75 KIAS</strong></div>
+          </div>
+        </div>
+        <div class="info-box-section">
+          <h3>Approach / landing</h3>
+          <div class="info-box-list">
+            <div><span>Final, flap 25</span><strong>60 KIAS</strong></div>
+            <div><span>Landing reference</span><strong>58 KIAS</strong></div>
+            <div><span>Go-around accelerate</span><strong>65 KIAS</strong></div>
+            <div><span>Retract flaps</span><strong>Vy / 74 KIAS</strong></div>
+            <div><span>Min retract altitude</span><strong>150 ft AGL</strong></div>
+          </div>
+        </div>
+        <div class="info-box-section">
+          <h3>Power settings</h3>
+          <div class="info-box-list">
+            <div><span>Take-off</span><strong>WOT / 5800 RPM</strong></div>
+            <div><span>Climb</span><strong>WOT / 5500 RPM</strong></div>
+            <div><span>En-route climb</span><strong>WOT / 5400 RPM</strong></div>
+            <div><span>Low cruise</span><strong>26 inHg / 4800</strong></div>
+            <div><span>High cruise</span><strong>26 inHg / 5000</strong></div>
+            <div><span>Max continuous</span><strong>27 inHg / 5500</strong></div>
+            <div><span>Descent</span><strong>15-17 inHg / 4500</strong></div>
+          </div>
+        </div>
+        <div class="info-box-section">
+          <h3>Ground / run-up</h3>
+          <div class="info-box-list">
+            <div><span>Taxi max before 50 C oil temp</span><strong>2500 RPM</strong></div>
+            <div><span>Best ground cooling</span><strong>2300-2500 RPM</strong></div>
+            <div><span>Run-up</span><strong>4000 RPM</strong></div>
+            <div><span>Ignition max drop</span><strong>300 RPM</strong></div>
+            <div><span>Ignition max difference</span><strong>115 RPM</strong></div>
+            <div><span>Carb heat drop</span><strong>150-200 RPM</strong></div>
+            <div><span>Prop cycle drop min</span><strong>200 RPM</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="top-toolbar">
+      <button class="mini-btn" id="themeToggleBtn" type="button" title="Toggle light mode">☀️ Light</button>
+      <button class="mini-btn" id="editModeBtn" type="button" title="Edit">✏️ Edit</button>
+      <button class="mini-btn" id="importProfileBtn" type="button" title="Import profile">⬆️ Import</button>
+      <button class="mini-btn" id="exportProfileBtn" type="button" title="Export profile">⬇️ Export</button>
+      <button class="mini-btn" id="voiceModeBtn" type="button" title="Voice input">🎙️ Mic</button>
+      <div class="voice-status" id="voiceStatusText">Voice off</div>
+    </div>
+
+    <div class="card install-area">
+      <h2>Install app</h2>
+      <p class="muted">Add this checklist to your Home Screen for a cleaner app-like experience and offline access after the first load.</p>
+      <div class="install-row">
+        <button class="secondary-btn install-btn" id="installBtn" type="button">Install app</button>
+      </div>
+      <p class="install-help" id="installHelp">On iPhone: open in Safari, tap Share, then Add to Home Screen.</p>
+    </div>
+  </div>
+
+  <script>
+    let defaultAirports = [
+      { code: 'ESGA', altitude: '424 ft', radio: '123.550 Backamo' },
+      { code: 'ESGT', altitude: '137 ft', radio: '122.730 Trollhättan TWR' }
+    ];
+
+    let defaultPhases = [
+      { title: 'Pre-flight inspection', intro: 'Walk-around and exterior inspection before entering the final cockpit setup flow.', items: [
+        { title: 'Left-hand leading edge - Pitot cover', detail: 'Remove' },
+        { title: 'Left-hand leading edge - Pitot tube', detail: 'Check condition' },
+        { title: 'Cabin - Ignition', detail: 'OFF' },
+        { title: 'Cabin - Avionics/Instruments', detail: 'Check condition' },
+        { title: 'Cabin - Cockpit', detail: 'Check for loose objects and general condition' },
+        { title: 'Cabin - Loading', detail: 'Check weight and balance, and that loading is secured' },
+        { title: 'Cabin - Master switch', detail: 'ON' },
+        { title: 'Cabin - Avionics switch', detail: 'ON' },
+        { title: 'Cabin - Fuel quantity indication', detail: 'Check' },
+        { title: 'Cabin - Flap', detail: 'Check operation, select down for inspection' },
+        { title: 'Cabin - Lights', detail: 'Check for VFR night flight, then set dimmers OFF' },
+        { title: 'Cabin - Pitot tube heating', detail: 'Check' },
+        { title: 'Cabin - Avionics switch', detail: 'OFF' },
+        { title: 'Cabin - Master switch', detail: 'OFF' },
+        { title: 'Cabin - Canopy', detail: 'Condition of attachment and cleanness, check that windscreen is clean and clear' },
+        { title: 'Engine - Cowling condition', detail: 'Check' },
+        { title: 'Engine - Propeller, blades and spinner', detail: 'Check condition' },
+        { title: 'Engine - Oil quantity', detail: 'Check', note: 'Open the oil access hatch and remove the oil filler cap. Rotate the propeller slowly in the normal direction until a gurgling sound is heard four times; only then will the dipstick indicate correctly.' },
+        { title: 'Engine - Inlet', detail: 'Verify free of obstructions' },
+        { title: 'Engine - Fuel system draining / gascolator', detail: 'Sample' },
+        { title: 'Engine - Nose gear condition', detail: 'Check' },
+        { title: 'Right-hand leading edge - Wing surface', detail: 'Check condition' },
+        { title: 'Right-hand leading edge - Leading edge', detail: 'Check condition' },
+        { title: 'Right-hand leading edge - Stall strips', detail: 'Check condition' },
+        { title: 'Right-hand leading edge - Actual fuel quantity', detail: 'Check against indication by opening filler cap' },
+        { title: 'Right-hand leading edge - Filler cap', detail: 'Check closing' },
+        { title: 'Right-hand leading edge - Fuel vent openings', detail: 'Check' },
+        { title: 'Right-hand leading edge - Landing gear', detail: 'Check damage, wheel attachment, brakes, and tire condition/pressure' },
+        { title: 'Right-hand trailing edge - Wing tip', detail: 'Check surface condition, attachment and light attachment' },
+        { title: 'Right-hand trailing edge - Aileron', detail: 'Check surface condition, attachment, clearance, movement and trim tab condition' },
+        { title: 'Right-hand trailing edge - Flap', detail: 'Check surface condition, attachment, clearance and hinge bolts', note: 'The left flap has a one degree offset versus the right flap. When retracted, the left flap sits about 7 mm below the stub wing contour, while the right flap is streamlined.' },
+        { title: 'Right-hand trailing edge - Wing locker', detail: 'Check loading, inspect drain hole and lock' },
+        { title: 'Rear fuselage - Static port', detail: 'Check clean and clear of obstructions' },
+        { title: 'Tailplane - Vertical stabilizer', detail: 'Check surface and attachment' },
+        { title: 'Tailplane - Horizontal stabilizer', detail: 'Check surface, attachment, free elevator movement and elevator stops' },
+        { title: 'Tailplane - Elevator tips attachment', detail: 'Check' },
+        { title: 'Tailplane - Trim / anti-servo tab', detail: 'Check' },
+        { title: 'Left-hand fuselage - Static port', detail: 'Check clean and clear of obstructions' },
+        { title: 'Left-hand leading edge - Wing surface', detail: 'Check condition' },
+        { title: 'Left-hand leading edge - Leading edge', detail: 'Check condition' },
+        { title: 'Left-hand leading edge - Stall strips', detail: 'Check condition' },
+        { title: 'Left-hand leading edge - Actual fuel quantity', detail: 'Check against indication by opening filler cap' },
+        { title: 'Left-hand leading edge - Filler cap', detail: 'Check closing' },
+        { title: 'Left-hand leading edge - Fuel vent openings', detail: 'Check' },
+        { title: 'Left-hand leading edge - Landing gear', detail: 'Check damage, wheel attachment, brakes, and tire condition/pressure' },
+        { title: 'Left-hand trailing edge - Wing tip', detail: 'Check surface condition, attachment and light attachment' },
+        { title: 'Left-hand trailing edge - Aileron', detail: 'Check surface condition, attachment, clearance, movement and trim tab condition' },
+        { title: 'Left-hand trailing edge - Flap', detail: 'Check surface condition, attachment, clearance and hinge bolts', note: 'The left flap has a one degree offset versus the right flap. When retracted, the left flap sits about 7 mm below the stub wing contour, while the right flap is streamlined.' },
+        { title: 'Left-hand trailing edge - Wing locker', detail: 'Check loading, inspect drain hole and lock' },
+        { title: 'Before entering cockpit - Chocks', detail: 'Removed' },
+        { title: 'Before entering cockpit - Tow bar', detail: 'Removed if used' },
+        { title: 'Before entering cockpit - Prop area and taxi path', detail: 'Clear, including wingtips and stabilizer if immediate turn is planned' }
+      ]},
+      { title: 'Before Engine Start', intro: 'Final cockpit checks before engine start.', items: [
+        { title: 'Flight log / remarks', detail: 'Checked' },
+        { title: 'Weight and balance', detail: 'Checked' },
+        { title: 'Pre-flight inspection', detail: 'Completed' },
+        { title: 'Rudder pedal position', detail: 'SET' },
+        { title: 'Seatbelts', detail: 'ON' },
+        { title: 'Parking brake', detail: 'SET' },
+        { title: 'Canopy', detail: 'Closed and locked' },
+        { title: 'Flight controls', detail: 'Check free and correct' }
+      ]},
+      { title: 'Engine Start', intro: 'Cockpit setup and engine start preparation.', items: [
+        { title: 'Backup BATT', detail: 'ON' },
+        { title: 'Master switch', detail: 'ON' },
+        { title: 'Choke', detail: 'Use as needed' },
+        { title: 'Dimmer', detail: 'Adjust' },
+        { title: 'Circuit breakers', detail: 'Check' },
+        { title: 'BPRS', detail: 'Arm' },
+        { title: 'Prop Control', detail: 'Max RPM' },
+        { title: 'Throttle', detail: 'Closed (max 5 mm open)' },
+        { title: 'Fuel selector', detail: 'LEFT' },
+        { title: 'PFD / fuel quantity', detail: 'Check fuel quantity' },
+        { title: 'Strobe light', detail: 'ON' },
+        { title: 'Fuel pump', detail: 'ON' },
+        { title: 'Prop area', detail: 'Clear' },
+        { title: 'Starter', detail: 'Engage' }
+      ]},
+      { title: 'After Start', intro: 'Initial engine checks after engine start.', items: [
+        { title: 'Oil pressure', detail: 'Check within 10 seconds' },
+        { title: 'Choke', detail: 'OFF' },
+        { title: 'Throttle', detail: 'Adjust for 2000 RPM' },
+        { title: 'Backup BATT', detail: 'OFF' },
+        { title: 'Voltage (battery)', detail: 'Check above 11.0 V' },
+        { title: 'ALT-1', detail: 'ON' },
+        { title: 'Voltage after ALT-1', detail: 'Check about 13.4 V' },
+        { title: 'ALT-2', detail: 'ON' },
+        { title: 'Voltage after ALT-2', detail: 'Check about 13.8 V' },
+        { title: 'Fuel pump', detail: 'OFF' },
+        { title: 'Avionics', detail: 'ON' },
+        { title: 'MFD', detail: 'Engine page' },
+        { title: 'EFIS', detail: 'ON' },
+        { title: 'Altimeter', detail: 'SET QNH' }
+      ]},
+      { title: 'Taxi', intro: 'Taxi checks and techniques.', items: [
+        { title: 'Ground control', detail: 'Check nose gear steering' },
+        { title: 'Brakes', detail: 'Check function' },
+        { title: 'Flight instruments', detail: 'Check' },
+        { title: 'Taxi technique', detail: 'Apply power as needed and keep RPM below 2500 until oil temperature reaches 50 C' }
+      ]},
+      { title: 'Before take-off / Engine run up', intro: 'Run-up and final checks before line-up.', items: [
+        { title: 'Parking brake', detail: 'ON / Set' },
+        { title: 'Oil temperature', detail: 'Above 50 C' },
+        { title: 'Prop Control', detail: 'Max RPM' },
+        { title: 'Throttle', detail: '4000 RPM' },
+        { title: 'Ignition left/right', detail: '300 RPM / 115 RPM' },
+        { title: 'Ignition', detail: 'Both' },
+        { title: 'Carburetor heat', detail: 'ON (pull), check speed drop min 150 RPM; stabilize OFF (push); check speed regain to 4000 RPM' },
+        { title: 'Prop Control', detail: 'Cycle 4 times Check speed drop minimum 200 RPM.' },
+        { title: 'Oil pressure / temperature', detail: 'Check' },
+        { title: 'Throttle', detail: 'IDLE' },
+        { title: 'Trim', detail: 'SET / Neutral' },
+        { title: 'Flaps', detail: 'Set 1' },
+        { title: 'Canopy', detail: 'Closed / locked' },
+        { title: 'Annunciators', detail: 'Extinguished' },
+        { title: 'Fuel pump', detail: 'ON' },
+        { title: 'Departure briefing', detail: 'Completed', note: 'Includes runway in use, takeoff type (normal/short-field), weather, abort procedures, emergency landing options, and departure trajectory.' },
+        { title: 'Emergency checklist', detail: 'Repeat' },
+        { title: 'Fuel selector', detail: 'Verify LEFT tank' }
+      ]},
+      { title: 'Autopilot Check', intro: 'Ground functional check of the optional Garmin GMC 307-20 autopilot. Re-engage the autopilot before each disconnect test.', source: 'Derived · AFM §7.14.3 (not a verbatim AFM checklist)', items: [
+        { title: 'Autopilot', detail: 'ENGAGE for each test', source: 'Derived · AFM §7.14.3' },
+        { title: 'Flight controls', detail: 'CHECK - verify the autopilot can be overpowered in both pitch and roll', source: 'Derived · AFM §7.14.3' },
+        { title: 'AP Disconnect button', detail: 'PRESS - verify autopilot disengages and the audio alert is heard', source: 'Derived · AFM §7.14.3' },
+        { title: 'CWS button', detail: 'PRESS LONG - verify autopilot disengages temporarily', source: 'Derived · AFM §7.4.7' },
+        { title: 'CWS button', detail: 'PRESS SHORT - verify autopilot disengages', source: 'Derived · AFM §7.4.7' },
+        { title: 'Autopilot', detail: 'DISENGAGED after test', note: 'The AFM specifically states that take-off or landing with the autopilot active is not permitted.', source: 'Derived · AFM §7.14.3' }
+      ]},
+      { title: 'Before Departure', intro: 'Final checks before entering runway.', items: [
+        { title: 'Approach sector', detail: 'Checked' },
+        { title: 'Transponder', detail: 'GND/ALT' },
+        { title: 'ON RWY - Compasses', detail: 'Checked' },
+        { title: 'Landing lights', detail: 'ON when take-off clearance is received' }
+      ]},
+      { title: 'Take off', intro: 'Take-off roll and initial climb actions.', items: [
+        { title: 'Brakes', detail: 'Hold' },
+        { title: 'Carburettor heat', detail: 'Closed' },
+        { title: 'Prop Control', detail: 'Max RPM' },
+        { title: 'Set Full Throttle', detail: 'Set' },
+        { title: 'Brakes', detail: 'Release' },
+        { title: 'Airspeed', detail: 'Verify and call AIRSPEED ALIVE', note: 'At 40 KIAS apply light back pressure; let the aircraft lift off at approx. 50 KIAS.' },
+        { title: 'Engine instruments normal indication', detail: 'Check' },
+        { title: 'Initial climb speed', detail: '70 KIAS' }
+      ]},
+      { title: 'After Take off', intro: 'Post take-off configuration and checks.', items: [
+        { title: 'Speed', detail: '75 KIAS' },
+        { title: 'Flaps', detail: '0 (Zero) — call "SPEED CHECKED, FLAPS 0"', note: 'At 300 ft AAL.' },
+        { title: 'Landing Lights', detail: 'OFF', note: 'At 600 ft AAL.' },
+        { title: 'Prop Control', detail: '5500 RPM' },
+        { title: 'Engine Instruments', detail: 'Check' },
+        { title: 'Cruise power — after leveling out', detail: '26" InHG / 4800 RPM', note: 'At 1500 ft AAL — set cruise.' },
+        { title: 'Fuel Pump', detail: 'OFF' }
+      ]},
+      { title: 'Cruise', intro: 'Cruise configuration and monitoring.', items: [
+        { title: 'Throttle/Prop', detail: 'Set 26" InHG / 4800 RPM' },
+        { title: 'Autopilot', detail: 'Use as necessary' },
+        { title: 'Fuel Selector', detail: 'Left or Right', note: 'Switch tanks at regular intervals (~25 min on left, ~20 min on right) to consume fuel evenly. The engine fuel return line runs ONLY to the left tank (~5 L/h).' },
+        { title: 'Fuel Pump', detail: 'OFF' },
+        { title: 'ENG Instruments', detail: 'Monitor' }
+      ]},
+      { title: 'Descent', intro: 'Descent configuration.', items: [
+        { title: 'Power', detail: 'Set (15-17")' },
+        { title: 'RPM', detail: '< 5000', note: 'Avoid abrupt throttle reduction to prevent shock cooling. On long descents monitor EGT, especially at high RPM; if a positive temperature trend appears, reduce RPM and/or power.' },
+        { title: 'Airspeed', detail: '90-100 KIAS' },
+        { title: 'Carb Heat', detail: 'As required', note: 'Use carb heat for extended descents in conditions of possible carburettor icing (visible moisture / cold OAT); periodic checks in visible moisture. Avoid in warm, dry air — it thermally stresses the engine. (AFM 3.2.3)' }
+      ]},
+      { title: 'Approach', intro: 'Preparation for landing.', items: [
+        { title: 'LDG Briefing', detail: 'Completed' },
+        { title: 'Altimeter', detail: 'Set QNH' },
+        { title: 'Seat belts', detail: 'Verify ON' },
+        { title: 'Landing Light', detail: 'ON' },
+        { title: 'Fuel Pump', detail: 'ON' },
+        { title: 'Carb Heat', detail: 'ON (OAT<10)' },
+        { title: 'Suggested downwind speed', detail: '90 KIAS' },
+        { title: 'Suggested base speed', detail: '75 KIAS' },
+        { title: 'Flap 1', detail: 'Set — call "SPEED CHECKED"', note: 'Verify speed below 82 KIAS before selecting Flap 1.' },
+        { title: 'Suggested final speed', detail: '60 KIAS', note: 'By 300 ft AAL the aircraft must be stabilized: speed on target (60 KIAS +10/-5), correct configuration, on the extended centerline, correct vertical profile, landing items complete, no sideslip. If not stabilized at or below 300 ft AAL, a go-around is mandatory.' },
+        { title: 'Flap 2', detail: 'Set — call "SPEED CHECKED"' },
+        { title: 'RPM', detail: 'Full forward', note: 'Set the RPM lever full forward AFTER configuring the final flap setting, so the propeller is already at its fine-pitch stop and no RPM increase occurs.' },
+        { title: 'Carb Heat', detail: 'Cold' }
+      ]},
+      { title: 'Go around', intro: 'Go around / rejected landing.', items: [
+        { title: 'Throttle', detail: 'MAX' },
+        { title: 'RPM', detail: 'MAX' },
+        { title: 'Carb Heat', detail: 'OFF' },
+        { title: 'Flaps', detail: '1 Set' },
+        { title: 'ATC', detail: 'Notify' }
+      ]},
+      { title: 'Touch and Go', intro: 'Touch and go procedure.', items: [
+        { title: 'Flaps', detail: '1 Set' },
+        { title: 'Carb Heat', detail: 'OFF' },
+        { title: 'Throttle', detail: 'MAX' },
+        { title: 'Take-off procedures', detail: 'Resume normal' }
+      ]},
+      { title: 'After Landing', intro: 'Post-landing actions after runway vacated.', items: [
+        { title: 'Flaps', detail: '0 (Zero)' },
+        { title: 'Transponder', detail: '7000 STBY' },
+        { title: 'Landing Lights', detail: 'OFF' },
+        { title: 'Fuel Pump', detail: 'OFF' },
+        { title: 'Carb Heat', detail: 'OFF' },
+        { title: 'Pitch Trim', detail: 'Neutral' }
+      ]},
+      { title: 'Parking', intro: 'Shutdown and securing the aircraft.', items: [
+        { title: 'Parking brake', detail: 'ON' },
+        { title: 'Throttle', detail: 'Idle' },
+        { title: 'Ignition', detail: 'OFF' },
+        { title: 'ALT 1 and 2', detail: 'OFF' },
+        { title: 'Hobs', detail: 'Note' },
+        { title: 'Avionics', detail: 'OFF' },
+        { title: 'EFIS', detail: 'OFF' },
+        { title: 'Ext Lights', detail: 'OFF' },
+        { title: 'Master Switch', detail: 'OFF' },
+        { title: 'BPRS PIN', detail: 'INSERT' },
+        { title: 'Parking brake', detail: 'As Req.' },
+        { title: 'Flightplan', detail: 'Closed.' }
+      ]},
+      { title: 'Engine Failure (Club Drill)', emergency: true, intro: 'Aeroklubben Goteborg SE-MOA/MOY checklist REV 4 (2024-10-10) - condensed engine-failure / forced-landing memory drill.', items: [
+        { title: 'Speed', detail: '67 KTS', memory: true, note: 'Best glide.' },
+        { title: 'Field', detail: 'SELECT', memory: true },
+        { title: 'Fuel Selector', detail: 'SWITCH', memory: true },
+        { title: 'Fuel Pump', detail: 'ON', memory: true },
+        { title: 'Carb Heat', detail: 'ON', memory: true },
+        { title: 'Magnetos', detail: 'BEST / BOTH', memory: true },
+        { title: 'ATC', detail: 'NOTIFY / 121.5' },
+        { title: 'XPNDR', detail: '7700' },
+        { title: 'PAX', detail: 'BRIEF' },
+        { title: 'ELT', detail: 'ON' },
+        { title: 'BPRS', detail: 'CONSIDER' }
+      ]},
+      { title: 'Engine Failure - Take-off Run', emergency: true, intro: 'Engine failure during the take-off run. (AFM 3.2.1)', items: [
+        { title: 'Throttle', detail: 'IDLE', memory: true },
+        { title: 'Ignition', detail: 'OFF', memory: true },
+        { title: 'Brakes', detail: 'APPLY', memory: true }
+      ]},
+      { title: 'Engine Failure - In Flight', emergency: true, intro: 'Engine failure enroute or after take-off. (AFM 3.2.2)', items: [
+        { title: 'Speed', detail: '67 KIAS', memory: true, note: 'Best glide.' },
+        { title: 'Landing Area', detail: 'DECIDE', memory: true, note: 'Below 150 ft AGL: land straight ahead. Above 150 ft: pick an area with minimal deviation. Above 1000 ft AGL a turn back to the runway may be possible. WARNING: turning back below 1000 ft AGL is the "impossible turn".' },
+        { title: 'Wind', detail: 'ASSESS' },
+        { title: 'Landing Area', detail: 'CONFIRM CLEAR' },
+        { title: 'Flaps', detail: 'AS REQUIRED' },
+        { title: 'Fuel Pump', detail: 'OFF' },
+        { title: 'Fuel Selector', detail: 'OFF' },
+        { title: 'Ignition', detail: 'OFF' },
+        { title: 'Safety Harness', detail: 'TIGHTEN' },
+        { title: 'Master Switch', detail: 'OFF / ON', note: 'VFR DAY: OFF. VFR NIGHT: leave ON. WARNING: flaps are unavailable once Master is OFF.' },
+        { title: 'Landing Lights', detail: 'ON', note: 'VFR NIGHT only.' },
+        { title: 'Land', detail: '' }
+      ]},
+      { title: 'Carburettor Icing', emergency: true, intro: 'Suspected carburettor icing. (AFM 3.2.3)', items: [
+        { title: 'Carb Heat', detail: 'PULL (ON)', memory: true },
+        { title: 'Icing Area', detail: 'LEAVE IF ABLE' },
+        { title: 'Power', detail: 'RESTORE GRADUALLY', timer: 120, note: 'After 1-2 min increase gradually up to cruise. Apply carb heat pre-emptively for extended descents.' }
+      ]},
+      { title: 'Engine Restart In Flight', emergency: true, intro: 'Attempt an engine restart in flight. (AFM 3.3)', items: [
+        { title: 'Electric Fuel Pump', detail: 'ON', memory: true },
+        { title: 'Fuel Selector', detail: 'FULLEST TANK', memory: true },
+        { title: 'Speed', detail: '75 KIAS' },
+        { title: 'Ignition', detail: 'CHECK ON (BOTH)' },
+        { title: 'Starter', detail: 'ENGAGE IF NEEDED' }
+      ]},
+      { title: 'Engine Fire - Ground Start', emergency: true, intro: 'Engine fire during start on the ground. (AFM 3.4.1)', items: [
+        { title: 'Starter', detail: 'KEEP CRANKING', memory: true },
+        { title: 'Brakes', detail: 'APPLY' },
+        { title: 'Fuel Selector', detail: 'CLOSE', memory: true },
+        { title: 'Throttle', detail: 'FULL', memory: true },
+        { title: 'Cabin Heat', detail: 'CLOSE' },
+        { title: 'Ignition', detail: 'OFF', timer: 30, note: 'After remaining fuel burns off.' },
+        { title: 'Master Switch', detail: 'OFF' },
+        { title: 'Aircraft', detail: 'EVACUATE' },
+        { title: 'Fire Extinguisher', detail: 'USE' },
+        { title: 'Fire Brigade', detail: 'CALL' }
+      ]},
+      { title: 'Fire - Ground, Engine Running', emergency: true, intro: 'Fire on the ground with the engine running. (AFM 3.4.2)', items: [
+        { title: 'Cabin Heat', detail: 'CLOSE', memory: true },
+        { title: 'Brakes', detail: 'APPLY' },
+        { title: 'Fuel Selector', detail: 'CLOSE', memory: true },
+        { title: 'Throttle', detail: 'FULL', memory: true },
+        { title: 'Ignition', detail: 'OFF', timer: 30, note: 'After remaining fuel burns off.' },
+        { title: 'Master Switch', detail: 'OFF' },
+        { title: 'Aircraft', detail: 'EVACUATE' },
+        { title: 'Fire Extinguisher', detail: 'USE' },
+        { title: 'Fire Brigade', detail: 'CALL' }
+      ]},
+      { title: 'Engine Fire - Take-off', emergency: true, intro: 'Engine fire during take-off. (AFM 3.4.3)', items: [
+        { title: 'Speed', detail: '65 KIAS', memory: true },
+        { title: 'Cabin Heat', detail: 'CLOSE', memory: true },
+        { title: 'Fuel Selector', detail: 'CLOSE', note: 'When landing is assured or the fire is critical.' },
+        { title: 'Throttle', detail: 'FULL' },
+        { title: 'Ignition', detail: 'OFF', timer: 30, note: 'After remaining fuel burns off.' },
+        { title: 'Land', detail: 'AND STOP' },
+        { title: 'Aircraft', detail: 'EVACUATE' },
+        { title: 'Fire Extinguisher', detail: 'USE' },
+        { title: 'Fire Brigade', detail: 'CALL' }
+      ]},
+      { title: 'Engine Fire - In Flight', emergency: true, intro: 'Engine fire in flight. (AFM 3.4.4)', items: [
+        { title: 'Cabin Heat', detail: 'CLOSE', memory: true },
+        { title: 'Fuel Selector', detail: 'CLOSE', memory: true },
+        { title: 'Throttle', detail: 'FULL', memory: true },
+        { title: 'Ignition', detail: 'OFF', timer: 30, note: 'After remaining fuel burns off. Engine stops in approx. 30 s. WARNING: do NOT attempt a restart.' },
+        { title: 'Emergency Landing', detail: 'PER 3.6.1' },
+        { title: 'Aircraft', detail: 'EVACUATE' },
+        { title: 'Fire Extinguisher', detail: 'USE' },
+        { title: 'Fire Brigade', detail: 'CALL' }
+      ]},
+      { title: 'Cockpit Fire', emergency: true, intro: 'Fire in the cockpit. (AFM 3.4.5)', items: [
+        { title: 'Master Switch', detail: 'OFF', memory: true },
+        { title: 'Cabin Heat', detail: 'CLOSE', memory: true },
+        { title: 'Fire Extinguisher', detail: 'USE', memory: true },
+        { title: 'Land', detail: '', note: 'Fire out: land as soon as practical. Fire continues: land as soon as possible.' }
+      ]},
+      { title: 'Glide', emergency: true, intro: 'Best glide configuration. (AFM 3.5)', items: [
+        { title: 'Speed', detail: '67 KIAS', memory: true },
+        { title: 'Flaps', detail: 'RETRACTED', note: 'Windmilling glide approx. 1.40 NM per 1000 ft.' }
+      ]},
+      { title: 'Emergency Landing - No Power', emergency: true, intro: 'Forced landing without engine power. (AFM 3.6.1)', items: [
+        { title: 'Speed', detail: '67 KIAS', memory: true },
+        { title: 'Propeller', detail: 'TAKE-OFF POSITION' },
+        { title: 'Trim', detail: 'ADJUST' },
+        { title: 'Safety Harness', detail: 'TIGHTEN' },
+        { title: 'Landing Light', detail: 'ON' },
+        { title: 'Flaps', detail: 'AS REQUIRED' },
+        { title: 'COM', detail: 'MAYDAY 121.5' },
+        { title: 'Transponder', detail: '7700' },
+        { title: 'Fuel Selector', detail: 'CLOSE' },
+        { title: 'Ignition', detail: 'OFF' },
+        { title: 'Turns', detail: 'SHALLOW ONLY' },
+        { title: 'Master Switch', detail: 'OFF / ON', note: 'VFR DAY: OFF before touchdown. VFR NIGHT: leave ON, Landing Lights ON.' }
+      ]},
+      { title: 'Precautionary Landing', emergency: true, intro: 'Land as soon as practical. (AFM 3.6.2)', items: [
+        { title: 'Speed', detail: '67 KIAS' },
+        { title: 'Propeller', detail: 'TAKE-OFF POSITION' },
+        { title: 'Trim', detail: 'ADJUST' },
+        { title: 'Landing Area', detail: 'SELECT', note: 'Consider wind direction.' },
+        { title: 'COM', detail: 'REPORT POSITION' },
+        { title: 'Inspection Pass', detail: 'FLAPS 10', note: 'Low pass to inspect the area.' },
+        { title: 'Circuit', detail: 'FLY' },
+        { title: 'Flaps', detail: 'AS REQUIRED' },
+        { title: 'Power', detail: 'IDLE' },
+        { title: 'After Stop', detail: 'ALL SWITCHES OFF' }
+      ]},
+      { title: 'Landing - Flat Tire', emergency: true, intro: 'Landing with a flat tire. (AFM 3.6.3)', items: [
+        { title: 'Damaged Wheel', detail: 'KEEP UP AS LONG AS POSSIBLE' },
+        { title: 'Direction', detail: 'MAINTAIN WITH RUDDER' }
+      ]},
+      { title: 'Landing - Defective Gear', emergency: true, intro: 'Landing with defective landing gear. (AFM 3.6.4)', items: [
+        { title: 'Touchdown Speed', detail: 'LOWEST POSSIBLE' },
+        { title: 'Main Gear Fault', detail: 'MAINTAIN DIRECTION' },
+        { title: 'Nose Wheel Fault', detail: 'HOLD NOSE UP' }
+      ]},
+      { title: 'Aircraft Turn Over', emergency: true, intro: 'After a turn-over on the ground. (AFM 3.6.5)', items: [
+        { title: 'Aircraft', detail: 'EVACUATE ASAP', note: 'Fuel-leak / fire risk. Emergency hammer is in the glovebox. Keep seatbelt on until ready to egress.' }
+      ]},
+      { title: 'Loss of Spatial Orientation', emergency: true, intro: 'Loss of spatial orientation. (AFM 3.7.1)', items: [
+        { title: 'Autopilot', detail: 'PRESS "LVL"', memory: true },
+        { title: 'If Not Regained', detail: 'CONSIDER AEPS' }
+      ]},
+      { title: 'Spin Recovery (PARE)', emergency: true, intro: 'Recovery from an unintentional spin. (AFM 3.7.2)', items: [
+        { title: 'Power', detail: 'IDLE', memory: true },
+        { title: 'Ailerons', detail: 'NEUTRAL', memory: true },
+        { title: 'Rudder', detail: 'FULL OPPOSITE', memory: true, note: 'Opposite to the rotation, until rotation stops.' },
+        { title: 'Elevator', detail: 'PUSH FORWARD', memory: true, note: 'Until rotation stops.' },
+        { title: 'Flaps', detail: 'RETRACT' },
+        { title: 'Rudder', detail: 'NEUTRALIZE', note: 'Immediately once rotation stops.' },
+        { title: 'Recover', detail: 'GENTLE PULL-OUT' }
+      ]},
+      { title: 'Vibration', emergency: true, intro: 'Engine or airframe vibration. (AFM 3.8.1)', items: [
+        { title: 'Engine Speed', detail: 'SET TO LOWEST VIBRATION', note: 'Shut down the engine if vibration is severe or structural.' },
+        { title: 'Land', detail: 'AS SOON AS PRACTICAL', note: 'Or emergency landing per 3.6 if needed.' }
+      ]},
+      { title: 'Autopilot Malfunction', emergency: true, intro: 'Autopilot malfunction. (AFM 3.8.2)', items: [
+        { title: 'AP Disconnect', detail: 'PRESS (STICK)' },
+        { title: 'Autopilot CB', detail: 'PULL' }
+      ]},
+      { title: 'Loss of Oil Pressure', emergency: true, intro: 'Low oil pressure. (AFM 3.8.3)', items: [
+        { title: 'Power', detail: 'REDUCE TO MINIMUM NEEDED' },
+        { title: 'Oil Temp', detail: 'CHECK', note: 'High: keep low power and descend to cool. Normal or no improvement: land as soon as practical.' }
+      ]},
+      { title: 'High Oil Pressure', emergency: true, intro: 'High oil pressure. (AFM 3.8.4)', items: [
+        { title: 'Power', detail: 'REDUCE TO MINIMUM' },
+        { title: 'Propeller RPM', detail: 'REDUCE < 5000' },
+        { title: 'Speed', detail: '67 KIAS' },
+        { title: 'Land', detail: 'AS SOON AS PRACTICAL (3.6.2)' }
+      ]},
+      { title: 'Alternator Failure', emergency: true, intro: 'Alternator failure / back-up battery. (AFM 3.8.5)', items: [
+        { title: 'Back-up Battery', detail: 'ENGAGE' },
+        { title: 'Back-up Battery CB', detail: 'PULL' },
+        { title: 'EIS CB', detail: 'PULL' },
+        { title: 'PFD CB', detail: 'PULL' },
+        { title: 'ADHRS CB', detail: 'PULL' },
+        { title: 'DIMMER CB', detail: 'PULL' },
+        { title: 'EFIS', detail: 'OFF, CONFIRM INTERNAL BATTERY' },
+        { title: 'USB', detail: 'REMOVE LOAD', note: 'Expect a low-fuel warning and loss of dimming.' }
+      ]},
+      { title: 'Bus System Failure', emergency: true, intro: 'Electrical bus failure. (AFM 3.8.6)', items: [
+        { title: 'Back-up Switch', detail: 'ENGAGE' },
+        { title: 'Master Switch', detail: 'OFF' },
+        { title: 'ALT 1', detail: 'OFF' },
+        { title: 'ALT 2', detail: 'OFF' },
+        { title: 'BUS TIE CB', detail: 'PULL' },
+        { title: 'BATT CB', detail: 'PULL' },
+        { title: 'ALT1 CB', detail: 'PULL' },
+        { title: 'ALT2 CB', detail: 'PULL' },
+        { title: 'Faults', detail: 'ISOLATE INDIVIDUALLY', note: 'Restore each source one at a time to find the fault. Continue on remaining sources.' },
+        { title: 'Land', detail: 'AS SOON AS PRACTICAL' }
+      ]},
+      { title: 'Overvoltage', emergency: true, intro: 'Overvoltage above 15 V. (AFM 3.8.7)', items: [
+        { title: 'Engine RPM / Power', detail: 'REDUCE' },
+        { title: 'Alternators', detail: 'CHECK ALT-1 / ALT-2', note: 'Keep the offending alternator OFF.' },
+        { title: 'If Charge Not Maintained', detail: 'BACK-UP BATTERY, LAND ASAP' }
+      ]},
+      { title: 'Inadvertent Icing', emergency: true, intro: 'Inadvertent icing encounter. Flight into known icing is prohibited. (AFM 3.8.8)', items: [
+        { title: 'Pitot Heat', detail: 'ON', memory: true },
+        { title: 'Icing Area', detail: 'EXIT', memory: true, note: 'Change altitude or turn back.' },
+        { title: 'Carb Heat', detail: 'PULL (ON)', memory: true },
+        { title: 'Cabin Heat', detail: 'PULL (ON)' },
+        { title: 'Defrost', detail: 'UP KNOB FORWARD' }
+      ]},
+      { title: 'Loss of Primary Instruments', emergency: true, intro: 'Loss of primary flight instruments. (AFM 3.8.9)', items: [
+        { title: 'EFIS', detail: 'USE AS PRIMARY' },
+        { title: 'One GDU460 Lost', detail: 'CONTINUE' },
+        { title: 'Both GDU460 Lost', detail: 'LAND ASAP' },
+        { title: 'EFIS Lost', detail: 'LAND ASAP' }
+      ]},
+      { title: 'RPM Fluctuation', emergency: true, intro: 'RPM overspeed / underspeed / propeller vibration. (AFM 3.8.10)', items: [
+        { title: 'Throttle / RPM', detail: 'ADJUST FOR SMOOTH RUNNING' },
+        { title: 'Within Limits', detail: 'LAND AS SOON AS PRACTICAL' },
+        { title: 'Out of Limits', detail: 'LAND AS SOON AS POSSIBLE' }
+      ]},
+      { title: 'EGT High', emergency: true, intro: 'High EGT. (AFM 3.8.11)', items: [
+        { title: 'Propeller Control', detail: 'REDUCE RPM' }
+      ]},
+      { title: 'AEPS Activation', emergency: true, intro: 'Ballistic parachute (AEPS) - last resort, if installed. (AFM 3.9)', items: [
+        { title: 'Decision', detail: 'LAST RESORT', note: 'Minimum 1000 ft AGL. Unlock in flight.' },
+        { title: 'COM', detail: 'REPORT INTENT' },
+        { title: 'PAX', detail: 'BRIEF' },
+        { title: 'Safety Harness', detail: 'TIGHTEN' },
+        { title: 'ELT', detail: 'ACTIVATE' },
+        { title: 'Area Below', detail: 'CHECK CLEAR' },
+        { title: 'Fuel Selector', detail: 'OFF' },
+        { title: 'Power', detail: 'REDUCE / SPEED LOW' },
+        { title: 'Master Switch', detail: 'OFF' },
+        { title: 'Activation Handle', detail: 'PULL FIRMLY' },
+        { title: 'Brace', detail: 'FOR IMPACT' },
+        { title: 'After Landing', detail: 'EVACUATE DOWNWIND' }
+      ]}
+    ];
+
+    const CLUB_DRILL_TITLE = 'Engine Failure (Club Drill)';
+    const EMERGENCY_PHASES = new Set([
+      'Engine Failure - Take-off Run', 'Engine Failure - In Flight', 'Carburettor Icing', 'Engine Restart In Flight',
+      'Engine Fire - Ground Start', 'Fire - Ground, Engine Running', 'Engine Fire - Take-off', 'Engine Fire - In Flight',
+      'Cockpit Fire', 'Glide', 'Emergency Landing - No Power', 'Precautionary Landing', 'Landing - Flat Tire',
+      'Landing - Defective Gear', 'Aircraft Turn Over', 'Loss of Spatial Orientation', 'Spin Recovery (PARE)',
+      'Vibration', 'Autopilot Malfunction', 'Loss of Oil Pressure', 'High Oil Pressure', 'Alternator Failure',
+      'Bus System Failure', 'Overvoltage', 'Inadvertent Icing', 'Loss of Primary Instruments', 'RPM Fluctuation',
+      'EGT High', 'AEPS Activation', CLUB_DRILL_TITLE
+    ]);
+
+    const OPTIONAL_PHASES = new Set(['Emergency', 'Autopilot Check', 'Cruise', 'Descent', 'Take off', 'After Take off', 'Approach', 'Go around', 'Touch and Go', 'After Landing']);
+    const stepsContainer = document.getElementById('stepsContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const finishBtn = document.getElementById('finishBtn');
+    const topResetBtn = document.getElementById('topResetBtn');
+    const collapseAllBtn = document.getElementById('collapseAllBtn');
+    const installBtn = document.getElementById('installBtn');
+    const installHelp = document.getElementById('installHelp');
+    const headerFuelLeftValue = document.getElementById('headerFuelLeftValue');
+    const headerFuelRightValue = document.getElementById('headerFuelRightValue');
+    const headerHobbsValue = document.getElementById('headerHobbsValue');
+    const headerAirport = document.getElementById('headerAirport');
+    const headerAircraft = document.getElementById('headerAircraft');
+    const headerStartTime = document.getElementById('headerStartTime');
+    const headerEndTime = document.getElementById('headerEndTime');
+    const headerAirportAlt = document.getElementById('headerAirportAlt');
+    const headerRadioFreq = document.getElementById('headerRadioFreq');
+    const editModeBtn = document.getElementById('editModeBtn');
+    const exportProfileBtn = document.getElementById('exportProfileBtn');
+    const importProfileBtn = document.getElementById('importProfileBtn');
+    const importProfileInput = document.getElementById('importProfileInput');
+    const audioModeBtn = document.getElementById('audioModeBtn');
+    const voiceModeBtn = document.getElementById('voiceModeBtn');
+    const appTitle = document.getElementById('appTitle');
+    const appDescription = document.getElementById('appDescription');
+    const editHeaderBtn = document.getElementById('editHeaderBtn');
+    const headerDisclaimer = document.getElementById('headerDisclaimer');
+    const finishSummaryCard = document.getElementById('finishSummaryCard');
+    const finishSummaryGrid = document.getElementById('finishSummaryGrid');
+    const keepReviewBtn = document.getElementById('keepReviewBtn');
+    const summaryResetBtn = document.getElementById('summaryResetBtn');
+    const voiceStatusText = document.getElementById('voiceStatusText');
+    const tabsContainer = document.getElementById('tabsContainer');
+    const tabTools = document.getElementById('tabTools');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+    const storageKey = 'b23-ground-check-progress-v11';
+    const customChecklistKey = 'b23-ground-check-custom-v5';
+    const editModeKey = 'b23-ground-check-edit-mode-v1';
+    const collapsedStorageKey = 'b23-ground-check-collapsed-v8';
+    const fuelStorageKey = 'b23-ground-check-fuel-v1';
+    const hobbsStorageKey = 'b23-ground-check-hobbs-v1';
+    const oilAddedStorageKey = 'b23-ground-check-oil-added-v1';
+    const headerContentKey = 'b23-ground-check-header-v1';
+    const airportsStorageKey = 'b23-airports-v1';
+    const disclaimerContentKey = 'b23-ground-check-disclaimer-v1';
+    const disclaimerAckKey = 'b23-disclaimer-ack-v1';
+    const finishSummaryKey = 'b23-ground-check-last-summary-v1';
+    const audioEnabledKey = 'b23-ground-check-audio-enabled-v1';
+    const voiceModeEnabledKey = 'b23-ground-check-voice-mode-enabled-v1';
+    const startTimeKey = 'b23-start-time';
+    const endTimeKey = 'b23-end-time';
+    const airportKey = 'b23-airport';
+    const aircraftKey = 'b23-aircraft';
+    const airportAltKey = 'b23-airport-alt';
+    const radioFreqKey = 'b23-radio-freq';
+    const tabsStorageKey = 'b23-ground-check-tabs-v1';
+    const themeStorageKey = 'b23-theme-v1';
+    const wakeLockKey = 'b23-wake-lock-enabled-v1';
+    const appVersionKey = 'b23-app-version';
+    const currentAppVersion = 'v6';
+
+    let airports = [];
+    let phases = [];
+    let tabDefinitions = [];
+    let currentTab = 'normal';
+    let flatSteps = [];
+    let fuelState = { left: '', right: '' };
+    let hobbsValue = '';
+    let oilAddedValue = '0';
+    let deferredPrompt = null;
+    let isWakeLockEnabled = localStorage.getItem(wakeLockKey) === 'true';
+    let wakeLockSentinel = null;
+    let activeStepTimers = {};
+    let isEditMode = localStorage.getItem(editModeKey) === 'true';
+    let isAudioEnabled = localStorage.getItem(audioEnabledKey) === null ? true : localStorage.getItem(audioEnabledKey) === 'true';
+    let isVoiceModeEnabled = localStorage.getItem(voiceModeEnabledKey) === 'true';
+    let editorState = null;
+    let collapsedPhases = [];
+    let lastSummary = null;
+    let activePhaseIndex = null;
+    let focusPhaseIndex = null;
+    let pendingFocusStepIndex = null;
+    let emergencyFlowReturnStepIndex = null;
+    let preferredVoice = null;
+    let recognition = null;
+    let recognitionAvailable = false;
+    let recognitionStarting = false;
+    let recognitionActive = false;
+    let isSpeaking = false;
+    let recognitionRestartTimer = null;
+    let currentVoicePhaseIndex = null;
+    let lastRecognitionError = '';
+    let phaseAnnouncementTimer = null;
+    let lastAnnouncedPhaseIndex = null;
+
+    function cloneDefaultAirports() { return JSON.parse(JSON.stringify(defaultAirports)); }
+    function cloneDefaultPhases() { return JSON.parse(JSON.stringify(defaultPhases)); }
+    function escapeHtml(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }
+    function specialStepType(phaseTitle, item, itemIndex) {
+      if (phaseTitle === 'Before Engine Start' && item.title === 'Pre-flight inspection') return 'derived_preflight';
+      if (item.title === 'Taxi technique') return 'tip';
+      if (phaseTitle === 'Pre-flight inspection' && item.title === 'Engine - Oil quantity') return 'oil_input';
+      if (phaseTitle === 'Pre-flight inspection' && item.title === 'Right-hand leading edge - Actual fuel quantity') return 'fuel_input';
+      if (item.title === 'Hobs') return 'hobbs_input';
+      return null;
+    }
+    function hasFuelInputValues() { return String(fuelState.left || '').trim() !== '' && String(fuelState.right || '').trim() !== ''; }
+    function canConfirmSpecialStep(type) {
+      if (type === 'fuel_input') return hasFuelInputValues();
+      return true;
+    }
+    function isProtectedStep(phaseTitle, item, itemIndex) { return specialStepType(phaseTitle, item, itemIndex) !== null; }
+    function isRequiredPhase(phaseTitle) { return !OPTIONAL_PHASES.has(phaseTitle) && !EMERGENCY_PHASES.has(phaseTitle); }
+    function isCountedStep(phaseTitle, item, itemIndex) { return specialStepType(phaseTitle, item, itemIndex) !== 'tip'; }
+    function getDisplayStepTitle(phase, item) { if (phase.title === 'Pre-flight inspection' && item.title.includes(' - ')) return item.title.split(' - ').slice(1).join(' - '); return item.title; }
+    function getPreflightSubsection(item) { if (!item.title.includes(' - ')) return null; return item.title.split(' - ')[0]; }
+    function globalIndexFor(phaseIndex, itemIndex) { let count = 0; for (let p = 0; p < phaseIndex; p += 1) count += phases[p].items.length; return count + itemIndex; }
+
+    function loadAirports() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(airportsStorageKey) || 'null');
+        if (Array.isArray(saved) && saved.length) {
+          airports = saved.map(function(item) {
+            return {
+              code: String(item.code || '').trim().toUpperCase(),
+              altitude: String(item.altitude || '').trim(),
+              radio: String(item.radio || '').trim()
+            };
+          }).filter(function(item) { return item.code; });
+        }
+      } catch (_) {}
+      if (!Array.isArray(airports) || !airports.length) airports = cloneDefaultAirports();
+    }
+    function saveAirports() { localStorage.setItem(airportsStorageKey, JSON.stringify(airports)); }
+    function getAirportConfig(code) {
+      return airports.find(function(item) { return item.code === code; }) || null;
+    }
+    function renderAirportOptions() {
+      if (!headerAirport) return;
+      headerAirport.innerHTML = airports.map(function(item) {
+        return '<option value="' + escapeHtml(item.code) + '">' + escapeHtml(item.code) + '</option>';
+      }).join('');
+    }
+    function applyAirportDefaults(code) {
+      const config = getAirportConfig(code);
+      if (!config) return;
+      headerAirportAlt.textContent = config.altitude || '--';
+      headerRadioFreq.textContent = config.radio || '--';
+      localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
+      localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
+    }
+    function loadCustomChecklist() { phases = cloneDefaultPhases(); }
+    function saveCustomChecklist() { localStorage.setItem(customChecklistKey, JSON.stringify(phases)); }
+    function buildDefaultTabs() { 
+      return [
+        { id: 'normal', label: 'Normal', phaseTitles: phases.filter(p => !EMERGENCY_PHASES.has(p.title)).map(p => p.title) },
+        { id: 'clubdrill', label: 'Emergency Checklist', phaseTitles: phases.filter(p => p.title === CLUB_DRILL_TITLE).map(p => p.title) },
+        { id: 'emergency', label: 'POH Emergency Procedures', phaseTitles: phases.filter(p => EMERGENCY_PHASES.has(p.title) && p.title !== CLUB_DRILL_TITLE).map(p => p.title) },
+        { id: 'quickref', label: 'Quick Ref', phaseTitles: [] }
+      ]; 
+    }
+    function normalizeTabDefinitions(inputTabs) {
+      if (!Array.isArray(inputTabs) || !inputTabs.length) return buildDefaultTabs();
+      const phaseTitleSet = new Set(phases.map(p => p.title));
+      const normalized = inputTabs.map(function(tab, index) {
+        const safeId = String(tab.id || ('tab-' + index)).trim() || ('tab-' + index);
+        const safeLabel = String(tab.label || ('Tab ' + (index + 1))).trim() || ('Tab ' + (index + 1));
+        const phaseTitles = Array.isArray(tab.phaseTitles) ? tab.phaseTitles.filter(title => phaseTitleSet.has(title)) : [];
+        return { id: safeId, label: safeLabel, phaseTitles: phaseTitles };
+      }).filter(function(tab) { return tab.label; });
+      return normalized.length ? normalized : buildDefaultTabs();
+    }
+    function loadTabDefinitions() {
+      try { tabDefinitions = normalizeTabDefinitions(JSON.parse(localStorage.getItem(tabsStorageKey) || 'null')); }
+      catch (_) { tabDefinitions = buildDefaultTabs(); }
+      if (!tabDefinitions.some(function(tab) { return tab.id === currentTab; })) currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal';
+    }
+    function saveTabDefinitions() { localStorage.setItem(tabsStorageKey, JSON.stringify(tabDefinitions)); }
+    function syncTabsWithPhases() {
+      const phaseTitleSet = new Set(phases.map(function(p) { return p.title; }));
+
+      tabDefinitions = normalizeTabDefinitions(tabDefinitions).map(function(tab, index) {
+        // Preserve Quick Ref tab
+        if (tab.id === 'quickref') {
+          return { id: tab.id, label: tab.label, phaseTitles: [] };
+        }
+
+        let filtered = tab.phaseTitles.filter(function(title) { return phaseTitleSet.has(title); });
+
+        // Club Drill tab = only the club drill card
+        if (tab.id === 'clubdrill') {
+          filtered = phases.filter(function(p) { return p.title === CLUB_DRILL_TITLE; }).map(function(p) { return p.title; });
+        }
+        // Emergency tab = all emergency phases except the club drill
+        else if (tab.id === 'emergency') {
+          filtered = phases.filter(function(p) { return EMERGENCY_PHASES.has(p.title) && p.title !== CLUB_DRILL_TITLE; }).map(function(p) { return p.title; });
+        }
+        // Normal / custom tabs = all non-emergency phases
+        else {
+          filtered = phases.filter(function(p) { return !EMERGENCY_PHASES.has(p.title); }).map(function(p) { return p.title; });
+        }
+
+        return { id: tab.id || ('tab-' + index), label: tab.label, phaseTitles: filtered };
+      });
+
+      // Ensure Quick Ref tab always exists
+      if (!tabDefinitions.some(function(t) { return t.id === 'quickref'; })) {
+        tabDefinitions.push({ id: 'quickref', label: 'Quick Ref', phaseTitles: [] });
+      }
+
+      if (!tabDefinitions.some(function(tab) { return tab.id === currentTab; })) {
+        currentTab = tabDefinitions[0] ? tabDefinitions[0].id : 'normal';
+      }
+
+      saveTabDefinitions();
+    }
+    function getCurrentTabDefinition() { return tabDefinitions.find(function(tab) { return tab.id === currentTab; }) || tabDefinitions[0] || null; }
+    function loadHeaderContent() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(headerContentKey) || 'null');
+        if (saved && typeof saved.title === 'string' && saved.title.trim()) {
+          appTitle.textContent = saved.title;
+        }
+      } catch (_) {}
+      try {
+        const savedDisclaimer = localStorage.getItem(disclaimerContentKey);
+        if (headerDisclaimer && typeof savedDisclaimer === 'string' && savedDisclaimer.trim()) {
+          headerDisclaimer.textContent = savedDisclaimer;
+        }
+      } catch (_) {}
+    }
+    function saveHeaderContent() {
+      localStorage.setItem(headerContentKey, JSON.stringify({
+        title: appTitle.textContent,
+        description: appDescription ? appDescription.textContent : ''
+      }));
+      if (headerDisclaimer) {
+        localStorage.setItem(disclaimerContentKey, headerDisclaimer.textContent || '');
+      }
+    }
+    function rebuildFlatSteps() { flatSteps = []; phases.forEach(function(phase, phaseIndex) { phase.items.forEach(function(item, itemIndex) { flatSteps.push({ title: item.title, detail: item.detail, note: item.note || '', confirmed: false, phaseTitle: phase.title, phaseIndex: phaseIndex, itemIndex: itemIndex }); }); }); }
+    function loadProgress() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        if (Array.isArray(saved) && saved.length === flatSteps.length) flatSteps.forEach(function(step, index) { step.confirmed = Boolean(saved[index]); });
+      } catch (_) {}
+    }
+    function saveProgress() { localStorage.setItem(storageKey, JSON.stringify(flatSteps.map(function(step) { return step.confirmed; }))); }
+    function loadCollapsedState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(collapsedStorageKey) || '[]');
+        if (Array.isArray(saved) && saved.length === phases.length) { collapsedPhases = saved.map(Boolean); return; }
+      } catch (_) {}
+      collapsedPhases = phases.map(function() { return false; });
+    }
+    function saveCollapsedState() { localStorage.setItem(collapsedStorageKey, JSON.stringify(collapsedPhases)); }
+    function loadFuelState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(fuelStorageKey) || '{}');
+        fuelState = { left: typeof saved.left === 'string' ? saved.left : '', right: typeof saved.right === 'string' ? saved.right : '' };
+      } catch (_) {}
+    }
+    function saveFuelState() { localStorage.setItem(fuelStorageKey, JSON.stringify(fuelState)); }
+    function loadHobbsValue() { hobbsValue = localStorage.getItem(hobbsStorageKey) || ''; }
+    function saveHobbsValue() { localStorage.setItem(hobbsStorageKey, hobbsValue); }
+    function loadOilAddedValue() {
+      const saved = localStorage.getItem(oilAddedStorageKey);
+      oilAddedValue = (saved === null || saved === undefined || saved === '') ? '0' : String(saved);
+    }
+    function saveOilAddedValue() { localStorage.setItem(oilAddedStorageKey, oilAddedValue); }
+    function loadLastSummary() { try { lastSummary = JSON.parse(localStorage.getItem(finishSummaryKey) || 'null'); } catch (_) { lastSummary = null; } }
+    function saveLastSummary() { if (lastSummary) localStorage.setItem(finishSummaryKey, JSON.stringify(lastSummary)); }
+    function clearLastSummary() { lastSummary = null; localStorage.removeItem(finishSummaryKey); }
+    function getCurrentZuluParts() {
+      const now = new Date();
+      return {
+        dateText: new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' }).format(now),
+        timeText: new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' }).format(now)
+      };
+    }
+    function getCurrentZuluTimeValue() { const now = new Date(); return String(now.getUTCHours()).padStart(2, '0') + ':' + String(now.getUTCMinutes()).padStart(2, '0'); }
+
+    // --- Stopwatch (left half of the Zulu-time pill): tap start/stop, hold to reset ---
+    const stopwatchKey = 'b23-stopwatch-v1';
+    let stopwatch = { running: false, startEpoch: null, accumulatedMs: 0 };
+    let stopwatchTickId = null;
+    function getStopwatchElapsedMs() {
+      return stopwatch.accumulatedMs + (stopwatch.running && stopwatch.startEpoch ? (Date.now() - stopwatch.startEpoch) : 0);
+    }
+    function formatStopwatch(ms) {
+      const total = Math.floor(Math.max(0, ms) / 1000);
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      const pad = function(n) { return String(n).padStart(2, '0'); };
+      return h > 0 ? (h + ':' + pad(m) + ':' + pad(s)) : (m + ':' + pad(s));
+    }
+    function renderStopwatch() {
+      const half = document.getElementById('stopwatchHalf');
+      if (!half) return;
+      half.textContent = '⏱ ' + formatStopwatch(getStopwatchElapsedMs());
+      half.classList.toggle('running', stopwatch.running);
+      half.title = (stopwatch.running ? 'Tap: stop' : 'Tap: start') + ' · Hold: reset';
+    }
+    function saveStopwatch() { try { localStorage.setItem(stopwatchKey, JSON.stringify(stopwatch)); } catch (_) {} }
+    function startStopwatchTicking() {
+      if (stopwatchTickId || !stopwatch.running) return;
+      stopwatchTickId = setInterval(renderStopwatch, 250);
+    }
+    function stopStopwatchTicking() {
+      if (stopwatchTickId) { clearInterval(stopwatchTickId); stopwatchTickId = null; }
+    }
+    function toggleStopwatch() {
+      if (stopwatch.running) {
+        stopwatch.accumulatedMs = getStopwatchElapsedMs();
+        stopwatch.running = false;
+        stopwatch.startEpoch = null;
+        stopStopwatchTicking();
+      } else {
+        stopwatch.startEpoch = Date.now();
+        stopwatch.running = true;
+        startStopwatchTicking();
+      }
+      saveStopwatch();
+      renderStopwatch();
+    }
+    function resetStopwatch() {
+      stopwatch = { running: false, startEpoch: null, accumulatedMs: 0 };
+      stopStopwatchTicking();
+      saveStopwatch();
+      renderStopwatch();
+    }
+    function loadStopwatch() {
+      try {
+        const raw = localStorage.getItem(stopwatchKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            stopwatch.running = !!parsed.running;
+            stopwatch.startEpoch = typeof parsed.startEpoch === 'number' ? parsed.startEpoch : null;
+            stopwatch.accumulatedMs = typeof parsed.accumulatedMs === 'number' ? parsed.accumulatedMs : 0;
+          }
+        }
+      } catch (_) {}
+      if (stopwatch.running && !stopwatch.startEpoch) { stopwatch.running = false; }
+      startStopwatchTicking();
+      renderStopwatch();
+    }
+    function wireStopwatch() {
+      const half = document.getElementById('stopwatchHalf');
+      if (!half) return;
+      let pressTimer = null;
+      let longPressed = false;
+      const cancelPress = function() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+      half.addEventListener('pointerdown', function(e) {
+        if (e.button && e.button !== 0) return;
+        longPressed = false;
+        cancelPress();
+        pressTimer = setTimeout(function() { longPressed = true; resetStopwatch(); }, 600);
+      });
+      half.addEventListener('pointerup', cancelPress);
+      half.addEventListener('pointercancel', function() { cancelPress(); longPressed = false; });
+      half.addEventListener('pointerleave', cancelPress);
+      half.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (longPressed) { longPressed = false; return; }
+        toggleStopwatch();
+      });
+      half.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleStopwatch(); }
+      });
+      half.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    }
+
+    // Record a Zulu time into a pill: short tap only when empty/reset, long-press to overwrite an existing value.
+    function wireTimeRecordPill(pill, valueEl, storageKey) {
+      if (!pill || !valueEl) return;
+      const isEmpty = function() { const t = (valueEl.textContent || '').trim(); return t === '' || t === '--'; };
+      const record = function() {
+        const value = getCurrentZuluTimeValue();
+        valueEl.textContent = value;
+        try { localStorage.setItem(storageKey, value); } catch (_) {}
+      };
+      let pressTimer = null;
+      let longPressed = false;
+      const cancelPress = function() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+      pill.addEventListener('pointerdown', function(e) {
+        if (e.button && e.button !== 0) return;
+        longPressed = false;
+        cancelPress();
+        if (isEmpty()) return; // empty: handled by the short click path
+        pressTimer = setTimeout(function() { longPressed = true; record(); }, 600);
+      });
+      pill.addEventListener('pointerup', cancelPress);
+      pill.addEventListener('pointercancel', function() { cancelPress(); longPressed = false; });
+      pill.addEventListener('pointerleave', cancelPress);
+      pill.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (longPressed) { longPressed = false; return; }
+        if (isEmpty()) record(); // short tap sets only when empty/reset; otherwise hold to update
+      });
+      pill.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); record(); }
+      });
+      pill.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    }
+
+    function updateTopMeta() {
+      const parts = getCurrentZuluParts();
+      document.getElementById('todayDate').textContent = 'Date ' + parts.dateText;
+      const zuluHalf = document.getElementById('zuluHalf');
+      if (zuluHalf) zuluHalf.textContent = 'Time ' + parts.timeText + ' Z';
+      headerFuelLeftValue.textContent = fuelState.left || '--';
+      headerFuelRightValue.textContent = fuelState.right || '--';
+      headerHobbsValue.textContent = hobbsValue || '--';
+    }
+    function isIos() { return /iphone|ipad|ipod/i.test(window.navigator.userAgent); }
+    function isInStandaloneMode() { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+    function updateInstallHelp() {
+      if (isInStandaloneMode()) installHelp.textContent = 'Installed on Home Screen.';
+      else if (isIos()) installHelp.textContent = 'On iPhone: open in Safari, tap Share, then Add to Home Screen.';
+      else if (deferredPrompt) installHelp.textContent = 'Install this checklist for a full-screen app experience and offline access.';
+      else installHelp.textContent = 'To install, host this app online, open it in your browser, then use Add to Home Screen or Install.';
+    }
+    function updateInstallButton() { installBtn.style.display = deferredPrompt && !isIos() && !isInStandaloneMode() ? 'inline-flex' : 'none'; updateInstallHelp(); }
+    function applyTheme(theme) {
+      const isLight = theme === 'light';
+      document.body.classList.toggle('light-mode', isLight);
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute('content', isLight ? '#f3f4f6' : '#111827');
+      if (themeToggleBtn) themeToggleBtn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+    }
+    function countedStepsInPhase(phaseIndex) { let count = 0; phases[phaseIndex].items.forEach(function(item, itemIndex) { if (isCountedStep(phases[phaseIndex].title, item, itemIndex)) count += 1; }); return count; }
+    function completedCountInPhase(phaseIndex) {
+      let count = 0;
+      const phase = phases[phaseIndex];
+      phase.items.forEach(function(item, itemIndex) {
+        if (!isCountedStep(phase.title, item, itemIndex)) return;
+        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
+        if (step && step.confirmed) count += 1;
+      });
+      return count;
+    }
+    function isUnlocked(index) {
+      const step = flatSteps[index];
+      if (!step) return false;
+      const phase = phases[step.phaseIndex];
+      const item = phase && phase.items[step.itemIndex];
+      const type = phase && item ? specialStepType(phase.title, item, step.itemIndex) : null;
+      if (step.itemIndex === 0) return canConfirmSpecialStep(type);
+      const previousIndex = globalIndexFor(step.phaseIndex, step.itemIndex - 1);
+      return Boolean(flatSteps[previousIndex] && flatSteps[previousIndex].confirmed) && canConfirmSpecialStep(type);
+    }
+    function isPhaseFullyCompleted(phaseIndex) {
+      const phase = phases[phaseIndex];
+      let hasCountedStep = false;
+      for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) {
+        const item = phase.items[itemIndex];
+        if (!isCountedStep(phase.title, item, itemIndex)) continue;
+        hasCountedStep = true;
+        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
+        if (!step || !step.confirmed) return false;
+      }
+      return hasCountedStep;
+    }
+    function syncDerivedSteps() {
+      const preflightPhaseIndex = phases.findIndex(function(phase) { return phase.title === 'Pre-flight inspection'; });
+      const beforeEngineStartPhaseIndex = phases.findIndex(function(phase) { return phase.title === 'Before Engine Start'; });
+      if (preflightPhaseIndex === -1 || beforeEngineStartPhaseIndex === -1) return;
+      const derivedStepIndex = phases[beforeEngineStartPhaseIndex].items.findIndex(function(item) { return item.title === 'Pre-flight inspection'; });
+      if (derivedStepIndex === -1) return;
+      const globalDerivedIndex = globalIndexFor(beforeEngineStartPhaseIndex, derivedStepIndex);
+      if (flatSteps[globalDerivedIndex]) flatSteps[globalDerivedIndex].confirmed = isPhaseFullyCompleted(preflightPhaseIndex);
+    }
+    function getActivePhaseIndex() { return activePhaseIndex; }
+    function getFirstActionableStepIndexInPhase(phaseIndex) {
+      const phase = phases[phaseIndex];
+      for (let itemIndex = 0; itemIndex < phase.items.length; itemIndex += 1) {
+        const item = phase.items[itemIndex];
+        if (!isCountedStep(phase.title, item, itemIndex)) continue;
+        const index = globalIndexFor(phaseIndex, itemIndex);
+        const step = flatSteps[index];
+        if (!step || step.confirmed || !isUnlocked(index)) continue;
+        return index;
+      }
+      return null;
+    }
+    function getCurrentActionableStepIndex(preferredPhaseIndex) {
+      if (typeof preferredPhaseIndex === 'number' && preferredPhaseIndex >= 0 && preferredPhaseIndex < phases.length) {
+        const inPhase = getFirstActionableStepIndexInPhase(preferredPhaseIndex);
+        if (inPhase !== null) return inPhase;
+      }
+      for (let index = 0; index < flatSteps.length; index += 1) {
+        const step = flatSteps[index];
+        const phase = phases[step.phaseIndex];
+        const item = phase && phase.items[step.itemIndex];
+        if (!phase || !item) continue;
+        if (!isCountedStep(phase.title, item, step.itemIndex)) continue;
+        if (step.confirmed || !isUnlocked(index)) continue;
+        return index;
+      }
+      return null;
+    }
+    function updateAudioToggleUi() {
+      if (!audioModeBtn) return;
+      audioModeBtn.classList.toggle('active', isAudioEnabled);
+      audioModeBtn.classList.toggle('off', !isAudioEnabled);
+      audioModeBtn.textContent = isAudioEnabled ? '🔊' : '🔈';
+      audioModeBtn.title = isAudioEnabled ? 'Audio on' : 'Audio off';
+
+      if (!voiceModeBtn) return;
+      voiceModeBtn.classList.toggle('active', isVoiceModeEnabled);
+      voiceModeBtn.classList.toggle('off', !isVoiceModeEnabled);
+      voiceModeBtn.textContent = '🎙️';
+      voiceModeBtn.title = isVoiceModeEnabled ? 'Voice on' : 'Voice off';
+    }
+    function updateVoiceModeUi() {
+      if (!voiceStatusText) return;
+      voiceStatusText.classList.remove('off', 'listening', 'speaking', 'error');
+      if (!recognitionAvailable) {
+        voiceStatusText.textContent = 'Voice unavailable';
+        voiceStatusText.classList.add('error');
+      } else if (!isVoiceModeEnabled) {
+        voiceStatusText.textContent = 'Voice off';
+        voiceStatusText.classList.add('off');
+      } else if (isSpeaking) {
+        voiceStatusText.textContent = 'Speaking';
+        voiceStatusText.classList.add('speaking');
+      } else if (recognitionActive) {
+        voiceStatusText.textContent = 'Say “confirm step”';
+        voiceStatusText.classList.add('listening');
+      } else if (lastRecognitionError) {
+        voiceStatusText.textContent = 'Voice error';
+        voiceStatusText.classList.add('error');
+      } else {
+        voiceStatusText.textContent = 'Starting';
+        voiceStatusText.classList.add('speaking');
+      }
+    }
+    function pickPreferredVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices() || [];
+      if (!voices.length) return null;
+      const preferredNames = ['Google UK English Male', 'Microsoft Ryan', 'Microsoft Guy', 'Microsoft David', 'Microsoft Mark', 'Alex', 'Daniel'];
+      for (let i = 0; i < preferredNames.length; i += 1) {
+        const found = voices.find(function(voice) { return (voice.name || '').toLowerCase().includes(preferredNames[i].toLowerCase()); });
+        if (found) return found;
+      }
+      return voices.find(function(voice) { return (voice.lang || '').toLowerCase().startsWith('en'); }) || voices[0] || null;
+    }
+    function ensureVoiceReady() { if ('speechSynthesis' in window && !preferredVoice) preferredVoice = pickPreferredVoice(); }
+    if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = function() { preferredVoice = pickPreferredVoice(); };
+    function speakText(text) {
+      if (!isAudioEnabled) return;
+      if (!('speechSynthesis' in window)) return;
+      ensureVoiceReady();
+      clearPhaseAnnouncementTimer();
+      if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; }
+      if (isVoiceModeEnabled) stopVoiceRecognition();
+      isSpeaking = true;
+      updateVoiceModeUi();
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        utterance.lang = (preferredVoice.lang && preferredVoice.lang.toLowerCase().startsWith('en-gb')) ? preferredVoice.lang : (preferredVoice.lang || 'en-US');
+      } else {
+        utterance.lang = 'en-GB';
+      }
+      utterance.rate = 1.1;
+      utterance.pitch = 0.8;
+      utterance.volume = 1;
+      utterance.onend = function() {
+        isSpeaking = false;
+        updateVoiceModeUi();
+        if (isVoiceModeEnabled) {
+          recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 100);
+        }
+      };
+      utterance.onerror = function() {
+        isSpeaking = false;
+        lastRecognitionError = 'speech error';
+        updateVoiceModeUi();
+        if (isVoiceModeEnabled) {
+          recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 100);
+        }
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+    function speakStepWithPhase(index, forcePhaseHeader) {
+      if (index === null || index === undefined) return;
+      const step = flatSteps[index];
+      if (!step) return;
+      const phase = phases[step.phaseIndex];
+      const item = phase && phase.items[step.itemIndex];
+      if (!phase || !item) return;
+      const title = getDisplayStepTitle(phase, item);
+      if (forcePhaseHeader) { lastAnnouncedPhaseIndex = step.phaseIndex; speakText(phase.title + '. ' + title + '. ' + step.detail); }
+      else speakText(title + '. ' + step.detail);
+    }
+    function speakCurrentActionableStep(forcePhaseHeader, preferredPhaseIndex) {
+      const phaseIndex = typeof preferredPhaseIndex === 'number' ? preferredPhaseIndex : currentVoicePhaseIndex;
+      const index = getCurrentActionableStepIndex(phaseIndex);
+      if (index === null) return;
+      currentVoicePhaseIndex = flatSteps[index] ? flatSteps[index].phaseIndex : currentVoicePhaseIndex;
+      speakStepWithPhase(index, forcePhaseHeader);
+    }
+    function schedulePhaseActivationAnnouncement(phaseIndex) {
+      if (!isAudioEnabled) return;
+      const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex);
+      if (actionableIndex === null) return;
+      clearPhaseAnnouncementTimer();
+      phaseAnnouncementTimer = setTimeout(function() { phaseAnnouncementTimer = null; speakStepWithPhase(actionableIndex, true); }, 0);
+    }
+    function clearPhaseAnnouncementTimer() { if (phaseAnnouncementTimer) { clearTimeout(phaseAnnouncementTimer); phaseAnnouncementTimer = null; } }
+    function startVoiceRecognition() {
+      if (!recognition || !recognitionAvailable || recognitionStarting || recognitionActive || isSpeaking) return;
+      recognitionStarting = true;
+      lastRecognitionError = '';
+      updateVoiceModeUi();
+      try { recognition.start(); }
+      catch (_) { recognitionStarting = false; lastRecognitionError = 'mic start failed'; updateVoiceModeUi(); }
+      setTimeout(function() { recognitionStarting = false; updateVoiceModeUi(); }, 500);
+    }
+    function stopVoiceRecognition() {
+      if (recognitionRestartTimer) { clearTimeout(recognitionRestartTimer); recognitionRestartTimer = null; }
+      recognitionActive = false;
+      recognitionStarting = false;
+      updateVoiceModeUi();
+      if (!recognition || !recognitionAvailable) return;
+      try { recognition.stop(); } catch (_) {}
+    }
+    function maybeAutoRecordTime(step) {
+      if (!step) return;
+      if (step.phaseTitle === 'Engine Start' && step.title === 'Master switch' && headerStartTime.textContent === '--') {
+        const value = getCurrentZuluTimeValue();
+        headerStartTime.textContent = value;
+        localStorage.setItem(startTimeKey, value);
+      }
+      if (step.phaseTitle === 'Parking' && step.title === 'Master Switch') {
+        const value = getCurrentZuluTimeValue();
+        headerEndTime.textContent = value;
+        localStorage.setItem(endTimeKey, value);
+      }
+    }
+    function buildCompletionSummary() {
+      const parts = getCurrentZuluParts();
+      const oilAddedNumeric = parseFloat(String(oilAddedValue || '').replace(',', '.'));
+      const includeOilAdded = !Number.isNaN(oilAddedNumeric) && oilAddedNumeric !== 0;
+      return {
+        aircraft: headerAircraft.value,
+        airport: headerAirport.value,
+        altitude: headerAirportAlt.textContent || '--',
+        radioFreq: headerRadioFreq.textContent || '--',
+        date: parts.dateText,
+        startTime: headerStartTime.textContent,
+        endTime: headerEndTime.textContent,
+        hobbs: hobbsValue || '--',
+        fuelLeft: fuelState.left || '--',
+        fuelRight: fuelState.right || '--',
+        oilAdded: includeOilAdded ? oilAddedValue : '',
+        completedAt: parts.timeText
+      };
+    }
+    function renderSummaryCard() {
+      if (!lastSummary) { finishSummaryCard.classList.remove('visible'); finishSummaryGrid.innerHTML = ''; return; }
+      const fields = [['Aircraft', lastSummary.aircraft], ['Airport', lastSummary.airport], ['Altitude (ft)', lastSummary.altitude], ['Radio (MHz)', lastSummary.radioFreq], ['Date (UTC)', lastSummary.date], ['Start time (Z)', lastSummary.startTime], ['End time (Z)', lastSummary.endTime], ['Hobs', lastSummary.hobbs], ['Fuel left', lastSummary.fuelLeft], ['Fuel right', lastSummary.fuelRight]];
+      if (lastSummary.oilAdded) fields.push(['Added oil', lastSummary.oilAdded]);
+      fields.push(['Completed at (Z)', lastSummary.completedAt]);
+      finishSummaryGrid.innerHTML = fields.map(function(entry) { return '<div class="summary-item"><span class="summary-label">' + escapeHtml(entry[0]) + '</span><div class="summary-value">' + escapeHtml(entry[1] || '--') + '</div></div>'; }).join('');
+      finishSummaryCard.classList.add('visible');
+    }
+    function showFinishSummary() { lastSummary = buildCompletionSummary(); saveLastSummary(); renderSummaryCard(); finishSummaryCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    function resetProgressForStructureChange() { rebuildFlatSteps(); flatSteps.forEach(function(step) { step.confirmed = false; }); syncDerivedSteps(); saveProgress(); }
+    function openInsertEditor(phaseIndex, insertAt, existingStep) {
+      editorState = { mode: existingStep ? 'edit' : 'insert', phaseIndex: phaseIndex, insertAt: insertAt, title: existingStep ? existingStep.title : '', detail: existingStep ? existingStep.detail : '', note: existingStep ? (existingStep.note || '') : '' };
+      render();
+    }
+    function closeEditor() { editorState = null; render(); }
+    function saveEditorStep() {
+      if (!editorState) return;
+      if (editorState.mode === 'edit-header') {
+        const title = editorState.title.trim();
+        const disclaimer = (editorState.disclaimer || '').trim();
+        if (!title) return alert('Header title is required.');
+        appTitle.textContent = title;
+        if (headerDisclaimer) headerDisclaimer.textContent = disclaimer;
+        saveHeaderContent();
+        closeEditor();
+        return;
+      }
+      if (editorState.mode === 'edit-airports') {
+        const nextAirports = (editorState.airports || []).map(function(item) {
+          return {
+            code: String(item.code || '').trim().toUpperCase(),
+            altitude: String(item.altitude || '').trim(),
+            radio: String(item.radio || '').trim()
+          };
+        }).filter(function(item) { return item.code; });
+        const codes = new Set();
+        for (let i = 0; i < nextAirports.length; i += 1) {
+          if (codes.has(nextAirports[i].code)) return alert('Airport codes must be unique.');
+          codes.add(nextAirports[i].code);
+        }
+        if (!nextAirports.length) return alert('At least one airport is required.');
+        airports = nextAirports;
+        saveAirports();
+        renderAirportOptions();
+        if (!getAirportConfig(headerAirport.value)) {
+          headerAirport.value = airports[0].code;
+          localStorage.setItem(airportKey, headerAirport.value);
+        }
+        applyAirportDefaults(headerAirport.value);
+        closeEditor();
+        return;
+      }
+      const phase = phases[editorState.phaseIndex];
+      if (!phase) return;
+      const title = editorState.title.trim();
+      const detail = editorState.detail.trim();
+      const note = editorState.note.trim();
+      if (!title || !detail) return alert('Step title and detail are required.');
+      const newStep = { title: title, detail: detail, note: note };
+      if (editorState.mode === 'edit') phase.items[editorState.insertAt] = newStep;
+      else phase.items.splice(editorState.insertAt, 0, newStep);
+      saveCustomChecklist();
+      resetProgressForStructureChange();
+      closeEditor();
+    }
+    function deleteStep(phaseIndex, itemIndex) {
+      const phase = phases[phaseIndex];
+      if (!phase) return;
+      const item = phase.items[itemIndex];
+      if (!item || isProtectedStep(phase.title, item, itemIndex)) return;
+      phase.items.splice(itemIndex, 1);
+      saveCustomChecklist();
+      resetProgressForStructureChange();
+      render();
+    }
+    function buildInlineEditorHtml() {
+      if (!editorState) return '';
+      const isHeaderEditor = editorState.mode === 'edit-header';
+      if (editorState.mode === 'edit-airports') {
+        const rows = (editorState.airports || []).map(function(item, index) {
+          return '<div class="edit-grid" data-airport-row="' + index + '" style="margin-top:8px;align-items:end;">' +
+            '<div><label class="small-label">ICAO</label><input data-airport-code="' + index + '" type="text" value="' + escapeHtml(item.code || '') + '" placeholder="ESGA"></div>' +
+            '<div><label class="small-label">Altitude</label><input data-airport-altitude="' + index + '" type="text" value="' + escapeHtml(item.altitude || '') + '" placeholder="424 ft"></div>' +
+            '<div><label class="small-label">Radio</label><input data-airport-radio="' + index + '" type="text" value="' + escapeHtml(item.radio || '') + '" placeholder="123.550 Backamo"></div>' +
+            '<div><button class="mini-btn danger-btn" data-remove-airport-row="' + index + '" type="button">Remove</button></div>' +
+          '</div>';
+        }).join('');
+        return '<div class="edit-panel" data-inline-editor="true">' +
+          '<div><label class="small-label">Airports</label>' + rows + '</div>' +
+          '<div class="step-tools" style="margin-top:12px;"><button class="mini-btn" id="addAirportRowBtn" type="button">Add airport</button><button class="mini-btn" id="saveEditorBtn" type="button">Save airports</button><button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button></div></div>';
+      }
+      return '<div class="edit-panel" data-inline-editor="true">' +
+        (isHeaderEditor
+          ? '<div><label class="small-label">Header title</label><input id="editorTitle" type="text" value="' + escapeHtml(editorState.title) + '" autofocus></div>' +
+            '<div><label class="small-label">Disclaimer text</label><textarea id="editorDisclaimer">' + escapeHtml(editorState.disclaimer || '') + '</textarea></div>'
+          : '<div class="edit-grid"><div><label class="small-label">Step title</label><input id="editorTitle" type="text" value="' + escapeHtml(editorState.title) + '" autofocus></div><div><label class="small-label">Step detail</label><input id="editorDetail" type="text" value="' + escapeHtml(editorState.detail) + '"></div></div><div><label class="small-label">Optional note</label><textarea id="editorNote">' + escapeHtml(editorState.note) + '</textarea></div>') +
+        '<div class="step-tools"><button class="mini-btn" id="saveEditorBtn" type="button">' + (isHeaderEditor ? 'Save header' : 'Save step') + '</button><button class="mini-btn" id="cancelEditorBtn" type="button">Cancel</button></div></div>';
+    }
+    function setActiveTab(tabName) { currentTab = tabName; }
+    function openTabEditor(tabId) {
+      const existing = tabDefinitions.find(function(tab) { return tab.id === tabId; });
+      editorState = { mode: existing ? 'edit-tab' : 'add-tab', tabId: existing ? existing.id : null, title: existing ? existing.label : '', phaseTitles: existing ? existing.phaseTitles.slice() : [] };
+      render();
+    }
+    function saveTabEditor() {
+      if (!editorState || (editorState.mode !== 'edit-tab' && editorState.mode !== 'add-tab')) return;
+      const label = String(editorState.title || '').trim();
+      if (!label) return alert('Tab name is required.');
+      const phaseTitles = Array.isArray(editorState.phaseTitles) ? editorState.phaseTitles.slice() : [];
+      if (editorState.mode === 'edit-tab') tabDefinitions = tabDefinitions.map(function(tab) { return tab.id !== editorState.tabId ? tab : { id: tab.id, label: label, phaseTitles: phaseTitles }; });
+      else { const newId = 'tab-' + Date.now(); tabDefinitions.push({ id: newId, label: label, phaseTitles: phaseTitles }); currentTab = newId; }
+      syncTabsWithPhases();
+      editorState = null;
+      render();
+    }
+    function deleteCurrentTab() {
+      if (tabDefinitions.length <= 1) return alert('At least one tab is required.');
+      tabDefinitions = tabDefinitions.filter(function(tab) { return tab.id !== currentTab; });
+      currentTab = tabDefinitions[0].id;
+      syncTabsWithPhases();
+      editorState = null;
+      render();
+    }
+    function buildTabEditorHtml() {
+      if (!editorState || (editorState.mode !== 'edit-tab' && editorState.mode !== 'add-tab')) return '';
+      const selected = new Set(editorState.phaseTitles || []);
+      return '<div class="edit-panel" data-tab-editor="true">' +
+        '<div><label class="small-label">Tab name</label><input id="tabEditorTitle" type="text" value="' + escapeHtml(editorState.title || '') + '" /></div>' +
+        '<div style="margin-top:12px;"><label class="small-label">Include phases</label>' +
+        phases.map(function(phase, index) { return '<label style="display:flex;align-items:center;gap:8px;margin-top:6px;"><input type="checkbox" data-tab-phase-index="' + index + '"' + (selected.has(phase.title) ? ' checked' : '') + '> <span>' + escapeHtml(phase.title) + '</span></label>'; }).join('') +
+        '</div><div class="step-tools" style="margin-top:12px;"><button class="mini-btn" id="saveTabEditorBtn" type="button">Save tab</button><button class="mini-btn" id="cancelTabEditorBtn" type="button">Cancel</button></div></div>';
+    }
+    function getNextPhaseIndexInOrder(currentPhaseIndex) { for (let phaseIndex = currentPhaseIndex + 1; phaseIndex < phases.length; phaseIndex += 1) if (!isPhaseFullyCompleted(phaseIndex)) return phaseIndex; return null; }
+    function activatePhase(phaseIndex) {
+      const actionableIndex = getFirstActionableStepIndexInPhase(phaseIndex);
+      collapsedPhases[phaseIndex] = false;
+      activePhaseIndex = phaseIndex;
+      currentVoicePhaseIndex = phaseIndex;
+      pendingFocusStepIndex = actionableIndex;
+      saveCollapsedState();
+      render();
+      schedulePhaseActivationAnnouncement(phaseIndex);
+    }
+    function deactivatePhase(phaseIndex) {
+      collapsedPhases[phaseIndex] = true;
+      if (activePhaseIndex === phaseIndex) activePhaseIndex = null;
+      if (currentVoicePhaseIndex === phaseIndex) currentVoicePhaseIndex = null;
+      pendingFocusStepIndex = null;
+      clearPhaseAnnouncementTimer();
+      saveCollapsedState();
+      render();
+    }
+    function confirmStep(index) {
+      if (!flatSteps[index] || flatSteps[index].confirmed || !isUnlocked(index)) return;
+      const currentStep = flatSteps[index];
+      currentVoicePhaseIndex = currentStep.phaseIndex;
+      currentStep.confirmed = true;
+      maybeAutoRecordTime(currentStep);
+      const nextItemIndex = currentStep.itemIndex + 1;
+      pendingFocusStepIndex = nextItemIndex < phases[currentStep.phaseIndex].items.length ? globalIndexFor(currentStep.phaseIndex, nextItemIndex) : null;
+      syncDerivedSteps();
+      const phaseCompleted = isPhaseFullyCompleted(currentStep.phaseIndex);
+      if (phaseCompleted) {
+        const completedPhaseIndex = currentStep.phaseIndex;
+        saveProgress();
+        const nextPhaseIndex = getNextPhaseIndexInOrder(completedPhaseIndex);
+        collapsedPhases = phases.map(function() { return true; });
+        activePhaseIndex = null;
+        focusPhaseIndex = completedPhaseIndex;
+        pendingFocusStepIndex = null;
+        currentVoicePhaseIndex = nextPhaseIndex;
+        saveCollapsedState();
+        render();
+        if (nextPhaseIndex !== null) {
+          setTimeout(function() {
+            const btn = document.querySelector('[data-phase-index="' + nextPhaseIndex + '"]');
+            const card = btn ? btn.closest('.phase-card') : null;
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 0);
+        }
+        if (isAudioEnabled) speakText(phases[completedPhaseIndex].title + '. Checks completed.');
+        return;
+      }
+      saveProgress();
+      render();
+      if (pendingFocusStepIndex !== null) {
+        setTimeout(function() {
+          const el = document.querySelector('[data-step-index="' + pendingFocusStepIndex + '"]');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 0);
+      }
+      if (isAudioEnabled) speakCurrentActionableStep(false, currentVoicePhaseIndex);
+    }
+    function renderHeaderEditor() {
+      const existing = document.getElementById('headerInlineEditorWrap');
+      if (existing) existing.remove();
+      if (!(editorState && (editorState.mode === 'edit-header' || editorState.mode === 'edit-airports'))) return;
+      const headerCard = document.querySelector('.container > .card');
+      if (!headerCard) return;
+      const wrap = document.createElement('div');
+      wrap.id = 'headerInlineEditorWrap';
+      wrap.innerHTML = buildInlineEditorHtml();
+      const progressWrap = headerCard.querySelector('.progress-wrap');
+      if (progressWrap) progressWrap.parentNode.insertBefore(wrap, progressWrap);
+      else headerCard.appendChild(wrap);
+    }
+    function buildStepHtml(phase, phaseIndex, item, itemIndex) {
+      const stepIndex = globalIndexFor(phaseIndex, itemIndex);
+      const step = flatSteps[stepIndex];
+      const unlocked = isUnlocked(stepIndex);
+      const type = specialStepType(phase.title, item, itemIndex);
+      const isDerived = type === 'derived_preflight';
+      const isTip = type === 'tip';
+      const isFuelInput = type === 'fuel_input';
+      const isOilInput = type === 'oil_input';
+      const isHobbsInput = type === 'hobbs_input';
+      const stateClass = step && step.confirmed ? 'done' : (unlocked ? 'ready' : 'locked');
+      const stateLabel = isDerived && step && step.confirmed ? 'Auto completed' : (step && step.confirmed ? 'Confirmed' : (isFuelInput && !hasFuelInputValues() ? 'Enter values' : (unlocked ? 'Ready' : 'Locked')));
+      const focusClass = pendingFocusStepIndex === stepIndex ? 'next-focus' : '';
+      const isEditingThisStep = editorState && editorState.mode === 'edit' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex;
+      const isProtected = isProtectedStep(phase.title, item, itemIndex);
+      if (isEditingThisStep) return buildInlineEditorHtml();
+      return '<div class="step ' + (step && step.confirmed ? 'completed' : '') + ' ' + focusClass + (item.memory ? ' memory-step' : '') + '" data-step-card="' + stepIndex + '" data-step-index="' + stepIndex + '"><div class="step-header"><div>' + (item.memory ? '<span class="memory-badge">Memory item</span>' : '') + (isTip ? '' : '<div class="step-number">Step ' + (itemIndex + 1) + '</div>') + '<h3 class="step-title">' + (isTip ? '💡 TIP — Taxi technique' : escapeHtml(getDisplayStepTitle(phase, item))) + '</h3><p class="step-detail">' + escapeHtml(item.detail) + '</p>' + (item.source ? '<span class="step-source">' + escapeHtml(item.source) + '</span>' : '') + '</div>' + (isTip ? '' : '<span class="status ' + stateClass + '">' + escapeHtml(stateLabel) + '</span>') + '</div>' +
+        (isOilInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="oil-added-' + stepIndex + '">Added oil</label><input id="oil-added-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="0" value="' + escapeHtml(oilAddedValue) + '" data-oil-added-input="true"></div></div><div class="fuel-helper">Optional. Leave at 0 if no oil was added. Non-zero values will appear in the final report.</div>' : '') +
+        (isFuelInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="fuel-left-' + stepIndex + '">Left tank</label><input id="fuel-left-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="Enter value" value="' + escapeHtml(fuelState.left) + '" data-fuel-side="left"></div><div class="fuel-input-card"><label for="fuel-right-' + stepIndex + '">Right tank</label><input id="fuel-right-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="Enter value" value="' + escapeHtml(fuelState.right) + '" data-fuel-side="right"></div></div><div class="fuel-helper">Enter measured fuel quantity for both tanks before confirming this step. These values remain visible in the collapsed phase header.</div>' : '') +
+        (isHobbsInput ? '<div class="fuel-input-grid"><div class="fuel-input-card"><label for="hobbs-' + stepIndex + '">Hobs</label><input id="hobbs-' + stepIndex + '" type="number" inputmode="decimal" step="0.1" placeholder="Enter value" value="' + escapeHtml(hobbsValue) + '" data-hobbs-input="true"></div></div><div class="fuel-helper">Enter the Hobs value. This value remains visible in the collapsed phase header.</div>' : '') +
+        (step && step.note ? '<div class="step-note">' + escapeHtml(step.note) + '</div>' : '') +
+        (item.timer ? '<div class="step-timer-wrap"><button class="step-timer-btn" data-timer-step="' + stepIndex + '" data-timer-seconds="' + item.timer + '" type="button">⏱ Start ' + formatTimerLabel(item.timer) + '</button></div>' : '') +
+        (isDerived && (!step || !step.confirmed) ? '<div class="fuel-helper">This step is completed automatically when the Pre-flight inspection phase is fully completed.</div>' : '') +
+        (isEditMode ? '<div class="step-tools"><button class="mini-btn" data-insert-before="' + phaseIndex + ':' + itemIndex + '" type="button">Insert before</button><button class="mini-btn" data-insert-after="' + phaseIndex + ':' + (itemIndex + 1) + '" type="button">Insert after</button>' + (!isProtected ? '<button class="mini-btn" data-edit-step="' + phaseIndex + ':' + itemIndex + '" type="button">Edit</button>' : '') + (!isProtected ? '<button class="mini-btn danger-btn" data-delete-step="' + phaseIndex + ':' + itemIndex + '" type="button">Delete</button>' : '') + '</div>' : '') + '</div>';
+    }
+    function attachRenderEvents() {
+      document.querySelectorAll('.phase-toggle[data-phase-index]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const index = Number(btn.dataset.phaseIndex);
+          const isCollapsed = Boolean(collapsedPhases[index]);
+          const isAlreadyActive = activePhaseIndex === index;
+          if (isCollapsed || !isAlreadyActive) { activatePhase(index); return; }
+          deactivatePhase(index);
+        });
+      });
+      document.querySelectorAll('[data-step-card][data-step-index]').forEach(function(card) {
+        card.addEventListener('click', function(event) {
+          if (event.target.closest('button, input, textarea, select, label')) return;
+          const stepIndex = Number(card.dataset.stepIndex);
+          if (flatSteps[stepIndex]) currentVoicePhaseIndex = flatSteps[stepIndex].phaseIndex;
+          confirmStep(stepIndex);
+        });
+      });
+      document.querySelectorAll('[data-insert-before]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.insertBefore.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }); });
+      document.querySelectorAll('[data-insert-after]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.insertAfter.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }); });
+      document.querySelectorAll('[data-add-end]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.addEnd.split(':').map(Number); openInsertEditor(parts[0], parts[1], null); }); });
+      document.querySelectorAll('[data-edit-step]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.editStep.split(':').map(Number); const phase = phases[parts[0]]; if (!phase || !phase.items[parts[1]]) return; openInsertEditor(parts[0], parts[1], phase.items[parts[1]]); }); });
+      document.querySelectorAll('[data-delete-step]').forEach(function(btn) { btn.addEventListener('click', function() { const parts = btn.dataset.deleteStep.split(':').map(Number); deleteStep(parts[0], parts[1]); }); });
+      const saveEditorBtn = document.getElementById('saveEditorBtn');
+      if (saveEditorBtn) saveEditorBtn.addEventListener('click', function() {
+        if (!editorState) return;
+        if (editorState.mode === 'edit-airports') {
+          const rows = Array.from(document.querySelectorAll('[data-airport-row]'));
+          editorState.airports = rows.map(function(row, index) {
+            const codeEl = row.querySelector('[data-airport-code="' + index + '"]');
+            const altitudeEl = row.querySelector('[data-airport-altitude="' + index + '"]');
+            const radioEl = row.querySelector('[data-airport-radio="' + index + '"]');
+            return {
+              code: codeEl ? codeEl.value : '',
+              altitude: altitudeEl ? altitudeEl.value : '',
+              radio: radioEl ? radioEl.value : ''
+            };
+          });
+          saveEditorStep();
+          return;
+        }
+        const titleEl = document.getElementById('editorTitle');
+        const detailEl = document.getElementById('editorDetail');
+        const noteEl = document.getElementById('editorNote');
+        if (!titleEl) return;
+        editorState.title = titleEl.value;
+        if (editorState.mode === 'edit-header') {
+          const disclaimerEl = document.getElementById('editorDisclaimer');
+          editorState.disclaimer = disclaimerEl ? disclaimerEl.value : '';
+        } else {
+          if (!detailEl) return;
+          editorState.detail = detailEl.value;
+          editorState.note = noteEl ? noteEl.value : '';
+        }
+        saveEditorStep();
+      });
+      document.querySelectorAll('[data-remove-airport-row]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (!editorState || editorState.mode !== 'edit-airports') return;
+          const index = Number(btn.dataset.removeAirportRow);
+          editorState.airports.splice(index, 1);
+          render();
+        });
+      });
+      const addAirportRowBtn = document.getElementById('addAirportRowBtn');
+      if (addAirportRowBtn) addAirportRowBtn.addEventListener('click', function() {
+        if (!editorState || editorState.mode !== 'edit-airports') return;
+        editorState.airports.push({ code: '', altitude: '', radio: '' });
+        render();
+      });
+      const cancelEditorBtn = document.getElementById('cancelEditorBtn');
+      if (cancelEditorBtn) cancelEditorBtn.addEventListener('click', closeEditor);
+      document.querySelectorAll('input[data-fuel-side]').forEach(function(input) { input.addEventListener('input', function() { fuelState[input.dataset.fuelSide] = input.value; saveFuelState(); updateTopMeta(); }); });
+      document.querySelectorAll('input[data-oil-added-input="true"]').forEach(function(input) { input.addEventListener('input', function() { oilAddedValue = input.value === '' ? '' : input.value; saveOilAddedValue(); }); });
+      document.querySelectorAll('input[data-hobbs-input="true"]').forEach(function(input) { input.addEventListener('input', function() { hobbsValue = input.value; saveHobbsValue(); updateTopMeta(); }); });
+      document.querySelectorAll('[data-reset-phase]').forEach(function(btn) { btn.addEventListener('click', function(event) { event.stopPropagation(); resetPhase(Number(btn.dataset.resetPhase)); }); });
+      document.querySelectorAll('[data-timer-step]').forEach(function(btn) {
+        btn.addEventListener('click', function(event) { event.stopPropagation(); toggleStepTimer(Number(btn.dataset.timerStep), Number(btn.dataset.timerSeconds) || 60); });
+        renderTimerButton(Number(btn.dataset.timerStep));
+      });
+      document.querySelectorAll('[data-emg-jump]').forEach(function(btn) { btn.addEventListener('click', function() { jumpToEmergency(Number(btn.dataset.emgJump)); }); });
+      const emgSearchEl = document.getElementById('emgSearch');
+      if (emgSearchEl) emgSearchEl.addEventListener('input', function() { filterEmergencyIndex(emgSearchEl.value); });
+    }
+    function render() {
+      const finalReportCard = document.getElementById('finalReportCard');
+      if (finalReportCard) {
+        finalReportCard.style.display = (currentTab === 'emergency' || currentTab === 'clubdrill' || currentTab === 'quickref') ? 'none' : 'block';
+      }
+      const quickRefCard = document.querySelector('.info-box-card');
+      if (quickRefCard) quickRefCard.style.display = (currentTab === 'quickref') ? 'block' : 'none';
+      syncDerivedSteps();
+      syncTabsWithPhases();
+      stepsContainer.innerHTML = '';
+      const currentTabDef = getCurrentTabDefinition();
+      tabsContainer.innerHTML = tabDefinitions.map(function(tab) {
+        return '<button class="tab ' + (tab.id === currentTab ? 'active' : '') + '" data-tab-id="' + escapeHtml(tab.id) + '" type="button">' + escapeHtml(tab.label) + '</button>';
+      }).join('') + (isEditMode ? '<button class="tab action-tab" id="addTabBtn" type="button">+ Tab</button>' + (currentTabDef ? '<button class="tab icon-tab" id="editTabBtn" type="button">✏️</button>' : '') + (currentTabDef && tabDefinitions.length > 1 ? '<button class="tab icon-tab" id="deleteTabBtn" type="button">🗑️</button>' : '') : '');
+      let visiblePhases = [];
+      if (currentTab === 'quickref') {
+        visiblePhases = [];
+      } else {
+        visiblePhases = phases.filter(function(p) { return currentTabDef ? currentTabDef.phaseTitles.includes(p.title) : true; });
+      }
+      if (isEditMode && editorState && (editorState.mode === 'edit-tab' || editorState.mode === 'add-tab')) {
+        tabTools.classList.add('visible');
+        tabTools.innerHTML = buildTabEditorHtml();
+      } else {
+        tabTools.classList.remove('visible');
+        tabTools.innerHTML = '';
+      }
+      if (currentTab === 'emergency' && visiblePhases.length) {
+        stepsContainer.insertAdjacentHTML('beforeend', buildEmergencyIndexHtml(visiblePhases));
+      }
+      visiblePhases.forEach(function(phase) {
+        const phaseIndex = phases.indexOf(phase);
+        const phaseDone = completedCountInPhase(phaseIndex);
+        const phaseTotal = countedStepsInPhase(phaseIndex);
+        const isPhaseComplete = phaseTotal > 0 && phaseDone === phaseTotal;
+        const isRequired = isRequiredPhase(phase.title);
+        const fuelSummaryText = phase.title === 'Pre-flight inspection' && (fuelState.left || fuelState.right) ? 'Fuel Tank Volume  L: ' + (fuelState.left || '-') + '  R: ' + (fuelState.right || '-') : '';
+        const hobbsSummaryText = phase.title === 'Parking' && hobbsValue ? 'Hobs ' + hobbsValue : '';
+        const phaseCard = document.createElement('div');
+        const bluePhases = ['Taxi', 'Before Departure', 'Take off', 'After Take off', 'Cruise', 'Descent', 'Approach', 'Go around', 'Touch and Go', 'After Landing'];
+        const baseClass = EMERGENCY_PHASES.has(phase.title) ? ' emergency-phase' : (bluePhases.includes(phase.title) ? ' highlight-blue' : ' highlight-green');
+        phaseCard.className = 'card phase-card' + baseClass;
+        if (isPhaseComplete) phaseCard.classList.add('completed');
+        if (activePhaseIndex === phaseIndex) phaseCard.classList.add('active-phase');
+        phaseCard.classList.toggle('collapsed', !!collapsedPhases[phaseIndex]);
+        let stepsHtml = '';
+        let lastSubsection = null;
+        phase.items.forEach(function(item, itemIndex) {
+          if (phase.title === 'Pre-flight inspection') {
+            const subsection = getPreflightSubsection(item);
+            if (subsection && subsection !== lastSubsection) { stepsHtml += '<div class="subsection-heading">' + escapeHtml(subsection) + '</div>'; lastSubsection = subsection; }
+          }
+          if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === itemIndex) stepsHtml += buildInlineEditorHtml();
+          stepsHtml += buildStepHtml(phase, phaseIndex, item, itemIndex);
+        });
+        if (editorState && editorState.mode === 'insert' && editorState.phaseIndex === phaseIndex && editorState.insertAt === phase.items.length) stepsHtml += buildInlineEditorHtml();
+        phaseCard.innerHTML = '<button class="phase-toggle" data-phase-index="' + phaseIndex + '" type="button"><div class="phase-header"><div class="phase-title-wrap"><h2>' + escapeHtml(phase.title) + '</h2></div><div class="phase-summary"><div class="phase-meta">' + (fuelSummaryText ? '<div class="fuel-summary">' + escapeHtml(fuelSummaryText) + '</div>' : '') + (hobbsSummaryText ? '<div class="value-summary">' + escapeHtml(hobbsSummaryText) + '</div>' : '') + '<span class="status ' + (isPhaseComplete ? 'done' : (isRequired ? 'ready' : 'locked')) + '">' + phaseDone + ' / ' + phaseTotal + (isRequired ? '' : ' optional') + '</span></div><span class="phase-chevron">▾</span></div></div></button><div class="phase-content"><p class="phase-intro">' + escapeHtml(phase.intro) + '</p>' + '<div class="phase-actions"><button class="phase-reset-btn" data-reset-phase="' + phaseIndex + '" type="button">↺ Reset this checklist</button></div>' + (isEditMode ? '<div class="phase-tools"><button class="mini-btn" data-add-end="' + phaseIndex + ':' + phase.items.length + '" type="button">Add step at end</button></div>' : '') + stepsHtml + '</div>';
+        stepsContainer.appendChild(phaseCard);
+      });
+      renderHeaderEditor();
+      attachRenderEvents();
+      renderSummaryCard();
+      const addTabBtn = document.getElementById('addTabBtn'); if (addTabBtn) addTabBtn.addEventListener('click', function() { editorState = null; openTabEditor(null); });
+      const editTabBtn = document.getElementById('editTabBtn'); if (editTabBtn && currentTabDef) editTabBtn.addEventListener('click', function() { editorState = null; openTabEditor(currentTabDef.id); });
+      const deleteTabBtn = document.getElementById('deleteTabBtn'); if (deleteTabBtn) deleteTabBtn.addEventListener('click', deleteCurrentTab);
+      const saveTabEditorBtn = document.getElementById('saveTabEditorBtn'); if (saveTabEditorBtn) saveTabEditorBtn.addEventListener('click', function() { const titleEl = document.getElementById('tabEditorTitle'); const selectedTitles = Array.from(document.querySelectorAll('[data-tab-phase-index]:checked')).map(function(input) { return phases[Number(input.dataset.tabPhaseIndex)].title; }); if (titleEl) editorState.title = titleEl.value; editorState.phaseTitles = selectedTitles; saveTabEditor(); });
+      const cancelTabEditorBtn = document.getElementById('cancelTabEditorBtn'); if (cancelTabEditorBtn) cancelTabEditorBtn.addEventListener('click', function() { editorState = null; render(); });
+      let completedRequiredPhases = 0;
+      let totalRequiredPhases = 0;
+      phases.forEach(function(phase, phaseIndex) { if (!isRequiredPhase(phase.title)) return; totalRequiredPhases += 1; if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1; });
+      progressFill.style.width = (totalRequiredPhases ? (completedRequiredPhases / totalRequiredPhases) * 100 : 0) + '%';
+      progressText.textContent = completedRequiredPhases + ' of ' + totalRequiredPhases + ' required phases completed';
+      finishBtn.disabled = completedRequiredPhases !== totalRequiredPhases || currentTab === 'emergency' || currentTab === 'clubdrill' || currentTab === 'quickref';
+      updateInstallButton();
+      updateAudioToggleUi();
+      updateVoiceModeUi();
+    }
+    function parseVoiceCommand(transcript) {
+      const normalized = String(transcript || '').toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!normalized) return null;
+      const words = normalized.split(' ');
+      if (words.includes('repeat')) return 'repeat';
+      if (normalized === 'stop' || normalized === 'stop listening') return 'stop';
+      // Require a distinct two-word phrase so common cockpit chatter ("check", "done",
+      // ATC readbacks) cannot silently advance the checklist.
+      if (/\bconfirm(ed)?\s+(step|item|check)\b/.test(normalized)) return 'confirm';
+      return null;
+    }
+    function handleVoiceCommand(transcript) {
+      if (isSpeaking) return;
+      const command = parseVoiceCommand(transcript);
+      if (!command) return;
+      if (command === 'repeat') { speakCurrentActionableStep(false, currentVoicePhaseIndex); return; }
+      if (command === 'stop') { isVoiceModeEnabled = false; localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled)); updateVoiceModeUi(); stopVoiceRecognition(); return; }
+      if (command === 'confirm') { const currentIndex = getCurrentActionableStepIndex(currentVoicePhaseIndex); if (currentIndex !== null) confirmStep(currentIndex); }
+    }
+    function initVoiceRecognition() {
+      const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognitionCtor) { recognitionAvailable = false; updateVoiceModeUi(); return; }
+      recognitionAvailable = true;
+      recognition = new SpeechRecognitionCtor();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 3;
+      recognition.lang = 'en-US';
+      recognition.onstart = function() { recognitionStarting = false; recognitionActive = true; lastRecognitionError = ''; updateVoiceModeUi(); };
+      recognition.onresult = function(event) {
+        if (isSpeaking) return;
+        const result = event.results[event.results.length - 1];
+        if (!result) return;
+        let transcript = '';
+        for (let i = 0; i < result.length; i += 1) transcript += ' ' + (result[i].transcript || '');
+        transcript = transcript.trim();
+        if (!transcript) return;
+        if (result.isFinal) handleVoiceCommand(transcript);
+      };
+      recognition.onend = function() { recognitionActive = false; updateVoiceModeUi(); if (isVoiceModeEnabled && !isSpeaking) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 300); } };
+      recognition.onerror = function(event) { recognitionActive = false; recognitionStarting = false; lastRecognitionError = event && event.error ? String(event.error) : 'mic error'; updateVoiceModeUi(); if (isVoiceModeEnabled && !isSpeaking) { recognitionRestartTimer = setTimeout(function() { recognitionRestartTimer = null; startVoiceRecognition(); }, 700); } };
+      updateVoiceModeUi();
+    }
+    function resetChecklist() {
+      if (!window.confirm('Reset all checklist progress, recorded times, fuel and Hobbs values?')) return;
+      flatSteps.forEach(function(step) { step.confirmed = false; });
+      fuelState = { left: '', right: '' };
+      hobbsValue = '';
+      oilAddedValue = '0';
+      pendingFocusStepIndex = null;
+      focusPhaseIndex = null;
+      emergencyFlowReturnStepIndex = null;
+      collapsedPhases = phases.map(function() { return true; });
+      activePhaseIndex = null;
+      currentVoicePhaseIndex = null;
+      clearPhaseAnnouncementTimer();
+      headerStartTime.textContent = '--';
+      headerEndTime.textContent = '--';
+      localStorage.setItem(startTimeKey, '');
+      localStorage.setItem(endTimeKey, '');
+      clearLastSummary();
+      syncDerivedSteps();
+      saveProgress();
+      saveCollapsedState();
+      saveFuelState();
+      saveHobbsValue();
+      saveOilAddedValue();
+      updateTopMeta();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function resetPhase(phaseIndex) {
+      const phase = phases[phaseIndex];
+      if (!phase) return;
+      phase.items.forEach(function(item, itemIndex) {
+        const step = flatSteps[globalIndexFor(phaseIndex, itemIndex)];
+        if (step) step.confirmed = false;
+      });
+      if (phase.title === 'Pre-flight inspection') { fuelState = { left: '', right: '' }; oilAddedValue = '0'; saveFuelState(); saveOilAddedValue(); }
+      if (phase.title === 'Parking') { hobbsValue = ''; saveHobbsValue(); }
+      syncDerivedSteps();
+      saveProgress();
+      updateTopMeta();
+      render();
+    }
+    function importChecklistProfileObject(profile) {
+      if (!profile || !Array.isArray(profile.phases) || !profile.phases.length) throw new Error('Invalid checklist profile file.');
+      phases = profile.phases.map(function(phase) { return { title: String(phase.title || ''), intro: String(phase.intro || ''), emergency: !!phase.emergency, items: Array.isArray(phase.items) ? phase.items.map(function(item) { var mapped = { title: String(item.title || ''), detail: String(item.detail || ''), note: String(item.note || '') }; if (item.memory) mapped.memory = true; if (item.timer) mapped.timer = Number(item.timer); if (item.source) mapped.source = String(item.source); return mapped; }) : [] }; });
+      defaultPhases = JSON.parse(JSON.stringify(phases));
+      tabDefinitions = normalizeTabDefinitions(profile.tabs);
+      if (typeof profile.appTitle === 'string' && profile.appTitle.trim()) appTitle.textContent = profile.appTitle;
+      if (typeof profile.appDescription === 'string') if (appDescription) appDescription.textContent = profile.appDescription;
+      saveHeaderContent();
+      if (typeof profile.airport === 'string') { headerAirport.value = profile.airport; localStorage.setItem(airportKey, headerAirport.value); }
+      if (typeof profile.aircraft === 'string') { headerAircraft.value = profile.aircraft; localStorage.setItem(aircraftKey, headerAircraft.value); }
+      if (typeof profile.altitude === 'string' || typeof profile.altitude === 'number') { headerAirportAlt.textContent = String(profile.altitude || ''); localStorage.setItem(airportAltKey, headerAirportAlt.textContent); }
+      if (typeof profile.radioFreq === 'string' || typeof profile.radioFreq === 'number') { headerRadioFreq.textContent = String(profile.radioFreq || ''); localStorage.setItem(radioFreqKey, headerRadioFreq.textContent); }
+      editorState = null;
+      pendingFocusStepIndex = null;
+      saveCustomChecklist();
+      saveTabDefinitions();
+      rebuildFlatSteps();
+      flatSteps.forEach(function(step) { step.confirmed = false; });
+      loadCollapsedState();
+      syncDerivedSteps();
+      saveProgress();
+      saveCollapsedState();
+      updateTopMeta();
+      render();
+    }
+    function activateTab(nextTab) {
+      if (!nextTab) return;
+      setActiveTab(nextTab);
+      activePhaseIndex = null;
+      pendingFocusStepIndex = null;
+      if (nextTab === 'emergency') {
+        const idx = phases.findIndex(function(p) { return EMERGENCY_PHASES.has(p.title); });
+        collapsedPhases = phases.map(function() { return true; });
+        if (idx >= 0) {
+          collapsedPhases[idx] = false;
+          activePhaseIndex = idx;
+        }
+        saveCollapsedState();
+      }
+      render();
+    }
+    function switchTabByOffset(offset) {
+      if (!Array.isArray(tabDefinitions) || tabDefinitions.length < 2) return;
+      const currentIndex = tabDefinitions.findIndex(function(t) { return t.id === currentTab; });
+      if (currentIndex === -1) return;
+      let nextIndex = currentIndex + offset;
+      if (nextIndex < 0) nextIndex = tabDefinitions.length - 1;
+      else if (nextIndex >= tabDefinitions.length) nextIndex = 0;
+      if (nextIndex === currentIndex) return;
+      activateTab(tabDefinitions[nextIndex].id);
+    }
+    function wireTabSwipe() {
+      let startX = 0, startY = 0, startT = 0, tracking = false;
+      const minDistance = 60;   // px of horizontal travel required
+      document.addEventListener('touchstart', function(e) {
+        if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
+        if (e.target.closest('input, textarea, select, .edit-panel, .disclaimer-gate, .tabs-bar, .tabs-actions, .top-meta, .emg-search')) { tracking = false; return; }
+        const gate = document.getElementById('disclaimerGate');
+        if (gate && getComputedStyle(gate).display !== 'none') { tracking = false; return; }
+        const t = e.touches[0];
+        startX = t.clientX; startY = t.clientY; startT = Date.now(); tracking = true;
+      }, { passive: true });
+      document.addEventListener('touchend', function(e) {
+        if (!tracking) return;
+        tracking = false;
+        const t = e.changedTouches && e.changedTouches[0];
+        if (!t) return;
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (Date.now() - startT > 600) return;         // too slow to be a flick
+        if (Math.abs(dx) < minDistance) return;         // not far enough
+        if (Math.abs(dx) < Math.abs(dy) * 1.5) return;  // mostly vertical = scroll, ignore
+        if (dx < 0) switchTabByOffset(1);               // swipe left -> next tab
+        else switchTabByOffset(-1);                     // swipe right -> previous tab
+      }, { passive: true });
+    }
+    function attachStaticEvents() {
+      document.addEventListener('click', function(event) {
+        const tabBtn = event.target.closest('.tab[data-tab-id]');
+        if (!tabBtn) return;
+        activateTab(tabBtn.dataset.tabId);
+      });
+
+      initVoiceRecognition();
+
+      if (topResetBtn) topResetBtn.addEventListener('click', resetChecklist);
+      const wakeLockBtn = document.getElementById('wakeLockBtn');
+      if (wakeLockBtn) wakeLockBtn.addEventListener('click', function() { setWakeLock(!isWakeLockEnabled); });
+      if (collapseAllBtn) collapseAllBtn.addEventListener('click', function() {
+        collapsedPhases = phases.map(function() { return true; });
+        activePhaseIndex = null;
+        saveCollapsedState();
+        render();
+      });
+
+      const resetPhaseBtn = document.getElementById('resetPhaseBtn');
+      if (resetPhaseBtn) resetPhaseBtn.addEventListener('click', function() {
+        if (activePhaseIndex === null) return;
+        const phase = phases[activePhaseIndex];
+        if (!phase) return;
+        phase.items.forEach(function(item, itemIndex) {
+          const idx = globalIndexFor(activePhaseIndex, itemIndex);
+          if (flatSteps[idx]) flatSteps[idx].confirmed = false;
+        });
+        saveProgress();
+        render();
+      });
+
+      if (finishBtn) finishBtn.addEventListener('click', function() {
+        let completedRequiredPhases = 0;
+        let totalRequiredPhases = 0;
+        phases.forEach(function(phase, phaseIndex) {
+          if (!isRequiredPhase(phase.title)) return;
+          totalRequiredPhases += 1;
+          if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1;
+        });
+        if (completedRequiredPhases === totalRequiredPhases) showFinishSummary();
+      });
+
+      if (keepReviewBtn) keepReviewBtn.addEventListener('click', function() {
+        finishSummaryCard.classList.remove('visible');
+      });
+      if (summaryResetBtn) summaryResetBtn.addEventListener('click', resetChecklist);
+
+      if (installBtn) installBtn.addEventListener('click', async function() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        try { await deferredPrompt.userChoice; } catch (_) {}
+        deferredPrompt = null;
+        updateInstallButton();
+      });
+
+      if (headerAirport) {
+        headerAirport.value = localStorage.getItem(airportKey) || 'ESGA';
+        function applyAirportDefaults(code) {
+          if (code === 'ESGA') {
+            headerAirportAlt.textContent = '424 ft';
+            headerRadioFreq.textContent = '123.550 Backamo';
+            localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
+            localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
+          } else if (code === 'ESGT') {
+            headerAirportAlt.textContent = '137 ft';
+            headerRadioFreq.textContent = '122.730 Trollhättan TWR';
+            localStorage.setItem(airportAltKey, headerAirportAlt.textContent);
+            localStorage.setItem(radioFreqKey, headerRadioFreq.textContent);
+          }
+        }
+        applyAirportDefaults(headerAirport.value);
+        headerAirport.addEventListener('change', function() {
+          localStorage.setItem(airportKey, headerAirport.value);
+          applyAirportDefaults(headerAirport.value);
+        });
+      }
+
+      if (headerAircraft) {
+        headerAircraft.value = localStorage.getItem(aircraftKey) || 'SE-MOY';
+        headerAircraft.addEventListener('change', function() {
+          localStorage.setItem(aircraftKey, headerAircraft.value);
+        });
+      }
+
+      if (headerAirportAlt) headerAirportAlt.textContent = localStorage.getItem(airportAltKey) || headerAirportAlt.textContent || '';
+      if (headerRadioFreq) headerRadioFreq.textContent = localStorage.getItem(radioFreqKey) || headerRadioFreq.textContent || '';
+      if (headerStartTime) headerStartTime.textContent = localStorage.getItem(startTimeKey) || '--';
+      if (headerEndTime) headerEndTime.textContent = localStorage.getItem(endTimeKey) || '--';
+
+      const startTimePill = document.getElementById('startTimePill');
+      wireTimeRecordPill(startTimePill, headerStartTime, startTimeKey);
+
+      const endTimePill = document.getElementById('endTimePill');
+      wireTimeRecordPill(endTimePill, headerEndTime, endTimeKey);
+
+      if (themeToggleBtn) {
+        applyTheme(localStorage.getItem(themeStorageKey) || 'light');
+        themeToggleBtn.addEventListener('click', function() {
+          const nextTheme = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+          localStorage.setItem(themeStorageKey, nextTheme);
+          applyTheme(nextTheme);
+        });
+      }
+
+      if (editModeBtn) {
+        editModeBtn.textContent = isEditMode ? '✓' : '✏️';
+        editModeBtn.addEventListener('click', function() {
+          const nextEditMode = !isEditMode;
+          isEditMode = nextEditMode;
+          localStorage.setItem(editModeKey, String(isEditMode));
+
+          if (!isEditMode) {
+            editorState = null;
+          } else if (editorState && editorState.mode !== 'edit-header' && editorState.mode !== 'edit-airports') {
+            editorState = null;
+          }
+
+          editModeBtn.textContent = isEditMode ? '✓' : '✏️';
+          if (editHeaderBtn) editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+          const editAirportsBtn = document.getElementById('editAirportsBtn');
+          if (editAirportsBtn) editAirportsBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+          render();
+        });
+      }
+
+      if (editHeaderBtn) {
+        editHeaderBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+        editHeaderBtn.addEventListener('click', function() {
+          editorState = {
+            mode: 'edit-header',
+            title: appTitle.textContent,
+            disclaimer: (headerDisclaimer ? headerDisclaimer.textContent : ''),
+            detail: '',
+            note: ''
+          };
+          render();
+        });
+      }
+
+      const editAirportsBtn = document.getElementById('editAirportsBtn');
+      if (editAirportsBtn) {
+        editAirportsBtn.style.display = isEditMode ? 'inline-flex' : 'none';
+        editAirportsBtn.addEventListener('click', function() {
+          editorState = {
+            mode: 'edit-airports',
+            airports: JSON.parse(JSON.stringify(airports))
+          };
+          render();
+        });
+      }
+
+      if (audioModeBtn) {
+        audioModeBtn.addEventListener('click', function() {
+          isAudioEnabled = !isAudioEnabled;
+          localStorage.setItem(audioEnabledKey, String(isAudioEnabled));
+          if (!isAudioEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+          updateAudioToggleUi();
+        });
+      }
+
+      if (voiceModeBtn) {
+        voiceModeBtn.addEventListener('click', function() {
+          isVoiceModeEnabled = !isVoiceModeEnabled;
+          localStorage.setItem(voiceModeEnabledKey, String(isVoiceModeEnabled));
+          if (!isVoiceModeEnabled) {
+            stopVoiceRecognition();
+          } else {
+            startVoiceRecognition();
+          }
+          updateAudioToggleUi();
+          updateVoiceModeUi();
+        });
+      }
+
+      if (exportProfileBtn) {
+        exportProfileBtn.addEventListener('click', function() {
+          const profile = {
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            airport: headerAirport.value,
+            aircraft: headerAircraft.value,
+            altitude: headerAirportAlt.textContent,
+            radioFreq: headerRadioFreq.textContent,
+            appTitle: appTitle.textContent,
+            appDescription: appDescription ? appDescription.textContent : '',
+            tabs: tabDefinitions,
+            phases: phases
+          };
+          const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          const aircraft = (profile.aircraft || 'B23').replace(/[^A-Za-z0-9_-]/g, '_');
+          link.href = url;
+          link.download = 'b23-checklist-profile-' + aircraft + '.json';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        });
+      }
+
+      if (importProfileBtn) importProfileBtn.addEventListener('click', function() {
+        importProfileInput.click();
+      });
+
+      if (importProfileInput) importProfileInput.addEventListener('change', function(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(loadEvent) {
+          try {
+            const parsed = JSON.parse(String(loadEvent.target.result || ''));
+            importChecklistProfileObject(parsed);
+          } catch (error) {
+            alert(error && error.message ? error.message : 'Could not import checklist profile.');
+          } finally {
+            importProfileInput.value = '';
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+    function formatTimerLabel(totalSeconds) {
+      const s = Number(totalSeconds) || 0;
+      if (s >= 60) { const m = Math.floor(s / 60); const r = s % 60; return r ? (m + 'm ' + r + 's') : (m + ' min'); }
+      return s + 's';
+    }
+    function formatTimerClock(totalSeconds) {
+      const s = Math.max(0, Number(totalSeconds) || 0);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return m + ':' + String(r).padStart(2, '0');
+    }
+    function stopStepTimer(stepIndex) {
+      const t = activeStepTimers[stepIndex];
+      if (t) { clearInterval(t.intervalId); delete activeStepTimers[stepIndex]; }
+    }
+    function renderTimerButton(stepIndex) {
+      const btn = document.querySelector('[data-timer-step="' + stepIndex + '"]');
+      if (!btn) return;
+      const t = activeStepTimers[stepIndex];
+      if (t) { btn.textContent = '⏱ ' + formatTimerClock(t.remaining) + ' — tap to stop'; btn.classList.add('running'); btn.classList.remove('done'); }
+      else { const secs = Number(btn.dataset.timerSeconds) || 60; btn.textContent = '⏱ Start ' + formatTimerLabel(secs); btn.classList.remove('running'); }
+    }
+    function notifyTimerDone(stepIndex) {
+      try { if ('speechSynthesis' in window && isAudioEnabled) { window.speechSynthesis.speak(new SpeechSynthesisUtterance('Timer complete')); } } catch (_) {}
+      try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (_) {}
+      const btn = document.querySelector('[data-timer-step="' + stepIndex + '"]');
+      if (btn) { btn.classList.add('done'); btn.classList.remove('running'); btn.textContent = '⏱ Time up'; setTimeout(function() { renderTimerButton(stepIndex); }, 5000); }
+    }
+    function toggleStepTimer(stepIndex, seconds) {
+      if (activeStepTimers[stepIndex]) { stopStepTimer(stepIndex); renderTimerButton(stepIndex); return; }
+      const total = Number(seconds) || 60;
+      // Wall-clock based: derive remaining from an absolute end time so mobile background
+      // throttling and setInterval drift cannot make an in-flight timer inaccurate.
+      const endTime = Date.now() + total * 1000;
+      activeStepTimers[stepIndex] = { remaining: total, endTime: endTime, intervalId: null };
+      renderTimerButton(stepIndex);
+      activeStepTimers[stepIndex].intervalId = setInterval(function() {
+        const t = activeStepTimers[stepIndex];
+        if (!t) return;
+        t.remaining = Math.max(0, Math.round((t.endTime - Date.now()) / 1000));
+        if (t.remaining <= 0) { stopStepTimer(stepIndex); notifyTimerDone(stepIndex); return; }
+        renderTimerButton(stepIndex);
+      }, 250);
+    }
+    function reconcileActiveTimers() {
+      Object.keys(activeStepTimers).forEach(function(key) {
+        const t = activeStepTimers[key];
+        if (!t || typeof t.endTime !== 'number') return;
+        t.remaining = Math.max(0, Math.round((t.endTime - Date.now()) / 1000));
+        if (t.remaining <= 0) { stopStepTimer(key); notifyTimerDone(key); }
+        else renderTimerButton(key);
+      });
+    }
+    function buildEmergencyIndexHtml(list) {
+      const items = list.map(function(p) { const pi = phases.indexOf(p); return '<button class="emg-index-item" data-emg-jump="' + pi + '" type="button">' + escapeHtml(p.title) + '</button>'; }).join('');
+      return '<div class="emergency-index card">'
+        + '<div class="emergency-index-head"><strong>Emergency procedures</strong><span class="emg-stamp">Verified vs AFM ADxC-73-001-AFM Rev B4 · memory items marked in red</span></div>'
+        + '<input type="search" class="emg-search" id="emgSearch" placeholder="Search emergencies (fire, engine, oil, gear…)" autocomplete="off">'
+        + '<div class="emg-index-list" id="emgIndexList">' + items + '</div></div>';
+    }
+    function jumpToEmergency(phaseIndex) {
+      collapsedPhases = phases.map(function() { return true; });
+      collapsedPhases[phaseIndex] = false;
+      activePhaseIndex = phaseIndex;
+      saveCollapsedState();
+      render();
+      setTimeout(function() { const el = document.querySelector('.phase-toggle[data-phase-index="' + phaseIndex + '"]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+    }
+    function filterEmergencyIndex(query) {
+      const norm = String(query || '').toLowerCase().trim();
+      document.querySelectorAll('[data-emg-jump]').forEach(function(btn) {
+        const match = !norm || btn.textContent.toLowerCase().indexOf(norm) !== -1;
+        btn.style.display = match ? '' : 'none';
+      });
+    }
+    function updateWakeLockUi() {
+      const btn = document.getElementById('wakeLockBtn');
+      if (!btn) return;
+      if (!('wakeLock' in navigator)) { btn.textContent = '🔅 Keep awake'; btn.classList.remove('active'); btn.title = 'Wake Lock needs https or an installed app (unavailable on file://)'; return; }
+      btn.classList.toggle('active', isWakeLockEnabled);
+      btn.textContent = isWakeLockEnabled ? '🔆 Screen on' : '🔅 Keep awake';
+      btn.title = isWakeLockEnabled ? (wakeLockSentinel ? 'Screen will stay awake' : 'Keep-awake on — re-acquiring when visible') : 'Tap to keep the screen awake in flight';
+    }
+    async function requestWakeLock() {
+      if (!('wakeLock' in navigator)) { updateWakeLockUi(); return; }
+      try {
+        wakeLockSentinel = await navigator.wakeLock.request('screen');
+        wakeLockSentinel.addEventListener('release', function() { wakeLockSentinel = null; updateWakeLockUi(); });
+      } catch (_) { wakeLockSentinel = null; }
+      updateWakeLockUi();
+    }
+    function releaseWakeLock() {
+      try { if (wakeLockSentinel) wakeLockSentinel.release(); } catch (_) {}
+      wakeLockSentinel = null;
+      updateWakeLockUi();
+    }
+    function setWakeLock(enabled) {
+      isWakeLockEnabled = !!enabled;
+      localStorage.setItem(wakeLockKey, String(isWakeLockEnabled));
+      if (isWakeLockEnabled) requestWakeLock(); else releaseWakeLock();
+      updateWakeLockUi();
+    }
+    function updateBatteryChip(battery) {
+      const chip = document.getElementById('batteryChip');
+      if (!chip) return;
+      if (!battery) { chip.style.display = 'none'; return; }
+      const pct = Math.round((battery.level || 0) * 100);
+      chip.style.display = 'inline-flex';
+      chip.textContent = (battery.charging ? '⚡ ' : '🔋 ') + pct + '%';
+      chip.classList.toggle('low', pct <= 20 && !battery.charging);
+      chip.title = battery.charging ? 'Charging' : (pct <= 20 ? 'Low battery — consider a power source' : 'Battery level');
+    }
+    function initBattery() {
+      const chip = document.getElementById('batteryChip');
+      if (!navigator.getBattery) { if (chip) chip.style.display = 'none'; return; }
+      navigator.getBattery().then(function(battery) {
+        updateBatteryChip(battery);
+        ['levelchange', 'chargingchange'].forEach(function(ev) { battery.addEventListener(ev, function() { updateBatteryChip(battery); }); });
+      }).catch(function() { if (chip) chip.style.display = 'none'; });
+    }
+    function showDisclaimerGateIfNeeded() {
+      const gate = document.getElementById('disclaimerGate');
+      if (!gate) return;
+      let acknowledged = false;
+      try { acknowledged = localStorage.getItem(disclaimerAckKey) === 'true'; } catch (_) {}
+      if (acknowledged) { gate.style.display = 'none'; return; }
+      const textEl = document.getElementById('disclaimerGateText');
+      const fallback = 'This checklist is an aid only and does not replace the approved aircraft AFM/checklist. Verify every item against the approved documentation before relying on it operationally.';
+      const text = (headerDisclaimer && headerDisclaimer.textContent ? headerDisclaimer.textContent : fallback).replace(/^⚠️\s*/, '');
+      if (textEl) textEl.textContent = text;
+      gate.style.display = 'flex';
+      const ackBtn = document.getElementById('disclaimerAckBtn');
+      if (ackBtn) ackBtn.onclick = function() {
+        try { localStorage.setItem(disclaimerAckKey, 'true'); } catch (_) {}
+        gate.style.display = 'none';
+      };
+    }
+    function initialize() {
+      try {
+        const savedVersion = localStorage.getItem(appVersionKey);
+        if (savedVersion !== currentAppVersion) {
+          const themeValue = localStorage.getItem(themeStorageKey);
+          const ackValue = localStorage.getItem(disclaimerAckKey);
+          localStorage.clear();
+          if (themeValue !== null) localStorage.setItem(themeStorageKey, themeValue);
+          if (ackValue !== null) localStorage.setItem(disclaimerAckKey, ackValue);
+          localStorage.setItem(appVersionKey, currentAppVersion);
+        }
+      } catch (_) {}
+      loadAirports();
+      loadCustomChecklist();
+      loadHeaderContent();
+      renderAirportOptions();
+      rebuildFlatSteps();
+      loadTabDefinitions();
+      loadCollapsedState();
+      loadProgress();
+      loadFuelState();
+      loadHobbsValue();
+      loadOilAddedValue();
+      loadLastSummary();
+      syncDerivedSteps();
+      updateTopMeta();
+      updateInstallButton();
+      attachStaticEvents();
+      wireStopwatch();
+      loadStopwatch();
+      wireTabSwipe();
+      setInterval(updateTopMeta, 30000);
+      initBattery();
+      updateWakeLockUi();
+      if (isWakeLockEnabled) requestWakeLock();
+      render();
+      showDisclaimerGateIfNeeded();
+      if (isVoiceModeEnabled) {
+        currentVoicePhaseIndex = getActivePhaseIndex();
+        startVoiceRecognition();
+      }
+      if (isAudioEnabled && currentVoicePhaseIndex !== null) {
+        speakCurrentActionableStep(true, currentVoicePhaseIndex);
+      }
+    }
+    window.addEventListener('beforeinstallprompt', function(event) { event.preventDefault(); deferredPrompt = event; updateInstallButton(); });
+    window.addEventListener('appinstalled', function() { deferredPrompt = null; updateInstallButton(); });
+    document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'visible') { if (isWakeLockEnabled && !wakeLockSentinel) requestWakeLock(); reconcileActiveTimers(); renderStopwatch(); } });
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js').catch(function() {}); });
+    }
+    function runBasicSelfTests() {
+      console.assert(Boolean(document.getElementById('editModeBtn')), 'editModeBtn should exist');
+      console.assert(Boolean(document.getElementById('importProfileBtn')), 'importProfileBtn should exist');
+      console.assert(Boolean(document.getElementById('exportProfileBtn')), 'exportProfileBtn should exist');
+      console.assert(Boolean(document.getElementById('themeToggleBtn')), 'themeToggleBtn should exist');
+      console.assert(Array.isArray(defaultAirports), 'defaultAirports should be an array');
+      console.assert(Array.isArray(defaultPhases), 'defaultPhases should be an array');
+      console.assert(typeof syncTabsWithPhases === 'function', 'syncTabsWithPhases should exist');
+      console.assert(typeof render === 'function', 'render should exist');
+      console.assert(defaultPhases.every(function(phase) { return Array.isArray(phase.items); }), 'Every phase should have an items array');
+    }
+    initialize();
+    runBasicSelfTests();
+  </script>
+</body>
+</html>
