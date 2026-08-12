@@ -216,6 +216,22 @@
       font-size: 28px;
     }
 
+    .app-header-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .app-header-row h1 { margin: 0 0 8px; }
+    .header-zulu {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .header-zulu.running { color: var(--warning); }
+
     h2 {
       margin: 0;
       font-size: 20px;
@@ -283,7 +299,7 @@
     .stopwatch-half {
       background: transparent;
       border: none;
-      border-right: 1px solid var(--border);
+      border-right: none;
       border-radius: 0;
       color: inherit;
       font-weight: 700;
@@ -668,7 +684,7 @@
 
     #collapseAllBtn {
       margin-left: auto;
-      min-width: 0;
+      min-width: 72px;
       max-width: 42%;
     }
 
@@ -1154,7 +1170,10 @@
     <div class="card" style="position: relative;">
       <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
       
-      <h1><span id="appTitle">Bristell B23 - Checklists</span></h1>
+      <div class="app-header-row">
+        <h1><span id="appTitle">Bristell B23</span></h1>
+        <span class="header-zulu" id="zuluHalf">Time -- Z</span>
+      </div>
       
       <div class="top-meta">
         <div class="header-input-pill">Airport
@@ -1174,10 +1193,9 @@
         <div class="top-meta-pill" id="todayDate">Date --</div>
         <div class="top-meta-pill split-pill" id="zuluTime">
           <button type="button" class="split-pill-half stopwatch-half" id="stopwatchHalf" title="Tap: start / stop · Hold: reset">⏱ 0:00</button>
-          <span class="split-pill-half zulu-half" id="zuluHalf">Time -- Z</span>
         </div>
-        <div class="header-input-pill clickable-pill" id="startTimePill" role="button" tabindex="0" title="Empty: tap to set · Set: hold to update">Start FlightTime <span class="header-input-value" id="headerStartTime">--</span></div>
-        <div class="header-input-pill clickable-pill" id="endTimePill" role="button" tabindex="0" title="Empty: tap to set · Set: hold to update">End FlightTime <span class="header-input-value" id="headerEndTime">--</span></div>
+        <div class="header-input-pill clickable-pill" id="startTimePill" role="button" tabindex="0" title="Empty: tap to set · Set: hold to update">Start <span class="header-input-value" id="headerStartTime">--</span></div>
+        <div class="header-input-pill clickable-pill" id="endTimePill" role="button" tabindex="0" title="Empty: tap to set · Set: hold to update">End <span class="header-input-value" id="headerEndTime">--</span></div>
         <div class="header-input-pill">L Fuel <span class="header-input-value" id="headerFuelLeftValue">--</span></div>
         <div class="header-input-pill">R Fuel <span class="header-input-value" id="headerFuelRightValue">--</span></div>
         <div class="header-input-pill">Hobs <span class="header-input-value" id="headerHobbsValue">--</span></div>
@@ -1188,18 +1206,14 @@
       </div>
       
       <div class="header-disclaimer" id="headerDisclaimer">⚠️ This browser version combines Aeroklubben Göteborg, 2024-10-10 RJO REV. 4 with Expanded SOP guidance for ground phases. Verify every item against the approved aircraft documentation before relying on it operationally.</div>
-      <div class="progress-wrap">
-        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-        <p id="progressText" class="muted">0 required phases completed</p>
-      </div>
     </div>
 
     <div class="tabs-actions">
       <button class="mini-btn" id="audioModeBtn" type="button" title="Audio output">🔊</button>
       <button class="secondary-btn" id="topResetBtn" type="button">Reset all</button>
       <button class="mini-btn" id="resetPhaseBtn" type="button" title="Reset active phase">↺ Phase</button>
-      <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse all">⤒⤓ Collapse all</button>
-      <button class="mini-btn" id="wakeLockBtn" type="button" title="Keep screen awake">🔅 Keep awake</button>
+      <button class="mini-btn" id="collapseAllBtn" type="button" title="Collapse / expand all" aria-label="Collapse / expand all">⇕</button>
+      <button class="mini-btn" id="wakeLockBtn" type="button" title="Keep screen awake">🔅 Screen Off</button>
       <span class="status-chip" id="batteryChip" style="display:none;"></span>
     </div>
 
@@ -1779,8 +1793,6 @@
 
     const OPTIONAL_PHASES = new Set(['Emergency', 'Autopilot Check', 'Cruise', 'Descent', 'Take off', 'After Take off', 'Approach', 'Go around', 'Touch and Go', 'After Landing']);
     const stepsContainer = document.getElementById('stepsContainer');
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
     const finishBtn = document.getElementById('finishBtn');
     const topResetBtn = document.getElementById('topResetBtn');
     const collapseAllBtn = document.getElementById('collapseAllBtn');
@@ -1935,9 +1947,9 @@
     function buildDefaultTabs() { 
       return [
         { id: 'normal', label: 'Normal', phaseTitles: phases.filter(p => !EMERGENCY_PHASES.has(p.title)).map(p => p.title) },
-        { id: 'clubdrill', label: 'Emergency Checklist', phaseTitles: phases.filter(p => p.title === CLUB_DRILL_TITLE).map(p => p.title) },
-        { id: 'emergency', label: 'POH Emergency Procedures', phaseTitles: phases.filter(p => EMERGENCY_PHASES.has(p.title) && p.title !== CLUB_DRILL_TITLE).map(p => p.title) },
-        { id: 'quickref', label: 'Quick Ref', phaseTitles: [] }
+        { id: 'clubdrill', label: 'Emergency', phaseTitles: phases.filter(p => p.title === CLUB_DRILL_TITLE).map(p => p.title) },
+        { id: 'emergency', label: 'Emergency POH', phaseTitles: phases.filter(p => EMERGENCY_PHASES.has(p.title) && p.title !== CLUB_DRILL_TITLE).map(p => p.title) },
+        { id: 'quickref', label: 'Speed Ref', phaseTitles: [] }
       ]; 
     }
     function normalizeTabDefinitions(inputTabs) {
@@ -1963,7 +1975,7 @@
       tabDefinitions = normalizeTabDefinitions(tabDefinitions).map(function(tab, index) {
         // Preserve Quick Ref tab
         if (tab.id === 'quickref') {
-          return { id: tab.id, label: tab.label, phaseTitles: [] };
+          return { id: tab.id, label: 'Speed Ref', phaseTitles: [] };
         }
 
         let filtered = tab.phaseTitles.filter(function(title) { return phaseTitleSet.has(title); });
@@ -1981,12 +1993,16 @@
           filtered = phases.filter(function(p) { return !EMERGENCY_PHASES.has(p.title); }).map(function(p) { return p.title; });
         }
 
-        return { id: tab.id || ('tab-' + index), label: tab.label, phaseTitles: filtered };
+        let label = tab.label;
+        if (tab.id === 'clubdrill') label = 'Emergency';
+        else if (tab.id === 'emergency') label = 'Emergency POH';
+
+        return { id: tab.id || ('tab-' + index), label: label, phaseTitles: filtered };
       });
 
       // Ensure Quick Ref tab always exists
       if (!tabDefinitions.some(function(t) { return t.id === 'quickref'; })) {
-        tabDefinitions.push({ id: 'quickref', label: 'Quick Ref', phaseTitles: [] });
+        tabDefinitions.push({ id: 'quickref', label: 'Speed Ref', phaseTitles: [] });
       }
 
       if (!tabDefinitions.some(function(tab) { return tab.id === currentTab; })) {
@@ -2828,8 +2844,6 @@
       let completedRequiredPhases = 0;
       let totalRequiredPhases = 0;
       phases.forEach(function(phase, phaseIndex) { if (!isRequiredPhase(phase.title)) return; totalRequiredPhases += 1; if (isPhaseFullyCompleted(phaseIndex)) completedRequiredPhases += 1; });
-      progressFill.style.width = (totalRequiredPhases ? (completedRequiredPhases / totalRequiredPhases) * 100 : 0) + '%';
-      progressText.textContent = completedRequiredPhases + ' of ' + totalRequiredPhases + ' required phases completed';
       finishBtn.disabled = completedRequiredPhases !== totalRequiredPhases || currentTab === 'emergency' || currentTab === 'clubdrill' || currentTab === 'quickref';
       updateInstallButton();
       updateAudioToggleUi();
@@ -3093,7 +3107,7 @@
       wireTimeRecordPill(endTimePill, headerEndTime, endTimeKey);
 
       if (themeToggleBtn) {
-        applyTheme(localStorage.getItem(themeStorageKey) || 'light');
+        applyTheme(localStorage.getItem(themeStorageKey) || 'dark');
         themeToggleBtn.addEventListener('click', function() {
           const nextTheme = document.body.classList.contains('light-mode') ? 'dark' : 'light';
           localStorage.setItem(themeStorageKey, nextTheme);
@@ -3297,9 +3311,9 @@
     function updateWakeLockUi() {
       const btn = document.getElementById('wakeLockBtn');
       if (!btn) return;
-      if (!('wakeLock' in navigator)) { btn.textContent = '🔅 Keep awake'; btn.classList.remove('active'); btn.title = 'Wake Lock needs https or an installed app (unavailable on file://)'; return; }
+      if (!('wakeLock' in navigator)) { btn.textContent = '🔅 Screen Off'; btn.classList.remove('active'); btn.title = 'Wake Lock needs https or an installed app (unavailable on file://)'; return; }
       btn.classList.toggle('active', isWakeLockEnabled);
-      btn.textContent = isWakeLockEnabled ? '🔆 Screen on' : '🔅 Keep awake';
+      btn.textContent = isWakeLockEnabled ? '🔆 Screen on' : '🔅 Screen Off';
       btn.title = isWakeLockEnabled ? (wakeLockSentinel ? 'Screen will stay awake' : 'Keep-awake on — re-acquiring when visible') : 'Tap to keep the screen awake in flight';
     }
     async function requestWakeLock() {
