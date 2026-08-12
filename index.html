@@ -277,6 +277,55 @@
       background: #2c3d50;
     }
 
+    /* Tap a read-only value pill to magnify it (helps small values on phones) */
+    .zoomable-value { cursor: zoom-in; }
+
+    .value-zoom-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 4000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(2, 6, 23, 0.82);
+      -webkit-backdrop-filter: blur(2px);
+      backdrop-filter: blur(2px);
+      cursor: zoom-out;
+    }
+    .value-zoom-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      max-width: 92vw;
+      padding: 32px 28px;
+      border-radius: 18px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+      text-align: center;
+    }
+    .value-zoom-label {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .value-zoom-value {
+      font-size: clamp(56px, 22vw, 160px);
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+      word-break: break-word;
+    }
+    .value-zoom-hint {
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
     /* Split Zulu-time pill: left half = stopwatch, right half = live Z time */
     .split-pill {
       padding: 0;
@@ -1210,6 +1259,14 @@
   </div>
   <div class="container">
 
+    <div class="value-zoom-overlay" id="valueZoomOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Enlarged value">
+      <div class="value-zoom-card">
+        <div class="value-zoom-label" id="valueZoomLabel"></div>
+        <div class="value-zoom-value" id="valueZoomValue">--</div>
+        <div class="value-zoom-hint">Tap anywhere to close</div>
+      </div>
+    </div>
+
     <div class="card" style="position: relative;">
       <input id="importProfileInput" type="file" accept="application/json" style="display:none;" />
       
@@ -1231,17 +1288,17 @@
             <option value="SE-MOA">SE-MOA</option>
           </select>
         </div>
-        <div class="header-input-pill">Altitude <span class="header-input-value" id="headerAirportAlt">--</span></div>
-        <div class="header-input-pill">Radio <span class="header-input-value" id="headerRadioFreq">--</span></div>
-        <div class="top-meta-pill" id="todayDate">Date --</div>
+        <div class="header-input-pill zoomable-value" data-zoom-label="Altitude">Altitude <span class="header-input-value" id="headerAirportAlt">--</span></div>
+        <div class="header-input-pill zoomable-value" data-zoom-label="Radio">Radio <span class="header-input-value" id="headerRadioFreq">--</span></div>
+        <div class="top-meta-pill zoomable-value" id="todayDate" data-zoom-label="Date">Date <span class="header-input-value" id="todayDateValue">--</span></div>
         <div class="top-meta-pill split-pill" id="zuluTime">
           <button type="button" class="split-pill-half stopwatch-half" id="stopwatchHalf" title="Tap: start / stop · Hold: reset">⏱ 0:00</button>
         </div>
-        <div class="header-input-pill clickable-pill" id="startTimePill" role="button" tabindex="0" title="Empty: tap to set · Set: hold to update">Start <span class="header-input-value" id="headerStartTime">--</span></div>
-        <div class="header-input-pill clickable-pill" id="endTimePill" role="button" tabindex="0" title="Empty: tap to set · Set: hold to update">End <span class="header-input-value" id="headerEndTime">--</span></div>
-        <div class="header-input-pill">L Fuel <span class="header-input-value" id="headerFuelLeftValue">--</span></div>
-        <div class="header-input-pill">R Fuel <span class="header-input-value" id="headerFuelRightValue">--</span></div>
-        <div class="header-input-pill">Hobs <span class="header-input-value" id="headerHobbsValue">--</span></div>
+        <div class="header-input-pill clickable-pill" id="startTimePill" role="button" tabindex="0" data-zoom-label="Start" title="Empty: tap to set · Set: tap to zoom · Hold to update">Start <span class="header-input-value" id="headerStartTime">--</span></div>
+        <div class="header-input-pill clickable-pill" id="endTimePill" role="button" tabindex="0" data-zoom-label="End" title="Empty: tap to set · Set: tap to zoom · Hold to update">End <span class="header-input-value" id="headerEndTime">--</span></div>
+        <div class="header-input-pill zoomable-value" data-zoom-label="L Fuel">L Fuel <span class="header-input-value" id="headerFuelLeftValue">--</span></div>
+        <div class="header-input-pill zoomable-value" data-zoom-label="R Fuel">R Fuel <span class="header-input-value" id="headerFuelRightValue">--</span></div>
+        <div class="header-input-pill zoomable-value" data-zoom-label="Hobs">Hobs <span class="header-input-value" id="headerHobbsValue">--</span></div>
       </div>
       <div class="top-actions">
         <button class="mini-btn" id="editHeaderBtn" type="button">Edit header</button>
@@ -2237,6 +2294,7 @@
         e.preventDefault();
         if (longPressed) { longPressed = false; return; }
         if (isEmpty()) record(); // short tap sets only when empty/reset; otherwise hold to update
+        else openValueZoom(pill.dataset.zoomLabel || '', (valueEl.textContent || '').trim()); // set: tap to zoom
       });
       pill.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); record(); }
@@ -2244,9 +2302,37 @@
       pill.addEventListener('contextmenu', function(e) { e.preventDefault(); });
     }
 
+    // ===== Value zoom: tap a read-only value pill to magnify it =====
+    function openValueZoom(label, value) {
+      const overlay = document.getElementById('valueZoomOverlay');
+      const labelEl = document.getElementById('valueZoomLabel');
+      const valueEl = document.getElementById('valueZoomValue');
+      if (!overlay || !labelEl || !valueEl) return;
+      labelEl.textContent = label || '';
+      valueEl.textContent = (value === null || value === undefined || value === '') ? '--' : value;
+      overlay.style.display = 'flex';
+    }
+    function closeValueZoom() {
+      const overlay = document.getElementById('valueZoomOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+    function wireValueZoom() {
+      document.querySelectorAll('.zoomable-value').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+          const valueEl = pill.querySelector('.header-input-value');
+          const value = valueEl ? (valueEl.textContent || '').trim() : '';
+          openValueZoom(pill.dataset.zoomLabel || '', value);
+        });
+      });
+      const overlay = document.getElementById('valueZoomOverlay');
+      if (overlay) overlay.addEventListener('click', closeValueZoom);
+      document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeValueZoom(); });
+    }
+
     function updateTopMeta() {
       const parts = getCurrentZuluParts();
-      document.getElementById('todayDate').textContent = 'Date ' + parts.dateText;
+      const todayDateValue = document.getElementById('todayDateValue');
+      if (todayDateValue) todayDateValue.textContent = parts.dateText;
       const zuluHalf = document.getElementById('zuluHalf');
       if (zuluHalf) zuluHalf.textContent = 'Time ' + parts.timeText + ' Z';
       headerFuelLeftValue.textContent = fuelState.left || '--';
@@ -3428,6 +3514,7 @@
       updateInstallButton();
       attachStaticEvents();
       wireStopwatch();
+      wireValueZoom();
       loadStopwatch();
       wireTabSwipe();
       setInterval(updateTopMeta, 30000);
