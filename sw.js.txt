@@ -1,33 +1,34 @@
-// sw.js
-const CACHE_NAME = "b23-checklist-v1";
-const APP_FILES = [
-  "./",
-  "./index.html",
-  "./manifest.webmanifest",
-  "./icon-192.png",
-  "./icon-512.png"
-];
+// Bristell B23 checklist - offline service worker (cache-first for a self-contained app).
+// Note: service workers require https or localhost; they do not run from file://.
+const CACHE = 'b23-checklist-v13';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', function (event) {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_FILES))
+    caches.open(CACHE).then(function (cache) {
+      // Cache each asset independently so one missing file does not abort the whole install.
+      return Promise.all(ASSETS.map(function (asset) { return cache.add(asset).catch(function () {}); }));
+    }).then(function () { return self.skipWaiting(); })
   );
 });
 
-self.addEventListener("activate", (event) => {
+self.addEventListener('activate', function (event) {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    )
+    caches.keys().then(function (keys) {
+      return Promise.all(keys.map(function (key) { if (key !== CACHE) return caches.delete(key); }));
+    }).then(function () { return self.clients.claim(); })
   );
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener('fetch', function (event) {
+  if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    caches.match(event.request).then(function (cached) {
+      return cached || fetch(event.request).then(function (response) {
+        const copy = response.clone();
+        caches.open(CACHE).then(function (cache) { cache.put(event.request, copy).catch(function () {}); });
+        return response;
+      }).catch(function () { return cached; });
+    })
   );
 });
